@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GESTÃO DE OBRAS - Perfecta</title>
+    <title>GESTÃO DE OBRAS - Perfecta (Firebase)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -80,7 +80,7 @@
     <div id="app" class="container mx-auto p-4 sm:p-6 md:p-8">
         <header class="mb-8 flex justify-between items-center">
             <div>
-                <h1 class="text-xl md:text-2xl font-bold text-gray-800">GESTÃO DE OBRAS - Perfecta</h1>
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800">GESTÃO DE OBRAS - Perfecta (Firebase)</h1>
             </div>
             <button id="btn-toggle-form-obra" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition shadow flex-shrink-0">NOVA OBRA</button>
         </header>
@@ -144,9 +144,12 @@
             </div>
         </div>
 
-        <div id="obras-container" class="space-y-2"></div>
+        <div id="obras-container" class="space-y-2">
+            <div class="text-center p-8 bg-white rounded-lg shadow-sm"><h3 class="text-lg font-medium text-gray-700">Carregando dados do Firebase...</h3><p class="text-gray-500 mt-1">Por favor, aguarde.</p></div>
+        </div>
     </div>
 
+    <!-- MODAIS (sem alteração na estrutura, apenas na lógica que os chama) -->
     <div id="status-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden modal">
         <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg mx-auto modal-content transform scale-95">
             <h2 class="text-2xl font-bold text-gray-800 mb-2" id="modal-header">Atualizar Status</h2>
@@ -272,34 +275,44 @@
     </div>
 
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    // --- CONFIGURAÇÕES ---
-    const ETAPAS_ITEM = [ { id: 'alteracaoProjeto', nome: 'Alterações' }, { id: 'projetoFinal', nome: 'Projeto Final' }, { id: 'emProducao', nome: 'PRODUÇÃO' }, { id: 'entregue', nome: 'Entrega' }, { id: 'instalado', nome: 'Instalação' }];
-    const STATUS_ITEM_MAP = { 'nao-iniciado': { texto: 'Não iniciado', classe: 'status-item-nao-iniciado' }, 'iniciado': { texto: 'Iniciado', classe: 'status-item-iniciado' }, 'parado': { texto: 'Parado', classe: 'status-item-parado' }, 'concluido': { texto: 'Concluído', classe: 'status-item-concluido' }, 'cancelado': { texto: 'Cancelado', classe: 'status-item-cancelado' }, 'default': { texto: 'Não iniciado', classe: 'status-item-nao-iniciado' } };
+<script type="module">
+    // --- INÍCIO: CONFIGURAÇÃO FIREBASE ---
+    // Importar funções necessárias dos SDKs do Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     
-    const STATUS_MATERIAL_MAP = { 
-        'emCotacao': { texto: 'Em cotação', classe: 'status-mat-branco' },
-        'compraParcial': { texto: 'Compra Parcial', classe: 'status-mat-amarelo' },
-        'compraTotal': { texto: 'Compra Total', classe: 'status-mat-verde' },
-        'recebidoParcial': { texto: 'Recebido Parcial', classe: 'status-mat-amarelo' },
-        'recebidoTotal': { texto: 'Recebido Total', classe: 'status-mat-verde' },
-        'conferidoFalta': { texto: 'Conferido Falta', classe: 'status-mat-vermelho' },
-        'conferidoParcial': { texto: 'Conferido Parcial', classe: 'status-mat-amarelo' },
-        'conferidoTotal': { texto: 'Conferido Total', classe: 'status-mat-verde' },
-        'alocadoParcial': { texto: 'Alocado Parcial', classe: 'status-mat-amarelo' },
-        'alocadoTotal': { texto: 'Alocado Total', classe: 'status-mat-verde' },
-        'cancelado': { texto: 'Cancelado', classe: 'status-mat-preto' },
-        'default': { texto: 'Em cotação', classe: 'status-mat-branco' }
-    };
-    const TIPO_ITEM_STYLE_MAP = {
-        'Projeto': 'bg-blue-100 text-blue-800',
-        'Orçamento': 'bg-green-100 text-green-800',
-        'Terceiros': 'bg-purple-100 text-purple-800',
-        'Compra Inicial': 'bg-orange-100 text-orange-800'
+    // Configuração do seu projeto Firebase.
+    // IMPORTANTE: Verifique se estes valores são os mesmos que aparecem nas configurações do seu projeto no console do Firebase.
+    // (Clique na engrenagem > Configurações do projeto > Role para baixo até "Seus apps")
+    const firebaseConfig = {
+        apiKey: "AIzaSyDyNk5BJscelHhxjKRHKlOZpYnNKgnh3B4",
+        authDomain: "controle-gc.firebaseapp.com",
+        projectId: "controle-gc",
+        storageBucket: "controle-gc.appspot.com",
+        messagingSenderId: "197002816768",
+        appId: "1:197002816768:web:a6a56f47421ea52961d7e5"
     };
 
-    let obras = [];
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // Referência para a coleção 'obras' no Firestore
+    const obrasCollection = collection(db, 'obras');
+    // --- FIM: CONFIGURAÇÃO FIREBASE ---
+
+document.addEventListener('DOMContentLoaded', () => {
+    // --- CONFIGURAÇÕES GLOBAIS (sem alteração) ---
+    const ETAPAS_ITEM = [ { id: 'alteracaoProjeto', nome: 'Alterações' }, { id: 'projetoFinal', nome: 'Projeto Final' }, { id: 'emProducao', nome: 'PRODUÇÃO' }, { id: 'entregue', nome: 'Entrega' }, { id: 'instalado', nome: 'Instalação' }];
+    const STATUS_ITEM_MAP = { 'nao-iniciado': { texto: 'Não iniciado', classe: 'status-item-nao-iniciado' }, 'iniciado': { texto: 'Iniciado', classe: 'status-item-iniciado' }, 'parado': { texto: 'Parado', classe: 'status-item-parado' }, 'concluido': { texto: 'Concluído', classe: 'status-item-concluido' }, 'cancelado': { texto: 'Cancelado', classe: 'status-item-cancelado' }, 'default': { texto: 'Não iniciado', classe: 'status-item-nao-iniciado' } };
+    const STATUS_MATERIAL_MAP = { 'emCotacao': { texto: 'Em cotação', classe: 'status-mat-branco' }, 'compraParcial': { texto: 'Compra Parcial', classe: 'status-mat-amarelo' }, 'compraTotal': { texto: 'Compra Total', classe: 'status-mat-verde' }, 'recebidoParcial': { texto: 'Recebido Parcial', classe: 'status-mat-amarelo' }, 'recebidoTotal': { texto: 'Recebido Total', classe: 'status-mat-verde' }, 'conferidoFalta': { texto: 'Conferido Falta', classe: 'status-mat-vermelho' }, 'conferidoParcial': { texto: 'Conferido Parcial', classe: 'status-mat-amarelo' }, 'conferidoTotal': { texto: 'Conferido Total', classe: 'status-mat-verde' }, 'alocadoParcial': { texto: 'Alocado Parcial', classe: 'status-mat-amarelo' }, 'alocadoTotal': { texto: 'Alocado Total', classe: 'status-mat-verde' }, 'cancelado': { texto: 'Cancelado', classe: 'status-mat-preto' }, 'default': { texto: 'Em cotação', classe: 'status-mat-branco' } };
+    const TIPO_ITEM_STYLE_MAP = { 'Projeto': 'bg-blue-100 text-blue-800', 'Orçamento': 'bg-green-100 text-green-800', 'Terceiros': 'bg-purple-100 text-purple-800', 'Compra Inicial': 'bg-orange-100 text-orange-800' };
+
+    // --- VARIÁVEIS DE ESTADO ---
+    let obras = []; // Esta variável agora será um cache local dos dados do Firestore
+    let uiState = {}; // Objeto para guardar estados de UI (ex: qual obra está expandida), para não salvar no DB
     let edicaoAtual = { obraId: null, itemId: null, materialId: null, etapaId: null };
     let edicaoItemAtual = { obraId: null, itemId: null };
     let edicaoMaterialAtual = { obraId: null, itemId: null, materialId: null };
@@ -307,6 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isFormularioNovaObraVisivel = false;
     let filtros = {};
 
+    // --- REFERÊNCIAS DE ELEMENTOS DO DOM (sem alteração) ---
     const obrasContainer = document.getElementById('obras-container');
     const modal = document.getElementById('status-modal');
     const modalContent = modal.querySelector('.modal-content');
@@ -319,85 +333,53 @@ document.addEventListener('DOMContentLoaded', () => {
     const formNovaObraContainer = document.getElementById('form-nova-obra-container');
     const btnToggleFormObra = document.getElementById('btn-toggle-form-obra');
 
-    const salvarDados = () => { localStorage.setItem('dadosEsquadriasV4', JSON.stringify(obras)); };
-    const carregarDados = () => {
-        const dados = localStorage.getItem('dadosEsquadriasV4');
-        if (dados) {
-            obras = JSON.parse(dados);
-            obras.forEach(obra => {
-                obra.itens = obra.itens ?? obra.pecas ?? []; // Compatibilidade com versão anterior
-                delete obra.pecas;
+    // --- FUNÇÕES DE DADOS (AGORA COM FIREBASE) ---
+    
+    // REMOVIDO: salvarDados() e carregarDados() - O Firestore cuida disso em tempo real.
+    
+    // NOVA FUNÇÃO: Ouve as mudanças na coleção de obras do Firestore
+    const escutarObras = () => {
+        onSnapshot(obrasCollection, (querySnapshot) => {
+            const obrasTemp = [];
+            querySnapshot.forEach((doc) => {
+                // Adiciona o ID do documento do Firestore ao objeto da obra
+                obrasTemp.push({ id: doc.id, ...doc.data() });
+            });
+            obras = obrasTemp;
+            aplicarFiltrosERenderizar(); // Re-renderiza a lista sempre que houver uma alteração
+        }, (error) => {
+            console.error("Erro ao buscar obras do Firestore: ", error);
+            obrasContainer.innerHTML = `<div class="text-center p-8 bg-white rounded-lg shadow-sm"><h3 class="text-lg font-medium text-red-700">Erro ao carregar dados.</h3><p class="text-gray-500 mt-1">Não foi possível conectar ao banco de dados. Verifique sua conexão e as configurações do Firebase.</p></div>`;
+        });
+    };
 
-                obra.endereco = obra.endereco ?? '';
-
-                // Migração de dados de datas antigas para novas
-                obra.previsaoInicialMedicao = obra.previsaoInicialMedicao ?? obra.previsaoMedicao ?? '';
-                obra.previsaoInicialEntrega = obra.previsaoInicialEntrega ?? obra.previsaoEntrega ?? '';
-                delete obra.previsaoMedicao;
-                delete obra.previsaoEntrega;
-
-                obra.novaPrevisaoMedicao = obra.novaPrevisaoMedicao ?? '';
-                obra.novaPrevisaoEntrega = obra.novaPrevisaoEntrega ?? '';
-
-                obra.medicaoEfetuada = obra.medicaoEfetuada ?? '';
-                obra.entregaRealizada = obra.entregaRealizada ?? '';
-                obra.obsMedicao = obra.obsMedicao ?? '';
-                obra.obsEntrega = obra.obsEntrega ?? '';
-                obra.itemExpandidoId = null;
-                obra.isExpanded = false; 
-                obra.dadosExpanded = false;
-                obra.itens.forEach(item => {
-                    item.tipo = item.tipo ?? 'Projeto';
-                    item.codigo = item.codigo ?? '';
-                    item.materiais = item.materiais ?? [];
-                    Object.values(item.etapas).forEach(etapa => {
-                        etapa.prazoConclusaoInicial = etapa.prazoConclusaoInicial ?? etapa.prazoConclusao ?? '';
-                        delete etapa.prazoConclusao;
-                    });
-                    
-                    if (item.tipo === 'Projeto') {
-                        item.largura = item.largura ?? '';
-                        item.altura = item.altura ?? '';
-                        item.m2Total = item.m2Total ?? '';
-                        item.cor = item.cor ?? '';
-                        item.vidro = item.vidro ?? '';
-                        item.m2Vidro = item.m2Vidro ?? '';
-                    }
-
-                    item.materiais.forEach(mat => { 
-                        mat.statusInfo = mat.statusInfo ?? {}; 
-                        mat.statusInfo.previsaoDisponibilidadeInicial = mat.statusInfo.previsaoDisponibilidadeInicial ?? mat.statusInfo.previsaoDisponibilidade ?? '';
-                        delete mat.statusInfo.previsaoDisponibilidade;
-                        delete mat.etapas;
-
-                        if (item.tipo === 'Compra Inicial' || item.tipo === 'Projeto') {
-                            mat.qtdeOrcada = mat.qtdeOrcada ?? '';
-                            mat.qtdeDisponivel = mat.qtdeDisponivel ?? '';
-                            delete mat.largura; // Limpa campos antigos para unificar
-                            delete mat.altura;
-                            delete mat.m2Total;
-                            delete mat.cor;
-                            delete mat.vidro;
-                            delete mat.m2Vidro;
-                        }
-                    });
-                });
+    // --- LÓGICA DE AUTENTICAÇÃO ANÔNIMA ---
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Usuário está logado (anonimamente ou não)
+            console.log("Usuário autenticado:", user.uid);
+            escutarObras(); // Começa a ouvir os dados do Firestore
+        } else {
+            // Usuário não está logado, tenta fazer login anônimo
+            signInAnonymously(auth).catch((error) => {
+                console.error("Erro na autenticação anônima:", error);
             });
         }
-    };
-    
+    });
+
+
+    // --- FUNÇÕES DE RENDERIZAÇÃO E UTILITÁRIOS (sem grandes alterações) ---
     const formatarData = (dataString) => dataString ? new Date(dataString + 'T00:00:00').toLocaleDateString('pt-BR') : '---';
 
     const calcularTotaisItens = (obra) => {
         const etapaProducaoId = 'emProducao';
+        if (!obra.itens) return { concluidas: 0, total: 0 };
         
         const itensContaveis = obra.itens.filter(item => item.tipo === 'Projeto' || item.tipo === 'Terceiros');
         const itensAtivos = itensContaveis.filter(item => item.etapas[etapaProducaoId]?.status !== 'cancelado');
         const totalItensAtivos = itensAtivos.length;
 
-        if (totalItensAtivos === 0) {
-            return { concluidas: 0, total: 0 };
-        }
+        if (totalItensAtivos === 0) return { concluidas: 0, total: 0 };
         
         const itensConcluidos = itensAtivos.filter(item => item.etapas[etapaProducaoId]?.status === 'concluido').length;
         
@@ -420,13 +402,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (temFiltroDeItem) {
             obrasFiltradas = obrasFiltradas.map(obra => {
-                const itensFiltrados = obra.itens.filter(item => {
-                    // Filtro por tipo de item (agora com múltiplos valores)
-                    if (tipoItemFiltro.length > 0 && !tipoItemFiltro.includes(item.tipo)) {
-                        return false;
-                    }
+                if (!obra.itens) return { ...obra, itens: [] };
 
-                    // Filtro por status de etapa
+                const itensFiltrados = obra.itens.filter(item => {
+                    if (tipoItemFiltro.length > 0 && !tipoItemFiltro.includes(item.tipo)) return false;
+                    
                     for (const etapaId in statusItemFiltros) {
                         const statusFiltro = statusItemFiltros[etapaId];
                         if (statusFiltro !== 'todos') {
@@ -435,17 +415,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                     
-                    // Filtro por status de material (agora com múltiplos valores)
                     if (statusMaterialFiltro.length > 0) {
-                        const temMaterialComStatus = item.materiais.some(mat => statusMaterialFiltro.includes(mat.statusInfo?.status || 'emCotacao'));
+                        const temMaterialComStatus = (item.materiais || []).some(mat => statusMaterialFiltro.includes(mat.statusInfo?.status || 'emCotacao'));
                         if (!temMaterialComStatus) return false;
                     }
                     
                     return true;
                 });
-
                 return { ...obra, itens: itensFiltrados };
-
             }).filter(obra => obra.itens.length > 0); 
         }
 
@@ -457,8 +434,9 @@ document.addEventListener('DOMContentLoaded', () => {
             ? `<div class="text-center p-8 bg-white rounded-lg shadow-sm"><h3 class="text-lg font-medium text-gray-700">Nenhuma obra encontrada.</h3><p class="text-gray-500 mt-1">Ajuste os filtros ou adicione uma nova obra.</p></div>`
             : listaObras.map(obra => {
                 const totais = calcularTotaisItens(obra);
+                const estadoUIObra = uiState[obra.id] || { dadosExpanded: false, isExpanded: false, itemExpandidoId: null };
 
-                const dadosHtml = obra.dadosExpanded ? `
+                const dadosHtml = estadoUIObra.dadosExpanded ? `
                     <div class="border-t pt-4 mt-4">
                         <div class="mb-4">
                             <p class="text-sm text-gray-800"><strong class="font-semibold">Cliente:</strong> ${obra.cliente}</p>
@@ -480,10 +458,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <p class="text-xs text-gray-500 mt-1 whitespace-pre-wrap">${obra.obsEntrega || ' '}</p>
                             </div>
                         </div>
-                    </div>
-                ` : '';
+                    </div>` : '';
 
-                const itensHtml = obra.isExpanded ? `
+                const itensHtml = estadoUIObra.isExpanded ? `
                     <div class="table-container -mx-3 mt-4">
                         <table class="min-w-full">
                             <thead id="header-itens-${obra.id}"></thead>
@@ -516,8 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <input type="file" id="upload-itens-${obra.id}" class="hidden" accept=".xlsx, .xls" data-obra-id="${obra.id}">
                             </div>
                         </div>
-                    </div>
-                ` : '';
+                    </div>` : '';
 
                 return `
                 <div class="bg-white rounded-xl shadow-md py-2 px-3">
@@ -532,8 +508,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div class="flex justify-center items-center gap-3 mt-4 sm:mt-0 flex-shrink-0">
                              <button title="Mostrar/Ocultar Dados" class="btn-toggle-dados action-btn bg-green-500 text-white font-semibold text-xs px-2 py-1" data-obra-id="${obra.id}">DADOS</button>
-                             <button title="${obra.isExpanded ? 'Ocultar Itens' : 'Mostrar Itens'}" class="btn-toggle-itens action-btn bg-blue-500 text-white" data-obra-id="${obra.id}">
-                                ${obra.isExpanded ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>'}
+                             <button title="${estadoUIObra.isExpanded ? 'Ocultar Itens' : 'Mostrar Itens'}" class="btn-toggle-itens action-btn bg-blue-500 text-white" data-obra-id="${obra.id}">
+                                ${estadoUIObra.isExpanded ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>'}
                              </button>
                              <button title="Alterar Obra" class="btn-alterar-obra action-btn bg-yellow-400 text-white" data-obra-id="${obra.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg></button>
                              <button title="Excluir Obra" class="btn-excluir-obra action-btn bg-red-500 text-white" data-obra-id="${obra.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></button>
@@ -543,8 +519,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${itensHtml}
                 </div>`
             }).join('');
-        obras.forEach(obra => {
-            if (obra.isExpanded) {
+        listaObras.forEach(obra => {
+            if (uiState[obra.id]?.isExpanded) {
                 renderizarHeaderItens(obra);
                 const tipoSelect = document.querySelector(`.input-add-item-tipo[data-obra-id="${obra.id}"]`);
                 if(tipoSelect) {
@@ -554,14 +530,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // --- DEMAIS FUNÇÕES DE RENDERIZAÇÃO (sem alterações significativas) ---
     const renderizarHeaderItens = (obra) => {
         const header = document.getElementById(`header-itens-${obra.id}`);
         if (!header) return;
-
         const splitIndex = ETAPAS_ITEM.findIndex(e => e.id === 'emProducao');
         const primeiraParteEtapas = ETAPAS_ITEM.slice(0, splitIndex);
         const segundaParteEtapas = ETAPAS_ITEM.slice(splitIndex);
-
         header.innerHTML = `<tr>
                 <th class="p-3 text-left text-xs font-semibold text-gray-500 uppercase sticky left-0 bg-white z-10 w-1/4">Item</th>
                 ${primeiraParteEtapas.map(e => `<th class="p-3 text-center text-xs font-semibold text-gray-500 uppercase">${e.nome}</th>`).join('')}
@@ -574,16 +549,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderizarEtapaItem = (obraId, itemId, etapa) => {
         const obra = obras.find(o => o.id === obraId);
         const item = obra.itens.find(p => p.id === itemId);
+        if (!item) return '<td></td>';
 
-        if (item.tipo === 'Compra Inicial') {
-            return `<td class="p-3 text-center text-gray-300">-</td>`;
-        }
-        if ((item.tipo === 'Projeto' || item.tipo === 'Terceiros') && etapa.id === 'alteracaoProjeto') {
-            return `<td class="p-3 text-center text-gray-300">-</td>`;
-        }
-        if (item.tipo === 'Orçamento' && etapa.id !== 'alteracaoProjeto') {
-            return `<td class="p-3 text-center text-gray-300">-</td>`;
-        }
+        if (item.tipo === 'Compra Inicial') return `<td class="p-3 text-center text-gray-300">-</td>`;
+        if ((item.tipo === 'Projeto' || item.tipo === 'Terceiros') && etapa.id === 'alteracaoProjeto') return `<td class="p-3 text-center text-gray-300">-</td>`;
+        if (item.tipo === 'Orçamento' && etapa.id !== 'alteracaoProjeto') return `<td class="p-3 text-center text-gray-300">-</td>`;
         
         const statusInfo = item.etapas[etapa.id];
         const statusData = statusInfo ? STATUS_ITEM_MAP[statusInfo.status] : STATUS_ITEM_MAP['default'];
@@ -594,9 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (statusInfo?.prazoConclusaoInicial && statusInfo.status !== 'concluido' && statusInfo.status !== 'cancelado') {
             const hoje = new Date(); hoje.setHours(0,0,0,0);
             const prazo = new Date(statusInfo.prazoConclusaoInicial + 'T00:00:00');
-            if (prazo < hoje) {
-                statusTextStyle = 'color: #dc2626; font-weight: bold;';
-            }
+            if (prazo < hoje) statusTextStyle = 'color: #dc2626; font-weight: bold;';
         }
         
         let tooltipText = statusInfo?.observacao || 'Sem observações';
@@ -622,53 +590,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const getBotaoMateriaisState = (materiais) => {
         const materiaisAtivos = (materiais || []).filter(mat => mat.statusInfo?.status !== 'cancelado');
         const totalMateriaisAtivos = materiaisAtivos.length;
-
-        if (totalMateriaisAtivos === 0) {
-            return { text: '0/0', className: 'bg-gray-200 text-gray-700' };
-        }
-
-        let alocadosCount = 0;
-        let emCotacaoCount = 0;
-        let hasConferidoFalta = false;
-
+        if (totalMateriaisAtivos === 0) return { text: '0/0', className: 'bg-gray-200 text-gray-700' };
+        let alocadosCount = 0, emCotacaoCount = 0, hasConferidoFalta = false;
         for (const mat of materiaisAtivos) {
             const status = mat.statusInfo?.status || 'emCotacao';
             if (status === 'alocadoTotal') alocadosCount++;
             if (status === 'emCotacao') emCotacaoCount++;
             if (status === 'conferidoFalta') hasConferidoFalta = true;
         }
-
         const text = `${alocadosCount}/${totalMateriaisAtivos}`;
         let className = '';
-
-        if (hasConferidoFalta) {
-            className = 'bg-red-500 text-white hover:bg-red-600';
-        } else if (alocadosCount === totalMateriaisAtivos) {
-            className = 'bg-green-500 text-white hover:bg-green-600';
-        } else if (emCotacaoCount === totalMateriaisAtivos) {
-            className = 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-100';
-        } else {
-            className = 'bg-yellow-400 text-white hover:bg-yellow-500';
-        }
+        if (hasConferidoFalta) className = 'bg-red-500 text-white hover:bg-red-600';
+        else if (alocadosCount === totalMateriaisAtivos) className = 'bg-green-500 text-white hover:bg-green-600';
+        else if (emCotacaoCount === totalMateriaisAtivos) className = 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-100';
+        else className = 'bg-yellow-400 text-white hover:bg-yellow-500';
         return { text, className };
     };
 
     const renderizarItens = (obra) => {
         if (!obra.itens || obra.itens.length === 0) return `<tr><td colspan="100%" class="p-4 text-center text-gray-500">Nenhum item adicionado.</td></tr>`;
-        
+        const itemExpandidoId = uiState[obra.id]?.itemExpandidoId;
         const splitIndex = ETAPAS_ITEM.findIndex(e => e.id === 'emProducao');
         const primeiraParteEtapas = ETAPAS_ITEM.slice(0, splitIndex);
         const segundaParteEtapas = ETAPAS_ITEM.slice(splitIndex);
 
         return obra.itens.map(item => {
             const tipoStyle = TIPO_ITEM_STYLE_MAP[item.tipo] || 'bg-gray-100 text-gray-800';
-            let materiaisCell = `<td class="p-3 text-center text-gray-300">-</td>`; // Default para Orçamento
+            let materiaisCell = `<td class="p-3 text-center text-gray-300">-</td>`;
             if (item.tipo === 'Projeto' || item.tipo === 'Terceiros' || item.tipo === 'Compra Inicial') {
                 const botaoState = getBotaoMateriaisState(item.materiais);
-                const buttonText = obra.itemExpandidoId === item.id ? 'Fechar' : botaoState.text;
+                const buttonText = itemExpandidoId === item.id ? 'Fechar' : botaoState.text;
                 materiaisCell = `<td class="p-3 text-center"><button class="btn-toggle-materiais text-sm font-semibold py-1 px-3 rounded-md ${botaoState.className}" data-obra-id="${obra.id}" data-item-id="${item.id}">${buttonText}</button></td>`;
             }
-            
             const projetoFieldsHtml = item.tipo === 'Projeto' ? `
                 <div class="mt-2 p-2 bg-gray-50 rounded-md text-xs grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1">
                     <p><strong>Largura:</strong> ${item.largura || '---'}</p>
@@ -677,8 +630,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p><strong>Cor:</strong> ${item.cor || '---'}</p>
                     <p><strong>Vidro:</strong> ${item.vidro || '---'}</p>
                     <p><strong>M² Vidro:</strong> ${item.m2Vidro || '---'}</p>
-                </div>
-            ` : '';
+                </div>` : '';
 
             return `
                 <tr class="border-t hover:bg-gray-50">
@@ -697,104 +649,46 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${segundaParteEtapas.map(etapa => renderizarEtapaItem(obra.id, item.id, etapa)).join('')}
                     ${renderizarAcoesItem(obra, item)}
                 </tr>
-                ${obra.itemExpandidoId === item.id ? renderizarMateriais(obra, item) : ''}`;
+                ${itemExpandidoId === item.id ? renderizarMateriais(obra, item) : ''}`;
         }).join('');
     };
 
     const renderizarMateriais = (obra, item) => {
-        let additionalHeaders = '';
-        let additionalInputsHtml = '';
-        
+        let additionalHeaders = '', additionalInputsHtml = '';
         if (item.tipo === 'Compra Inicial' || item.tipo === 'Projeto') {
-            additionalHeaders = `
-                <th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Qtde Orçada</th>
-                <th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Qtde Disponível</th>
-                <th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">%</th>
-            `;
-            additionalInputsHtml = `
-                <input type="number" placeholder="Qtde Orçada" class="input-material-qtde-orcada flex-grow p-2 border rounded-md" data-item-id="${item.id}">
-                <input type="number" placeholder="Qtde Disponível" class="input-material-qtde-disponivel flex-grow p-2 border rounded-md" data-item-id="${item.id}">
-            `;
+            additionalHeaders = `<th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Qtde Orçada</th><th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Qtde Disponível</th><th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">%</th>`;
+            additionalInputsHtml = `<input type="number" placeholder="Qtde Orçada" class="input-material-qtde-orcada flex-grow p-2 border rounded-md" data-item-id="${item.id}"><input type="number" placeholder="Qtde Disponível" class="input-material-qtde-disponivel flex-grow p-2 border rounded-md" data-item-id="${item.id}">`;
         }
-
         const renderAdditionalCells = (mat) => {
             if (item.tipo === 'Compra Inicial' || item.tipo === 'Projeto') {
-                const qtdeOrcada = parseFloat(mat.qtdeOrcada) || 0;
-                const qtdeDisponivel = parseFloat(mat.qtdeDisponivel) || 0;
+                const qtdeOrcada = parseFloat(mat.qtdeOrcada) || 0, qtdeDisponivel = parseFloat(mat.qtdeDisponivel) || 0;
                 const percentual = qtdeOrcada > 0 ? Math.round((qtdeDisponivel / qtdeOrcada) * 100) : 0;
-                const barWidth = Math.min(100, percentual);
-                let hue = (barWidth / 100) * 120; // Mapeia 0-100% para hue 0-120 (Vermelho-Verde)
-
-                return `
-                    <td class="p-2 text-gray-600">${mat.qtdeOrcada || ''}</td>
-                    <td class="p-2 text-gray-600">${mat.qtdeDisponivel || ''}</td>
-                    <td class="p-2">
-                        <div class="progress-bar-container bg-gray-300 rounded-full h-4 w-full">
-                            <div class="h-full rounded-full transition-all duration-500" style="width: ${barWidth}%; background-color: hsl(${hue}, 80%, 40%);"></div>
-                            <span class="progress-bar-text text-xs font-bold">${percentual}%</span>
-                        </div>
-                    </td>
-                `;
-            }
-            return '';
+                const barWidth = Math.min(100, percentual); let hue = (barWidth / 100) * 120;
+                return `<td class="p-2 text-gray-600">${mat.qtdeOrcada || ''}</td><td class="p-2 text-gray-600">${mat.qtdeDisponivel || ''}</td><td class="p-2"><div class="progress-bar-container bg-gray-300 rounded-full h-4 w-full"><div class="h-full rounded-full transition-all duration-500" style="width: ${barWidth}%; background-color: hsl(${hue}, 80%, 40%);"></div><span class="progress-bar-text text-xs font-bold">${percentual}%</span></div></td>`;
+            } return '';
         };
-        
-        return `
-        <tr class="materiais-row"><td colspan="100%" class="bg-gray-100 p-4">
-            <div class="p-4"><h4 class="font-bold text-gray-700 mb-3">Materiais: ${item.codigo} - ${item.descricao}</h4>
-                <div class="table-container"><table class="min-w-full bg-white rounded-lg shadow"><thead><tr>
-                    <th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Tipo</th>
-                    <th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Descrição</th>
-                    ${additionalHeaders}
-                    <th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Prev. Inicial</th>
-                    <th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Prev. Reag.</th>
-                    <th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">Status</th>
-                    <th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">Ação</th>
-                </tr></thead><tbody>
+        return `<tr class="materiais-row"><td colspan="100%" class="bg-gray-100 p-4"><div class="p-4"><h4 class="font-bold text-gray-700 mb-3">Materiais: ${item.codigo} - ${item.descricao}</h4><div class="table-container"><table class="min-w-full bg-white rounded-lg shadow"><thead><tr><th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Tipo</th><th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Descrição</th>${additionalHeaders}<th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Prev. Inicial</th><th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Prev. Reag.</th><th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">Status</th><th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">Ação</th></tr></thead><tbody>
                 ${(item.materiais || []).map(mat => {
-                    const statusInfo = mat.statusInfo || {};
-                    const statusData = statusInfo.status ? STATUS_MATERIAL_MAP[statusInfo.status] : STATUS_MATERIAL_MAP['default'];
-                    
-                    return `
-                    <tr class="border-t">
-                        <td class="p-2 font-medium text-gray-800">${mat.tipo}</td>
-                        <td class="p-2 text-gray-600">${mat.descricao}</td>
-                        ${renderAdditionalCells(mat)}
-                        <td class="p-2 text-gray-600">${formatarData(statusInfo.previsaoDisponibilidadeInicial)}</td>
-                        <td class="p-2 text-gray-600">${formatarData(statusInfo.previsaoDisponibilidadeReagendado)}</td>
-                        <td class="p-2 text-center">
-                            <div class="status-badge rounded-md ${statusData.classe} material-status-badge" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}" title="${statusInfo.observacao || ''}">
-                                ${statusData.texto}
-                            </div>
-                        </td>
-                        <td class="p-2">
-                            <div class="flex justify-center items-center gap-3">
-                                <button title="Alterar Material" class="btn-alterar-material action-btn bg-yellow-400 text-white" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg></button>
-                                <button title="Excluir Material" class="btn-excluir-material action-btn bg-red-500 text-white" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></button>
-                            </div>
-                        </td>
-                    </tr>`;
+                    const statusInfo = mat.statusInfo || {}, statusData = statusInfo.status ? STATUS_MATERIAL_MAP[statusInfo.status] : STATUS_MATERIAL_MAP['default'];
+                    return `<tr class="border-t"><td class="p-2 font-medium text-gray-800">${mat.tipo}</td><td class="p-2 text-gray-600">${mat.descricao}</td>${renderAdditionalCells(mat)}<td class="p-2 text-gray-600">${formatarData(statusInfo.previsaoDisponibilidadeInicial)}</td><td class="p-2 text-gray-600">${formatarData(statusInfo.previsaoDisponibilidadeReagendado)}</td><td class="p-2 text-center"><div class="status-badge rounded-md ${statusData.classe} material-status-badge" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}" title="${statusInfo.observacao || ''}">${statusData.texto}</div></td><td class="p-2"><div class="flex justify-center items-center gap-3"><button title="Alterar Material" class="btn-alterar-material action-btn bg-yellow-400 text-white" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg></button><button title="Excluir Material" class="btn-excluir-material action-btn bg-red-500 text-white" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></button></div></td></tr>`;
                 }).join('')}
-                </tbody></table></div>
-                <div class="mt-4 flex flex-col sm:flex-row gap-2 flex-wrap items-center">
-                    <input type="text" placeholder="Tipo (ex: Perfil)" class="input-material-tipo flex-grow p-2 border rounded-md" data-item-id="${item.id}">
-                    <input type="text" placeholder="Descrição (ex: PVC Branco)" class="input-material-desc flex-grow p-2 border rounded-md" data-item-id="${item.id}">
-                    ${additionalInputsHtml}
-                    <button class="btn-add-material bg-indigo-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-600" data-obra-id="${obra.id}" data-item-id="${item.id}">Adicionar</button>
-                </div></div>
-        </td></tr>`;
+                </tbody></table></div><div class="mt-4 flex flex-col sm:flex-row gap-2 flex-wrap items-center"><input type="text" placeholder="Tipo (ex: Perfil)" class="input-material-tipo flex-grow p-2 border rounded-md" data-item-id="${item.id}"><input type="text" placeholder="Descrição (ex: PVC Branco)" class="input-material-desc flex-grow p-2 border rounded-md" data-item-id="${item.id}">${additionalInputsHtml}<button class="btn-add-material bg-indigo-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-600" data-obra-id="${obra.id}" data-item-id="${item.id}">Adicionar</button></div></div></td></tr>`;
     }
 
+    // --- FUNÇÕES DE MODAL (lógica interna alterada para usar Firestore) ---
     const abrirModal = (obraId, itemId, etapaId, materialId) => {
         edicaoAtual = { obraId, itemId, etapaId, materialId };
         const obra = obras.find(o => o.id === obraId);
+        if (!obra) return;
         const item = obra.itens.find(p => p.id === itemId);
+        if (!item) return;
         const isMaterial = !!materialId;
-        const targetItem = isMaterial ? item.materiais.find(m => m.id === materialId) : item;
+        const targetItem = isMaterial ? (item.materiais || []).find(m => m.id === materialId) : item;
+        if (!targetItem) return;
+        
         const statusMap = isMaterial ? STATUS_MATERIAL_MAP : STATUS_ITEM_MAP;
         document.getElementById('modal-header').textContent = `Atualizar Status de ${isMaterial ? 'Material' : 'Item'}`;
         document.getElementById('modal-item-nome').textContent = isMaterial ? `${targetItem.tipo}: ${targetItem.descricao}` : `${targetItem.codigo}: ${targetItem.descricao}`;
-        
         const prazoContainer = document.getElementById('modal-prazo-container');
         const previsaoContainer = document.getElementById('modal-previsao-container');
         let itemStatus = {};
@@ -832,17 +726,20 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const fecharModal = () => { modal.classList.add('opacity-0'); modalContent.classList.add('scale-95'); setTimeout(() => modal.classList.add('hidden'), 300); };
 
-    const salvarStatus = () => {
+    const salvarStatus = async () => {
         const { obraId, itemId, etapaId, materialId } = edicaoAtual;
         const obra = obras.find(o => o.id === obraId);
-        const item = obra.itens.find(p => p.id === itemId);
+        const itemIndex = obra.itens.findIndex(p => p.id === itemId);
         const novoStatus = { 
             status: document.getElementById('modal-status').value, 
             data: document.getElementById('modal-data').value, 
             observacao: document.getElementById('modal-obs').value.trim() 
         };
+        const obraDocRef = doc(db, 'obras', obraId);
+
         if (materialId) { 
-            const material = item.materiais.find(m => m.id === materialId);
+            const materialIndex = obra.itens[itemIndex].materiais.findIndex(m => m.id === materialId);
+            const material = obra.itens[itemIndex].materiais[materialIndex];
             if (!document.getElementById('modal-previsao-disponibilidade-inicial').disabled) {
                 novoStatus.previsaoDisponibilidadeInicial = document.getElementById('modal-previsao-disponibilidade-inicial').value;
             }
@@ -853,31 +750,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 novoStatus.prazoConclusaoInicial = document.getElementById('modal-prazo-inicial').value;
             }
             novoStatus.prazoConclusaoReagendado = document.getElementById('modal-prazo-reagendado').value; 
-            item.etapas[etapaId] = {...item.etapas[etapaId], ...novoStatus};
+            obra.itens[itemIndex].etapas[etapaId] = {...obra.itens[itemIndex].etapas[etapaId], ...novoStatus};
         }
-        salvarDados(); 
-        aplicarFiltrosERenderizar(); 
+        
+        // ATUALIZAÇÃO: Salva a obra inteira no Firestore
+        await updateDoc(obraDocRef, { itens: obra.itens });
         fecharModal();
     };
 
-    const limparStatus = () => {
+    const limparStatus = async () => {
         if(confirm('Deseja limpar o status deste item?')) {
             const { obraId, itemId, etapaId, materialId } = edicaoAtual;
             const obra = obras.find(o => o.id === obraId);
-            const item = obra.itens.find(p => p.id === itemId);
-            if (materialId) { const material = item.materiais.find(m => m.id === materialId); delete material.statusInfo;
-            } else { delete item.etapas[etapaId]; }
-            salvarDados(); aplicarFiltrosERenderizar(); fecharModal();
+            const itemIndex = obra.itens.findIndex(p => p.id === itemId);
+            const obraDocRef = doc(db, 'obras', obraId);
+
+            if (materialId) {
+                const materialIndex = obra.itens[itemIndex].materiais.findIndex(m => m.id === materialId);
+                obra.itens[itemIndex].materiais[materialIndex].statusInfo = {}; // Limpa o objeto
+            } else { 
+                delete obra.itens[itemIndex].etapas[etapaId];
+            }
+            
+            await updateDoc(obraDocRef, { itens: obra.itens });
+            fecharModal();
         }
     };
     
+    // As funções de abrir/fechar modals de edição não precisam ser async,
+    // pois apenas leem o estado local 'obras'. As funções de SALVAR sim.
+
     const toggleProjetoFieldsModal = (tipo) => {
         const fieldsContainer = document.getElementById('edit-item-projeto-fields');
-        if (tipo === 'Projeto') {
-            fieldsContainer.classList.remove('hidden');
-        } else {
-            fieldsContainer.classList.add('hidden');
-        }
+        fieldsContainer.classList.toggle('hidden', tipo !== 'Projeto');
     };
     
     const abrirModalAlterarItem = (obraId, itemId) => {
@@ -891,7 +796,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('edit-item-descricao').value = item.descricao;
         
         toggleProjetoFieldsModal(item.tipo);
-
         if (item.tipo === 'Projeto') {
             document.getElementById('edit-item-largura').value = item.largura || '';
             document.getElementById('edit-item-altura').value = item.altura || '';
@@ -907,14 +811,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fecharModalAlterarItem = () => { editItemModal.classList.add('opacity-0'); editItemModalContent.classList.add('scale-95'); setTimeout(() => editItemModal.classList.add('hidden'), 300); };
     
-    const salvarAlteracaoItem = () => {
+    const salvarAlteracaoItem = async () => {
         const { obraId, itemId } = edicaoItemAtual;
         const obra = obras.find(o => o.id === obraId);
-        const item = obra.itens.find(p => p.id === itemId);
+        const itemIndex = obra.itens.findIndex(p => p.id === itemId);
         const novoCodigo = document.getElementById('edit-item-codigo').value.trim();
         const novaDescricao = document.getElementById('edit-item-descricao').value.trim();
         
         if (novoCodigo && novaDescricao) { 
+            const item = obra.itens[itemIndex];
             item.tipo = document.getElementById('edit-item-tipo').value;
             item.codigo = novoCodigo; 
             item.descricao = novaDescricao;
@@ -927,9 +832,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.vidro = document.getElementById('edit-item-vidro').value;
                 item.m2Vidro = document.getElementById('edit-item-m2-vidro').value;
             }
-
-            salvarDados(); 
-            aplicarFiltrosERenderizar(); 
+            
+            const obraDocRef = doc(db, 'obras', obraId);
+            await updateDoc(obraDocRef, { itens: obra.itens });
             fecharModalAlterarItem();
         } else { alert('Código e Descrição não podem estar vazios.'); }
     };
@@ -938,43 +843,46 @@ document.addEventListener('DOMContentLoaded', () => {
         edicaoMaterialAtual = { obraId, itemId, materialId };
         const obra = obras.find(o => o.id === obraId);
         const item = obra.itens.find(p => p.id === itemId);
-        const material = item.materiais.find(m => m.id === materialId);
+        const material = (item.materiais || []).find(m => m.id === materialId);
+        if (!material) return;
 
         document.getElementById('edit-material-tipo').value = material.tipo;
         document.getElementById('edit-material-descricao').value = material.descricao;
 
         const compraFields = document.getElementById('edit-material-compra-fields');
-        compraFields.classList.add('hidden');
+        const showCompraFields = item.tipo === 'Compra Inicial' || item.tipo === 'Projeto';
+        compraFields.classList.toggle('hidden', !showCompraFields);
 
-        if (item.tipo === 'Compra Inicial' || item.tipo === 'Projeto') {
+        if (showCompraFields) {
             document.getElementById('edit-material-qtde-orcada').value = material.qtdeOrcada || '';
             document.getElementById('edit-material-qtde-disponivel').value = material.qtdeDisponivel || '';
-            compraFields.classList.remove('hidden');
         }
 
         editMaterialModal.classList.remove('hidden');
         setTimeout(() => { editMaterialModal.classList.remove('opacity-0'); editMaterialModalContent.classList.remove('scale-95'); }, 10);
     };
     const fecharModalAlterarMaterial = () => { editMaterialModal.classList.add('opacity-0'); editMaterialModalContent.classList.add('scale-95'); setTimeout(() => editMaterialModal.classList.add('hidden'), 300); };
-    const salvarAlteracaoMaterial = () => {
+    const salvarAlteracaoMaterial = async () => {
         const { obraId, itemId, materialId } = edicaoMaterialAtual;
         const obra = obras.find(o => o.id === obraId);
-        const item = obra.itens.find(p => p.id === itemId);
-        const material = item.materiais.find(m => m.id === materialId);
+        const itemIndex = obra.itens.findIndex(p => p.id === itemId);
+        const materialIndex = obra.itens[itemIndex].materiais.findIndex(m => m.id === materialId);
+        
         const novoTipo = document.getElementById('edit-material-tipo').value.trim();
         const novaDescricao = document.getElementById('edit-material-descricao').value.trim();
         
-        if (novoTipo && novaDescricao) { 
+        if (novoTipo && novaDescricao) {
+            const material = obra.itens[itemIndex].materiais[materialIndex];
             material.tipo = novoTipo; 
             material.descricao = novaDescricao; 
 
-            if (item.tipo === 'Compra Inicial' || item.tipo === 'Projeto') {
+            if (obra.itens[itemIndex].tipo === 'Compra Inicial' || obra.itens[itemIndex].tipo === 'Projeto') {
                 material.qtdeOrcada = document.getElementById('edit-material-qtde-orcada').value;
                 material.qtdeDisponivel = document.getElementById('edit-material-qtde-disponivel').value;
             }
 
-            salvarDados(); 
-            aplicarFiltrosERenderizar(); 
+            const obraDocRef = doc(db, 'obras', obraId);
+            await updateDoc(obraDocRef, { itens: obra.itens });
             fecharModalAlterarMaterial();
         } else { alert('Tipo e Descrição não podem estar vazios.'); }
     };
@@ -985,19 +893,15 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('edit-obra-nome').value = obra.nome;
         document.getElementById('edit-obra-cliente').value = obra.cliente;
         document.getElementById('edit-obra-endereco').value = obra.endereco;
-
         const previsaoInicialMedicaoInput = document.getElementById('edit-obra-previsao-inicial-medicao');
         previsaoInicialMedicaoInput.value = obra.previsaoInicialMedicao;
         previsaoInicialMedicaoInput.disabled = !!obra.previsaoInicialMedicao;
         document.getElementById('edit-obra-nova-previsao-medicao').value = obra.novaPrevisaoMedicao;
-
         document.getElementById('edit-obra-medicao-efetuada').value = obra.medicaoEfetuada;
-
         const previsaoInicialEntregaInput = document.getElementById('edit-obra-previsao-inicial-entrega');
         previsaoInicialEntregaInput.value = obra.previsaoInicialEntrega;
         previsaoInicialEntregaInput.disabled = !!obra.previsaoInicialEntrega;
         document.getElementById('edit-obra-nova-previsao-entrega').value = obra.novaPrevisaoEntrega;
-
         document.getElementById('edit-obra-entrega-realizada').value = obra.entregaRealizada;
         document.getElementById('edit-obra-obs-medicao').value = obra.obsMedicao;
         document.getElementById('edit-obra-obs-entrega').value = obra.obsEntrega;
@@ -1005,28 +909,32 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => { editObraModal.classList.remove('opacity-0'); editObraModalContent.classList.remove('scale-95'); }, 10);
     };
     const fecharModalAlterarObra = () => { editObraModal.classList.add('opacity-0'); editObraModalContent.classList.add('scale-95'); setTimeout(() => editObraModal.classList.add('hidden'), 300); };
-    const salvarAlteracaoObra = () => {
+    const salvarAlteracaoObra = async () => {
         const { obraId } = edicaoObraAtual;
-        const obra = obras.find(o => o.id === obraId);
         const nome = document.getElementById('edit-obra-nome').value.trim();
         const cliente = document.getElementById('edit-obra-cliente').value.trim();
         if (nome && cliente) {
-            obra.nome = nome;
-            obra.cliente = cliente;
-            obra.endereco = document.getElementById('edit-obra-endereco').value.trim();
+            const obraDocRef = doc(db, 'obras', obraId);
+            const dadosAtualizados = {
+                nome: nome,
+                cliente: cliente,
+                endereco: document.getElementById('edit-obra-endereco').value.trim(),
+                novaPrevisaoMedicao: document.getElementById('edit-obra-nova-previsao-medicao').value,
+                medicaoEfetuada: document.getElementById('edit-obra-medicao-efetuada').value,
+                novaPrevisaoEntrega: document.getElementById('edit-obra-nova-previsao-entrega').value,
+                entregaRealizada: document.getElementById('edit-obra-entrega-realizada').value,
+                obsMedicao: document.getElementById('edit-obra-obs-medicao').value,
+                obsEntrega: document.getElementById('edit-obra-obs-entrega').value,
+            };
             if (!document.getElementById('edit-obra-previsao-inicial-medicao').disabled) {
-                obra.previsaoInicialMedicao = document.getElementById('edit-obra-previsao-inicial-medicao').value;
+                dadosAtualizados.previsaoInicialMedicao = document.getElementById('edit-obra-previsao-inicial-medicao').value;
             }
             if (!document.getElementById('edit-obra-previsao-inicial-entrega').disabled) {
-                obra.previsaoInicialEntrega = document.getElementById('edit-obra-previsao-inicial-entrega').value;
+                dadosAtualizados.previsaoInicialEntrega = document.getElementById('edit-obra-previsao-inicial-entrega').value;
             }
-            obra.novaPrevisaoMedicao = document.getElementById('edit-obra-nova-previsao-medicao').value;
-            obra.medicaoEfetuada = document.getElementById('edit-obra-medicao-efetuada').value;
-            obra.novaPrevisaoEntrega = document.getElementById('edit-obra-nova-previsao-entrega').value;
-            obra.entregaRealizada = document.getElementById('edit-obra-entrega-realizada').value;
-            obra.obsMedicao = document.getElementById('edit-obra-obs-medicao').value;
-            obra.obsEntrega = document.getElementById('edit-obra-obs-entrega').value;
-            salvarDados(); aplicarFiltrosERenderizar(); fecharModalAlterarObra();
+
+            await updateDoc(obraDocRef, dadosAtualizados);
+            fecharModalAlterarObra();
         } else { alert('Nome da Obra e do Cliente não podem estar vazios.'); }
     };
 
@@ -1043,37 +951,57 @@ document.addEventListener('DOMContentLoaded', () => {
             btnToggleFormObra.classList.replace('hover:bg-gray-600', 'hover:bg-blue-700');
         }
     };
-
-    function handleButtonClick(e) {
+    
+    // --- LÓGICA DE EVENTOS ---
+    async function handleButtonClick(e) {
         const button = e.target.closest('button');
         if (!button) return;
         const { obraId, itemId, materialId } = button.dataset;
 
         if (button.classList.contains('btn-toggle-dados')) {
-            const obra = obras.find(o => o.id === obraId);
-            if(obra) {
-                obra.dadosExpanded = !obra.dadosExpanded;
-                salvarDados();
-                aplicarFiltrosERenderizar();
-            }
+            uiState[obraId] = { ...uiState[obraId], dadosExpanded: !uiState[obraId]?.dadosExpanded };
+            aplicarFiltrosERenderizar();
         } else if (button.classList.contains('btn-toggle-itens')) {
-            const clickedObra = obras.find(o => o.id === obraId);
-            if(clickedObra) {
-                const newState = !clickedObra.isExpanded;
-                obras.forEach(obra => obra.isExpanded = false);
-                clickedObra.isExpanded = newState;
-                salvarDados();
-                aplicarFiltrosERenderizar();
+            const newState = !uiState[obraId]?.isExpanded;
+            // Fecha todas as outras obras para uma UI mais limpa
+            Object.keys(uiState).forEach(id => uiState[id] = {...uiState[id], isExpanded: false });
+            uiState[obraId] = { ...uiState[obraId], isExpanded: newState };
+            aplicarFiltrosERenderizar();
+        } else if (button.classList.contains('btn-excluir-obra')) { 
+            if (confirm('Deseja EXCLUIR esta obra e todos os seus itens permanentemente?')) {
+                await deleteDoc(doc(db, 'obras', obraId));
+                // A UI se atualizará automaticamente via onSnapshot
             }
-        } else if (button.classList.contains('btn-excluir-obra')) { if (confirm('Deseja EXCLUIR esta obra e todos os seus itens permanentemente?')) { obras = obras.filter(o => o.id !== obraId); salvarDados(); aplicarFiltrosERenderizar(); }
-        } else if (button.classList.contains('btn-alterar-obra')) { abrirModalAlterarObra(obraId);
-        } else if (button.id === 'btnAdicionarObra') { const nome = document.getElementById('inputNomeObra').value.trim(); const cliente = document.getElementById('inputClienteObra').value.trim(); if (nome && cliente) { obras.push({ id: Date.now().toString(), nome, cliente, endereco: document.getElementById('inputEnderecoObra').value.trim(), previsaoInicialMedicao: document.getElementById('inputPrevisaoInicialMedicao').value, novaPrevisaoMedicao: document.getElementById('inputNovaPrevisaoMedicao').value, medicaoEfetuada: document.getElementById('inputMedicaoEfetuada').value, previsaoInicialEntrega: document.getElementById('inputPrevisaoInicialEntrega').value, novaPrevisaoEntrega: document.getElementById('inputNovaPrevisaoEntrega').value, entregaRealizada: document.getElementById('inputEntregaRealizada').value, obsMedicao: document.getElementById('inputObsMedicao').value.trim(), obsEntrega: document.getElementById('inputObsEntrega').value.trim(), itens: [], itemExpandidoId: null, isExpanded: false, dadosExpanded: false }); ['inputNomeObra', 'inputClienteObra', 'inputEnderecoObra', 'inputPrevisaoInicialMedicao', 'inputNovaPrevisaoMedicao', 'inputMedicaoEfetuada', 'inputPrevisaoInicialEntrega', 'inputNovaPrevisaoEntrega', 'inputEntregaRealizada', 'inputObsMedicao', 'inputObsEntrega'].forEach(id => document.getElementById(id).value = ''); salvarDados(); isFormularioNovaObraVisivel = false; renderizarFormulario(); aplicarFiltrosERenderizar(); } else { alert('Preencha pelo menos o Nome da Obra e do Cliente.'); }
+        } else if (button.classList.contains('btn-alterar-obra')) { 
+            abrirModalAlterarObra(obraId);
+        } else if (button.id === 'btnAdicionarObra') { 
+            const nome = document.getElementById('inputNomeObra').value.trim(); 
+            const cliente = document.getElementById('inputClienteObra').value.trim(); 
+            if (nome && cliente) {
+                const novaObra = {
+                    nome, 
+                    cliente, 
+                    endereco: document.getElementById('inputEnderecoObra').value.trim(),
+                    previsaoInicialMedicao: document.getElementById('inputPrevisaoInicialMedicao').value,
+                    novaPrevisaoMedicao: document.getElementById('inputNovaPrevisaoMedicao').value,
+                    medicaoEfetuada: document.getElementById('inputMedicaoEfetuada').value,
+                    previsaoInicialEntrega: document.getElementById('inputPrevisaoInicialEntrega').value,
+                    novaPrevisaoEntrega: document.getElementById('inputNovaPrevisaoEntrega').value,
+                    entregaRealizada: document.getElementById('inputEntregaRealizada').value,
+                    obsMedicao: document.getElementById('inputObsMedicao').value.trim(),
+                    obsEntrega: document.getElementById('inputObsEntrega').value.trim(),
+                    itens: []
+                };
+                await addDoc(obrasCollection, novaObra);
+                ['inputNomeObra', 'inputClienteObra', 'inputEnderecoObra', 'inputPrevisaoInicialMedicao', 'inputNovaPrevisaoMedicao', 'inputMedicaoEfetuada', 'inputPrevisaoInicialEntrega', 'inputNovaPrevisaoEntrega', 'inputEntregaRealizada', 'inputObsMedicao', 'inputObsEntrega'].forEach(id => document.getElementById(id).value = ''); 
+                isFormularioNovaObraVisivel = false; 
+                renderizarFormulario();
+            } else { alert('Preencha pelo menos o Nome da Obra e do Cliente.'); }
         } else if (button.classList.contains('btn-add-item')) {
             const obra = obras.find(o => o.id === obraId);
             const tipo = document.querySelector(`.input-add-item-tipo[data-obra-id="${obraId}"]`).value;
             const codigo = document.querySelector(`.input-add-item-codigo[data-obra-id="${obraId}"]`).value.trim();
             const descricao = document.querySelector(`.input-add-item-descricao[data-obra-id="${obraId}"]`).value.trim();
-
             if (codigo && descricao) {
                 const novoItem = { id: Date.now().toString(), tipo, codigo, descricao, etapas: {}, materiais: [] };
                 if (tipo === 'Projeto') {
@@ -1084,39 +1012,54 @@ document.addEventListener('DOMContentLoaded', () => {
                     novoItem.vidro = document.querySelector(`.input-add-item-vidro[data-obra-id="${obraId}"]`).value.trim();
                     novoItem.m2Vidro = document.querySelector(`.input-add-item-m2-vidro[data-obra-id="${obraId}"]`).value.trim();
                 }
-                obra.itens.push(novoItem);
-                
-                // Limpar campos
+                const itensAtualizados = [...(obra.itens || []), novoItem];
+                await updateDoc(doc(db, 'obras', obraId), { itens: itensAtualizados });
                 document.querySelector(`.input-add-item-codigo[data-obra-id="${obraId}"]`).value = '';
                 document.querySelector(`.input-add-item-descricao[data-obra-id="${obraId}"]`).value = '';
-                if (tipo === 'Projeto') {
-                    document.querySelector(`.input-add-item-largura[data-obra-id="${obraId}"]`).value = '';
-                    document.querySelector(`.input-add-item-altura[data-obra-id="${obraId}"]`).value = '';
-                    document.querySelector(`.input-add-item-m2-total[data-obra-id="${obraId}"]`).value = '';
-                    document.querySelector(`.input-add-item-cor[data-obra-id="${obraId}"]`).value = '';
-                    document.querySelector(`.input-add-item-vidro[data-obra-id="${obraId}"]`).value = '';
-                    document.querySelector(`.input-add-item-m2-vidro[data-obra-id="${obraId}"]`).value = '';
-                }
-                salvarDados();
-                aplicarFiltrosERenderizar();
-            } else {
-                alert('Preencha o Código e a Descrição do item.');
+            } else { alert('Preencha o Código e a Descrição do item.'); }
+        } else if (button.classList.contains('btn-add-material')) { 
+            const tipoInput = document.querySelector(`.input-material-tipo[data-item-id="${itemId}"]`); 
+            const descInput = document.querySelector(`.input-material-desc[data-item-id="${itemId}"]`); 
+            if (tipoInput.value.trim() && descInput.value.trim()) { 
+                const obra = obras.find(o => o.id === obraId); 
+                const item = obra.itens.find(p => p.id === itemId); 
+                const novoMaterial = { id: Date.now().toString(), tipo: tipoInput.value.trim(), descricao: descInput.value.trim(), statusInfo: {}};
+                if (item.tipo === 'Compra Inicial' || item.tipo === 'Projeto') { 
+                    novoMaterial.qtdeOrcada = document.querySelector(`.input-material-qtde-orcada[data-item-id="${itemId}"]`).value.trim(); 
+                    novoMaterial.qtdeDisponivel = document.querySelector(`.input-material-qtde-disponivel[data-item-id="${itemId}"]`).value.trim(); 
+                } 
+                item.materiais = [...(item.materiais || []), novoMaterial];
+                await updateDoc(doc(db, 'obras', obraId), { itens: obra.itens });
+                tipoInput.value = ''; descInput.value = '';
             }
-        } else if (button.classList.contains('btn-add-material')) { const tipoInput = document.querySelector(`.input-material-tipo[data-item-id="${itemId}"]`); const descInput = document.querySelector(`.input-material-desc[data-item-id="${itemId}"]`); if (tipoInput.value.trim() && descInput.value.trim()) { const obra = obras.find(o => o.id === obraId); const item = obra.itens.find(p => p.id === itemId); const novoMaterial = { id: Date.now().toString(), tipo: tipoInput.value.trim(), descricao: descInput.value.trim(), statusInfo: {}}; if (item.tipo === 'Compra Inicial' || item.tipo === 'Projeto') { novoMaterial.qtdeOrcada = document.querySelector(`.input-material-qtde-orcada[data-item-id="${itemId}"]`).value.trim(); novoMaterial.qtdeDisponivel = document.querySelector(`.input-material-qtde-disponivel[data-item-id="${itemId}"]`).value.trim(); } item.materiais.push(novoMaterial); salvarDados(); aplicarFiltrosERenderizar(); }
-        } else if (button.classList.contains('btn-excluir-item')) { if (confirm('Deseja EXCLUIR este item permanentemente?')) { const obra = obras.find(o => o.id === obraId); if(obra) { obra.itens = obra.itens.filter(p => p.id !== itemId); salvarDados(); aplicarFiltrosERenderizar(); } }
+        } else if (button.classList.contains('btn-excluir-item')) { 
+            if (confirm('Deseja EXCLUIR este item permanentemente?')) { 
+                const obra = obras.find(o => o.id === obraId); 
+                if(obra) { 
+                    const itensAtualizados = obra.itens.filter(p => p.id !== itemId); 
+                    await updateDoc(doc(db, 'obras', obraId), { itens: itensAtualizados });
+                }
+            }
         } else if (button.classList.contains('btn-alterar-item')) { abrirModalAlterarItem(obraId, itemId);
-        } else if (button.classList.contains('btn-toggle-materiais')) { const obra = obras.find(o => o.id === obraId); obra.itemExpandidoId = obra.itemExpandidoId === itemId ? null : itemId; salvarDados(); aplicarFiltrosERenderizar();
-        } else if (button.classList.contains('btn-excluir-material')) { if(confirm('Deseja EXCLUIR este material?')) { const obra = obras.find(o => o.id === obraId); const item = obra.itens.find(p => p.id === itemId); item.materiais = item.materiais.filter(m => m.id !== materialId); salvarDados(); aplicarFiltrosERenderizar(); }
+        } else if (button.classList.contains('btn-toggle-materiais')) { 
+            const currentExpanded = uiState[obraId]?.itemExpandidoId;
+            uiState[obraId] = { ...uiState[obraId], itemExpandidoId: currentExpanded === itemId ? null : itemId };
+            aplicarFiltrosERenderizar();
+        } else if (button.classList.contains('btn-excluir-material')) { 
+            if(confirm('Deseja EXCLUIR este material?')) { 
+                const obra = obras.find(o => o.id === obraId); 
+                const item = obra.itens.find(p => p.id === itemId); 
+                item.materiais = (item.materiais || []).filter(m => m.id !== materialId); 
+                await updateDoc(doc(db, 'obras', obraId), { itens: obra.itens });
+            }
         } else if (button.classList.contains('btn-alterar-material')) { abrirModalAlterarMaterial(obraId, itemId, materialId); }
     }
 
     const handleItemFileUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
         const { obraId } = e.target.dataset;
         const reader = new FileReader();
-
         reader.onload = (event) => {
             try {
                 const data = new Uint8Array(event.target.result);
@@ -1125,89 +1068,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 const worksheet = workbook.Sheets[sheetName];
                 const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                 parseSheetDataAndAddItems(jsonData, obraId);
-            } catch (error) {
-                console.error("Erro ao processar o arquivo de itens:", error);
-                alert("Ocorreu um erro ao ler o arquivo. Verifique se o formato está correto.");
-            }
+            } catch (error) { console.error("Erro ao processar o arquivo:", error); alert("Erro ao ler o arquivo."); }
         };
-
         reader.readAsArrayBuffer(file);
         e.target.value = '';
     };
 
-    const parseSheetDataAndAddItems = (sheetData, obraId) => {
+    const parseSheetDataAndAddItems = async (sheetData, obraId) => {
         const obra = obras.find(o => o.id === obraId);
         if (!obra) return;
-
         const requiredHeaders = ['Tipo', 'Código', 'Descrição', 'L', 'H', 'M2 Total', 'Tratamento/Cor', 'Vidro', 'M2 Vidro Tot.', 'Qtde'];
-        let headerRowIndex = -1;
-        let headers = [];
-
+        let headerRowIndex = -1, headers = [];
         for (let i = 0; i < sheetData.length; i++) {
-            const row = sheetData[i];
-            if (!Array.isArray(row)) continue;
+            const row = sheetData[i]; if (!Array.isArray(row)) continue;
             const foundHeaders = requiredHeaders.filter(h => row.includes(h));
-            if (foundHeaders.length > 5) {
-                headerRowIndex = i;
-                headers = row;
-                break;
-            }
+            if (foundHeaders.length > 5) { headerRowIndex = i; headers = row; break; }
         }
-
-        if (headerRowIndex === -1) {
-            alert("Não foi possível encontrar a linha de cabeçalho na planilha de itens.");
-            return;
-        }
-
+        if (headerRowIndex === -1) { alert("Cabeçalho não encontrado na planilha."); return; }
         const headerMap = {};
         try {
             requiredHeaders.forEach(h => {
                 const index = headers.findIndex(header => String(header).trim() === h);
-                if (index === -1) {
-                     throw new Error(`Cabeçalho de item obrigatório não encontrado: "${h}"`);
-                }
+                if (index === -1) throw new Error(`Cabeçalho obrigatório não encontrado: "${h}"`);
                 headerMap[h] = index;
             });
-        } catch (e) {
-            alert(e.message);
-            return;
-        }
-
+        } catch (e) { alert(e.message); return; }
         const newItems = [];
         for (let i = headerRowIndex + 1; i < sheetData.length; i++) {
-            const row = sheetData[i];
-            if (!row || row.length === 0 || row.every(cell => cell === null || cell === '')) continue;
-            
-            const qtde = parseFloat(String(row[headerMap['Qtde']]).trim());
-            if (isNaN(qtde) || qtde < 1 || qtde > 10) {
-                continue;
+            const row = sheetData[i]; if (!row || row.length === 0 || row.every(cell => cell === null || cell === '')) continue;
+            const qtde = parseFloat(String(row[headerMap['Qtde']]).trim()); if (isNaN(qtde) || qtde < 1) continue;
+            for (let j = 0; j < qtde; j++) {
+                const newItem = {
+                    id: `${Date.now()}-${i}-${j}`, tipo: 'Projeto', etapas: {}, materiais: [],
+                    codigo: row[headerMap['Tipo']] || '',
+                    descricao: `${row[headerMap['Código']] || ''} - ${row[headerMap['Descrição']] || ''}`,
+                    altura: row[headerMap['L']] || '', largura: row[headerMap['H']] || '',
+                    m2Total: row[headerMap['M2 Total']] || '', cor: row[headerMap['Tratamento/Cor']] || '',
+                    vidro: row[headerMap['Vidro']] || '', m2Vidro: row[headerMap['M2 Vidro Tot.']] || ''
+                }; newItems.push(newItem);
             }
-
-            const newItem = {
-                id: `${Date.now()}-${i}`,
-                tipo: 'Projeto',
-                etapas: {},
-                materiais: [],
-                codigo: row[headerMap['Tipo']] || '',
-                descricao: `${row[headerMap['Código']] || ''} - ${row[headerMap['Descrição']] || ''}`,
-                altura: row[headerMap['L']] || '',
-                largura: row[headerMap['H']] || '',
-                m2Total: row[headerMap['M2 Total']] || '',
-                cor: row[headerMap['Tratamento/Cor']] || '',
-                vidro: row[headerMap['Vidro']] || '',
-                m2Vidro: row[headerMap['M2 Vidro Tot.']] || ''
-            };
-            newItems.push(newItem);
         }
-
-        if(newItems.length > 0) {
-            obra.itens.push(...newItems);
-            salvarDados();
-            aplicarFiltrosERenderizar();
+        if (newItems.length > 0) {
+            const itensAtualizados = [...(obra.itens || []), ...newItems];
+            await updateDoc(doc(db, 'obras', obraId), { itens: itensAtualizados });
             alert(`${newItems.length} itens foram adicionados com sucesso!`);
-        } else {
-            alert("Nenhum item com Qtde entre 1 e 10 foi encontrado na planilha para importar.");
-        }
+        } else { alert("Nenhum item válido encontrado na planilha."); }
     };
     
     document.addEventListener('click', (e) => {
@@ -1222,156 +1127,59 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleProjetoFields = (tipo, obraId) => {
         const fieldsContainer = document.getElementById(`add-item-projeto-fields-${obraId}`);
         const uploadContainer = document.getElementById(`upload-itens-container-${obraId}`);
-
         if (fieldsContainer && uploadContainer) {
-            if (tipo === 'Projeto') {
-                fieldsContainer.classList.remove('hidden');
-                fieldsContainer.classList.add('grid');
-                uploadContainer.classList.remove('hidden');
-            } else {
-                fieldsContainer.classList.add('hidden');
-                fieldsContainer.classList.remove('grid');
-                uploadContainer.classList.add('hidden');
-            }
+            fieldsContainer.classList.toggle('hidden', tipo !== 'Projeto');
+            fieldsContainer.classList.toggle('grid', tipo === 'Projeto');
+            uploadContainer.classList.toggle('hidden', tipo !== 'Projeto');
         }
     };
     
     document.addEventListener('change', (e) => {
-        if (e.target.matches('input[id^="upload-itens-"]')) {
-            handleItemFileUpload(e);
-        }
-        if (e.target.matches('.input-add-item-tipo')) {
-            toggleProjetoFields(e.target.value, e.target.dataset.obraId);
-        }
-        if (e.target.matches('#edit-item-tipo')) {
-            toggleProjetoFieldsModal(e.target.value);
-        }
+        if (e.target.matches('input[id^="upload-itens-"]')) handleItemFileUpload(e);
+        if (e.target.matches('.input-add-item-tipo')) toggleProjetoFields(e.target.value, e.target.dataset.obraId);
+        if (e.target.matches('#edit-item-tipo')) toggleProjetoFieldsModal(e.target.value);
     });
 
     const popularFiltros = () => {
-        // Popula filtro de Tipo de Item com checkboxes
         const tipoItemContainer = document.getElementById('filtro-tipo-item-container');
         const tipos = Object.keys(TIPO_ITEM_STYLE_MAP);
-        let tipoCheckboxesHtml = `
-            <div class="flex items-center">
-                <input type="checkbox" id="filtro-tipo-todos" class="filtro-tipo-checkbox-todos h-4 w-4 rounded">
-                <label for="filtro-tipo-todos" class="ml-2 text-sm font-semibold">Todos</label>
-            </div>
-        `;
-        tipos.forEach(tipo => {
-            tipoCheckboxesHtml += `
-                <div class="flex items-center">
-                    <input type="checkbox" id="filtro-tipo-${tipo}" value="${tipo}" class="filtro-tipo-checkbox h-4 w-4 rounded">
-                    <label for="filtro-tipo-${tipo}" class="ml-2 text-sm">${tipo}</label>
-                </div>
-            `;
-        });
+        let tipoCheckboxesHtml = `<div class="flex items-center"><input type="checkbox" id="filtro-tipo-todos" class="filtro-tipo-checkbox-todos h-4 w-4 rounded"><label for="filtro-tipo-todos" class="ml-2 text-sm font-semibold">Todos</label></div>`;
+        tipos.forEach(tipo => { tipoCheckboxesHtml += `<div class="flex items-center"><input type="checkbox" id="filtro-tipo-${tipo}" value="${tipo}" class="filtro-tipo-checkbox h-4 w-4 rounded"><label for="filtro-tipo-${tipo}" class="ml-2 text-sm">${tipo}</label></div>`; });
         tipoItemContainer.innerHTML = tipoCheckboxesHtml;
 
-        // Popula filtro de Status de Material com checkboxes
         const statusMaterialContainer = document.getElementById('filtro-status-material-container');
         const statusMateriais = Object.entries(STATUS_MATERIAL_MAP).filter(([key]) => key !== 'default');
-        let matCheckboxesHtml = `
-             <div class="flex items-center">
-                <input type="checkbox" id="filtro-mat-todos" class="filtro-mat-checkbox-todos h-4 w-4 rounded">
-                <label for="filtro-mat-todos" class="ml-2 text-sm font-semibold">Todos</label>
-            </div>
-        `;
-        statusMateriais.forEach(([key, value]) => {
-            matCheckboxesHtml += `
-                 <div class="flex items-center">
-                    <input type="checkbox" id="filtro-mat-${key}" value="${key}" class="filtro-mat-checkbox h-4 w-4 rounded">
-                    <label for="filtro-mat-${key}" class="ml-2 text-sm">${value.texto}</label>
-                </div>
-            `;
-        });
+        let matCheckboxesHtml = `<div class="flex items-center"><input type="checkbox" id="filtro-mat-todos" class="filtro-mat-checkbox-todos h-4 w-4 rounded"><label for="filtro-mat-todos" class="ml-2 text-sm font-semibold">Todos</label></div>`;
+        statusMateriais.forEach(([key, value]) => { matCheckboxesHtml += `<div class="flex items-center"><input type="checkbox" id="filtro-mat-${key}" value="${key}" class="filtro-mat-checkbox h-4 w-4 rounded"><label for="filtro-mat-${key}" class="ml-2 text-sm">${value.texto}</label></div>`; });
         statusMaterialContainer.innerHTML = matCheckboxesHtml;
 
-
-        // Popula outros filtros
         const filtrosStatusContainer = document.getElementById('filtros-status-item-container');
-        filtrosStatusContainer.innerHTML = ETAPAS_ITEM.map(etapa => `
-            <div>
-                <label for="filtro-status-${etapa.id}" class="text-sm font-medium text-gray-600">${etapa.nome}</label>
-                <select id="filtro-status-${etapa.id}" data-etapa-id="${etapa.id}" class="filtro-status-item w-full p-2 border rounded-lg mt-1">
-                    <option value="todos">Todos</option>
-                    ${Object.entries(STATUS_ITEM_MAP).filter(([key]) => key !== 'default').map(([key, value]) => `<option value="${key}">${value.texto}</option>`).join('')}
-                </select>
-            </div>
-        `).join('');
-        
-        filtros = {
-            nomeObra: '',
-            tipoItem: [], 
-            statusMaterial: [], 
-            statusItem: ETAPAS_ITEM.reduce((acc, etapa) => ({...acc, [etapa.id]: 'todos'}), {})
-        };
+        filtrosStatusContainer.innerHTML = ETAPAS_ITEM.map(etapa => `<div><label for="filtro-status-${etapa.id}" class="text-sm font-medium text-gray-600">${etapa.nome}</label><select id="filtro-status-${etapa.id}" data-etapa-id="${etapa.id}" class="filtro-status-item w-full p-2 border rounded-lg mt-1"><option value="todos">Todos</option>${Object.entries(STATUS_ITEM_MAP).filter(([key]) => key !== 'default').map(([key, value]) => `<option value="${key}">${value.texto}</option>`).join('')}</select></div>`).join('');
+        filtros = { nomeObra: '', tipoItem: [], statusMaterial: [], statusItem: ETAPAS_ITEM.reduce((acc, etapa) => ({...acc, [etapa.id]: 'todos'}), {}) };
     };
 
     const adicionarListenersFiltros = () => {
-        document.getElementById('filtro-nome-obra').addEventListener('input', (e) => {
-            filtros.nomeObra = e.target.value;
-            aplicarFiltrosERenderizar();
-        });
-
-        // Listener para checkboxes de Tipo de Item
+        document.getElementById('filtro-nome-obra').addEventListener('input', (e) => { filtros.nomeObra = e.target.value; aplicarFiltrosERenderizar(); });
         document.getElementById('filtro-tipo-item-container').addEventListener('change', (e) => {
-            const target = e.target;
-            if (target.type !== 'checkbox') return;
-
-            const todosCheckbox = document.getElementById('filtro-tipo-todos');
-            const tipoCheckboxes = document.querySelectorAll('.filtro-tipo-checkbox');
-            
-            if (target.id === 'filtro-tipo-todos') {
-                tipoCheckboxes.forEach(cb => cb.checked = target.checked);
-            } else {
-                todosCheckbox.checked = [...tipoCheckboxes].every(cb => cb.checked);
-            }
-
+            const target = e.target; if (target.type !== 'checkbox') return;
+            const todosCheckbox = document.getElementById('filtro-tipo-todos'); const tipoCheckboxes = document.querySelectorAll('.filtro-tipo-checkbox');
+            if (target.id === 'filtro-tipo-todos') tipoCheckboxes.forEach(cb => cb.checked = target.checked); else todosCheckbox.checked = [...tipoCheckboxes].every(cb => cb.checked);
             filtros.tipoItem = [...document.querySelectorAll('.filtro-tipo-checkbox:checked')].map(cb => cb.value);
-            
-            if (todosCheckbox.checked) {
-                filtros.tipoItem = [];
-            }
-
+            if (todosCheckbox.checked) filtros.tipoItem = [];
             aplicarFiltrosERenderizar();
         });
-
-        // Listener para checkboxes de Status de Material
         document.getElementById('filtro-status-material-container').addEventListener('change', (e) => {
-            const target = e.target;
-            if (target.type !== 'checkbox') return;
-
-            const todosCheckbox = document.getElementById('filtro-mat-todos');
-            const matCheckboxes = document.querySelectorAll('.filtro-mat-checkbox');
-
-            if (target.id === 'filtro-mat-todos') {
-                matCheckboxes.forEach(cb => cb.checked = target.checked);
-            } else {
-                todosCheckbox.checked = [...matCheckboxes].every(cb => cb.checked);
-            }
-
+            const target = e.target; if (target.type !== 'checkbox') return;
+            const todosCheckbox = document.getElementById('filtro-mat-todos'); const matCheckboxes = document.querySelectorAll('.filtro-mat-checkbox');
+            if (target.id === 'filtro-mat-todos') matCheckboxes.forEach(cb => cb.checked = target.checked); else todosCheckbox.checked = [...matCheckboxes].every(cb => cb.checked);
             filtros.statusMaterial = [...document.querySelectorAll('.filtro-mat-checkbox:checked')].map(cb => cb.value);
-
-            if (todosCheckbox.checked) {
-                filtros.statusMaterial = [];
-            }
+            if (todosCheckbox.checked) filtros.statusMaterial = [];
             aplicarFiltrosERenderizar();
         });
-
-
-        document.querySelectorAll('.filtro-status-item').forEach(select => {
-            select.addEventListener('change', (e) => {
-                filtros.statusItem[e.target.dataset.etapaId] = e.target.value;
-                aplicarFiltrosERenderizar();
-            });
-        });
+        document.querySelectorAll('.filtro-status-item').forEach(select => { select.addEventListener('change', (e) => { filtros.statusItem[e.target.dataset.etapaId] = e.target.value; aplicarFiltrosERenderizar(); }); });
     };
 
-    btnToggleFormObra.addEventListener('click', () => {
-        isFormularioNovaObraVisivel = !isFormularioNovaObraVisivel;
-        renderizarFormulario();
-    });
+    btnToggleFormObra.addEventListener('click', () => { isFormularioNovaObraVisivel = !isFormularioNovaObraVisivel; renderizarFormulario(); });
     document.getElementById('modal-btn-salvar').addEventListener('click', salvarStatus);
     document.getElementById('modal-btn-cancelar').addEventListener('click', fecharModal);
     document.getElementById('modal-btn-limpar').addEventListener('click', limparStatus);
@@ -1386,12 +1194,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('edit-obra-btn-cancelar').addEventListener('click', fecharModalAlterarObra);
     editObraModal.addEventListener('click', (e) => e.target === editObraModal && fecharModalAlterarObra());
 
-    carregarDados();
     popularFiltros();
     adicionarListenersFiltros();
-    aplicarFiltrosERenderizar();
+    // A chamada inicial para carregar dados agora é feita pelo listener de autenticação
 });
 </script>
 
 </body>
 </html>
+
