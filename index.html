@@ -30,7 +30,7 @@
         .action-btn:hover {
             opacity: 0.8;
         }
-        
+
         /* --- STATUS DOS ITENS --- */
         .status-item-nao-iniciado { background-color: #ffffff; color: #1f2937; border: 1px solid #d1d5db; }
         .status-item-iniciado { background-color: #38bdf8; color: white; } /* Azul claro */
@@ -50,7 +50,7 @@
         .table-container { overflow-x: auto; }
         .materiais-row td { padding: 0 !important; border: 0; }
         .material-status-badge { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
-        
+
         .material-cell {
             font-size: 0.7rem; /* 30% menor que o padrão (aprox. 1rem) */
             vertical-align: middle;
@@ -120,7 +120,7 @@
                 <button id="btnAdicionarObra" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition shadow w-full">Adicionar Obra</button>
             </div>
         </div>
-        
+
         <div class="bg-white p-4 rounded-xl shadow-md mb-6">
             <h3 class="text-lg font-semibold text-gray-700 mb-4">Filtros de Consulta</h3>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -154,7 +154,7 @@
             <div class="space-y-4">
                 <div><label for="modal-status" class="block text-sm font-medium text-gray-700 mb-1">Status</label><select id="modal-status" class="w-full p-3 border rounded-lg"></select></div>
                 <div><label for="modal-data" class="block text-sm font-medium text-gray-700 mb-1">Data</label><input type="date" id="modal-data" class="w-full p-3 border rounded-lg"></div>
-                
+
                 <div id="modal-prazo-container" class="hidden">
                     <label for="modal-prazo-inicial" class="block text-sm font-medium text-gray-700 mb-1">Prazo Conclusão - Inicial</label>
                     <input type="date" id="modal-prazo-inicial" class="w-full p-3 border rounded-lg">
@@ -168,7 +168,7 @@
                     <label for="modal-previsao-disponibilidade-reagendado" class="block text-sm font-medium text-gray-700 mb-1 mt-2">Previsão Disponibilidade - Reagendado</label>
                     <input type="date" id="modal-previsao-disponibilidade-reagendado" class="w-full p-3 border rounded-lg">
                 </div>
-                
+
                 <div><label for="modal-obs" class="block text-sm font-medium text-gray-700 mb-1">Observação</label><textarea id="modal-obs" rows="4" placeholder="Adicione uma observação..." class="w-full p-3 border rounded-lg"></textarea></div>
             </div>
             <div class="flex justify-between items-center mt-8">
@@ -180,7 +180,7 @@
             </div>
         </div>
     </div>
-    
+
     <div id="edit-item-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden modal">
         <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg mx-auto modal-content transform scale-95 overflow-y-auto max-h-screen">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">Alterar Item</h2>
@@ -196,7 +196,7 @@
                 </div>
                 <div><label for="edit-item-codigo" class="block text-sm font-medium text-gray-700 mb-1">Código</label><input type="text" id="edit-item-codigo" class="w-full p-3 border rounded-lg"></div>
                 <div><label for="edit-item-descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label><input type="text" id="edit-item-descricao" class="w-full p-3 border rounded-lg"></div>
-                
+
                 <div id="edit-item-projeto-fields" class="hidden space-y-4 border-t pt-4">
                      <div><label for="edit-item-largura" class="block text-sm font-medium text-gray-700 mb-1">Largura</label><input type="text" id="edit-item-largura" class="w-full p-3 border rounded-lg"></div>
                      <div><label for="edit-item-altura" class="block text-sm font-medium text-gray-700 mb-1">Altura</label><input type="text" id="edit-item-altura" class="w-full p-3 border rounded-lg"></div>
@@ -219,7 +219,7 @@
             <div class="space-y-4">
                 <div><label for="edit-material-tipo" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label><input type="text" id="edit-material-tipo" class="w-full p-3 border rounded-lg"></div>
                 <div><label for="edit-material-descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label><input type="text" id="edit-material-descricao" class="w-full p-3 border rounded-lg"></div>
-                
+
                 <div id="edit-material-compra-fields" class="hidden space-y-4 border-t pt-4">
                     <div><label for="edit-material-qtde-orcada" class="block text-sm font-medium text-gray-700 mb-1">Qtde Orçada</label><input type="number" id="edit-material-qtde-orcada" class="w-full p-3 border rounded-lg"></div>
                     <div><label for="edit-material-qtde-disponivel" class="block text-sm font-medium text-gray-700 mb-1">Qtde Disponível</label><input type="number" id="edit-material-qtde-disponivel" class="w-full p-3 border rounded-lg"></div>
@@ -272,13 +272,45 @@
     </div>
 
 
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+  import { getFirestore, collection, doc, setDoc, addDoc, deleteDoc, onSnapshot, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDyNk5BJscelHhxjKRHKlOZpYnNKgnh3B4",
+    authDomain: "controle-gc.firebaseapp.com",
+    projectId: "controle-gc",
+    storageBucket: "controle-gc.firebasestorage.app",
+    messagingSenderId: "197002816768",
+    appId: "1:197002816768:web:a6a56f47421ea52961d7e5",
+    measurementId: "G-EJN7NMWZ6P"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Make db and other functions available globally for the other script
+  window.db = db;
+  window.collection = collection;
+  window.doc = doc;
+  window.setDoc = setDoc;
+  window.addDoc = addDoc;
+  window.deleteDoc = deleteDoc;
+  window.onSnapshot = onSnapshot;
+  window.writeBatch = writeBatch;
+  window.serverTimestamp = serverTimestamp;
+</script>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONFIGURAÇÕES ---
     const ETAPAS_ITEM = [ { id: 'alteracaoProjeto', nome: 'Alterações' }, { id: 'projetoFinal', nome: 'Projeto Final' }, { id: 'emProducao', nome: 'PRODUÇÃO' }, { id: 'entregue', nome: 'Entrega' }, { id: 'instalado', nome: 'Instalação' }];
     const STATUS_ITEM_MAP = { 'nao-iniciado': { texto: 'Não iniciado', classe: 'status-item-nao-iniciado' }, 'iniciado': { texto: 'Iniciado', classe: 'status-item-iniciado' }, 'parado': { texto: 'Parado', classe: 'status-item-parado' }, 'concluido': { texto: 'Concluído', classe: 'status-item-concluido' }, 'cancelado': { texto: 'Cancelado', classe: 'status-item-cancelado' }, 'default': { texto: 'Não iniciado', classe: 'status-item-nao-iniciado' } };
-    
-    const STATUS_MATERIAL_MAP = { 
+
+    const STATUS_MATERIAL_MAP = {
         'emCotacao': { texto: 'Em cotação', classe: 'status-mat-branco' },
         'compraParcial': { texto: 'Compra Parcial', classe: 'status-mat-amarelo' },
         'compraTotal': { texto: 'Compra Total', classe: 'status-mat-verde' },
@@ -319,42 +351,54 @@ document.addEventListener('DOMContentLoaded', () => {
     const formNovaObraContainer = document.getElementById('form-nova-obra-container');
     const btnToggleFormObra = document.getElementById('btn-toggle-form-obra');
 
-    const salvarDados = () => { localStorage.setItem('dadosEsquadriasV4', JSON.stringify(obras)); };
-    const carregarDados = () => {
-        const dados = localStorage.getItem('dadosEsquadriasV4');
-        if (dados) {
-            obras = JSON.parse(dados);
+    const listenToObras = () => {
+        const obrasCollection = window.collection(window.db, 'obras');
+        window.onSnapshot(obrasCollection, (querySnapshot) => {
+            console.log("Dados recebidos do Firestore.");
+            const obrasFromDB = [];
+            querySnapshot.forEach((doc) => {
+                obrasFromDB.push({ id: doc.id, ...doc.data() });
+            });
+
+            const expandedState = obras.reduce((acc, o) => {
+                if (o.id) {
+                    acc[o.id] = { isExpanded: o.isExpanded, dadosExpanded: o.dadosExpanded, itemExpandidoId: o.itemExpandidoId };
+                }
+                return acc;
+            }, {});
+
+            obras = obrasFromDB;
+
             obras.forEach(obra => {
-                obra.itens = obra.itens ?? obra.pecas ?? []; // Compatibilidade com versão anterior
+                const uiState = expandedState[obra.id] || {};
+                obra.isExpanded = uiState.isExpanded || false;
+                obra.dadosExpanded = uiState.dadosExpanded || false;
+                obra.itemExpandidoId = uiState.itemExpandidoId || null;
+
+                obra.itens = obra.itens ?? obra.pecas ?? [];
                 delete obra.pecas;
-
                 obra.endereco = obra.endereco ?? '';
-
-                // Migração de dados de datas antigas para novas
                 obra.previsaoInicialMedicao = obra.previsaoInicialMedicao ?? obra.previsaoMedicao ?? '';
                 obra.previsaoInicialEntrega = obra.previsaoInicialEntrega ?? obra.previsaoEntrega ?? '';
                 delete obra.previsaoMedicao;
                 delete obra.previsaoEntrega;
-
                 obra.novaPrevisaoMedicao = obra.novaPrevisaoMedicao ?? '';
                 obra.novaPrevisaoEntrega = obra.novaPrevisaoEntrega ?? '';
-
                 obra.medicaoEfetuada = obra.medicaoEfetuada ?? '';
                 obra.entregaRealizada = obra.entregaRealizada ?? '';
                 obra.obsMedicao = obra.obsMedicao ?? '';
                 obra.obsEntrega = obra.obsEntrega ?? '';
-                obra.itemExpandidoId = null;
-                obra.isExpanded = false; 
-                obra.dadosExpanded = false;
-                obra.itens.forEach(item => {
+
+                (obra.itens || []).forEach(item => {
                     item.tipo = item.tipo ?? 'Projeto';
                     item.codigo = item.codigo ?? '';
                     item.materiais = item.materiais ?? [];
+                    item.etapas = item.etapas ?? {};
                     Object.values(item.etapas).forEach(etapa => {
                         etapa.prazoConclusaoInicial = etapa.prazoConclusaoInicial ?? etapa.prazoConclusao ?? '';
                         delete etapa.prazoConclusao;
                     });
-                    
+
                     if (item.tipo === 'Projeto') {
                         item.largura = item.largura ?? '';
                         item.altura = item.altura ?? '';
@@ -364,8 +408,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         item.m2Vidro = item.m2Vidro ?? '';
                     }
 
-                    item.materiais.forEach(mat => { 
-                        mat.statusInfo = mat.statusInfo ?? {}; 
+                    (item.materiais || []).forEach(mat => {
+                        mat.statusInfo = mat.statusInfo ?? {};
                         mat.statusInfo.previsaoDisponibilidadeInicial = mat.statusInfo.previsaoDisponibilidadeInicial ?? mat.statusInfo.previsaoDisponibilidade ?? '';
                         delete mat.statusInfo.previsaoDisponibilidade;
                         delete mat.etapas;
@@ -373,7 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (item.tipo === 'Compra Inicial' || item.tipo === 'Projeto') {
                             mat.qtdeOrcada = mat.qtdeOrcada ?? '';
                             mat.qtdeDisponivel = mat.qtdeDisponivel ?? '';
-                            delete mat.largura; // Limpa campos antigos para unificar
+                            delete mat.largura;
                             delete mat.altura;
                             delete mat.m2Total;
                             delete mat.cor;
@@ -383,14 +427,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 });
             });
-        }
+
+            aplicarFiltrosERenderizar();
+        });
     };
-    
+
     const formatarData = (dataString) => dataString ? new Date(dataString + 'T00:00:00').toLocaleDateString('pt-BR') : '---';
 
     const calcularTotaisItens = (obra) => {
         const etapaProducaoId = 'emProducao';
-        
+
         const itensContaveis = obra.itens.filter(item => item.tipo === 'Projeto' || item.tipo === 'Terceiros');
         const itensAtivos = itensContaveis.filter(item => item.etapas[etapaProducaoId]?.status !== 'cancelado');
         const totalItensAtivos = itensAtivos.length;
@@ -398,9 +444,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (totalItensAtivos === 0) {
             return { concluidas: 0, total: 0 };
         }
-        
+
         const itensConcluidos = itensAtivos.filter(item => item.etapas[etapaProducaoId]?.status === 'concluido').length;
-        
+
         return { concluidas: itensConcluidos, total: totalItensAtivos };
     };
 
@@ -434,26 +480,26 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (itemStatus !== statusFiltro) return false;
                         }
                     }
-                    
+
                     // Filtro por status de material (agora com múltiplos valores)
                     if (statusMaterialFiltro.length > 0) {
                         const temMaterialComStatus = item.materiais.some(mat => statusMaterialFiltro.includes(mat.statusInfo?.status || 'emCotacao'));
                         if (!temMaterialComStatus) return false;
                     }
-                    
+
                     return true;
                 });
 
                 return { ...obra, itens: itensFiltrados };
 
-            }).filter(obra => obra.itens.length > 0); 
+            }).filter(obra => obra.itens.length > 0);
         }
 
         renderizarObras(obrasFiltradas);
     }
 
     const renderizarObras = (listaObras = obras) => {
-        obrasContainer.innerHTML = listaObras.length === 0 
+        obrasContainer.innerHTML = listaObras.length === 0
             ? `<div class="text-center p-8 bg-white rounded-lg shadow-sm"><h3 class="text-lg font-medium text-gray-700">Nenhuma obra encontrada.</h3><p class="text-gray-500 mt-1">Ajuste os filtros ou adicione uma nova obra.</p></div>`
             : listaObras.map(obra => {
                 const totais = calcularTotaisItens(obra);
@@ -584,12 +630,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (item.tipo === 'Orçamento' && etapa.id !== 'alteracaoProjeto') {
             return `<td class="p-3 text-center text-gray-300">-</td>`;
         }
-        
+
         const statusInfo = item.etapas[etapa.id];
         const statusData = statusInfo ? STATUS_ITEM_MAP[statusInfo.status] : STATUS_ITEM_MAP['default'];
         const dataFormatada = statusInfo?.data ? formatarData(statusInfo.data) : '';
         const prazoFormatado = statusInfo?.prazoConclusaoInicial ? formatarData(statusInfo.prazoConclusaoInicial) : '';
-        
+
         let statusTextStyle = '';
         if (statusInfo?.prazoConclusaoInicial && statusInfo.status !== 'concluido' && statusInfo.status !== 'cancelado') {
             const hoje = new Date(); hoje.setHours(0,0,0,0);
@@ -598,7 +644,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusTextStyle = 'color: #dc2626; font-weight: bold;';
             }
         }
-        
+
         let tooltipText = statusInfo?.observacao || 'Sem observações';
         if (prazoFormatado !== '---') { tooltipText += `\nPrazo: ${prazoFormatado}`; }
 
@@ -610,7 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         </td>`;
     };
-	
+
 	const renderizarAcoesItem = (obra, item) => `
         <td class="p-3 text-center">
             <div class="flex justify-center items-center gap-3">
@@ -655,7 +701,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderizarItens = (obra) => {
         if (!obra.itens || obra.itens.length === 0) return `<tr><td colspan="100%" class="p-4 text-center text-gray-500">Nenhum item adicionado.</td></tr>`;
-        
+
         const splitIndex = ETAPAS_ITEM.findIndex(e => e.id === 'emProducao');
         const primeiraParteEtapas = ETAPAS_ITEM.slice(0, splitIndex);
         const segundaParteEtapas = ETAPAS_ITEM.slice(splitIndex);
@@ -668,7 +714,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const buttonText = obra.itemExpandidoId === item.id ? 'Fechar' : botaoState.text;
                 materiaisCell = `<td class="p-3 text-center"><button class="btn-toggle-materiais text-sm font-semibold py-1 px-3 rounded-md ${botaoState.className}" data-obra-id="${obra.id}" data-item-id="${item.id}">${buttonText}</button></td>`;
             }
-            
+
             const projetoFieldsHtml = item.tipo === 'Projeto' ? `
                 <div class="mt-2 p-2 bg-gray-50 rounded-md text-xs grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1">
                     <p><strong>Largura:</strong> ${item.largura || '---'}</p>
@@ -704,7 +750,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderizarMateriais = (obra, item) => {
         let additionalHeaders = '';
         let additionalInputsHtml = '';
-        
+
         if (item.tipo === 'Compra Inicial' || item.tipo === 'Projeto') {
             additionalHeaders = `
                 <th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Qtde Orçada</th>
@@ -738,7 +784,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return '';
         };
-        
+
         return `
         <tr class="materiais-row"><td colspan="100%" class="bg-gray-100 p-4">
             <div class="p-4"><h4 class="font-bold text-gray-700 mb-3">Materiais: ${item.codigo} - ${item.descricao}</h4>
@@ -754,7 +800,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${(item.materiais || []).map(mat => {
                     const statusInfo = mat.statusInfo || {};
                     const statusData = statusInfo.status ? STATUS_MATERIAL_MAP[statusInfo.status] : STATUS_MATERIAL_MAP['default'];
-                    
+
                     return `
                     <tr class="border-t">
                         <td class="p-2 font-medium text-gray-800">${mat.tipo}</td>
@@ -794,13 +840,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const statusMap = isMaterial ? STATUS_MATERIAL_MAP : STATUS_ITEM_MAP;
         document.getElementById('modal-header').textContent = `Atualizar Status de ${isMaterial ? 'Material' : 'Item'}`;
         document.getElementById('modal-item-nome').textContent = isMaterial ? `${targetItem.tipo}: ${targetItem.descricao}` : `${targetItem.codigo}: ${targetItem.descricao}`;
-        
+
         const prazoContainer = document.getElementById('modal-prazo-container');
         const previsaoContainer = document.getElementById('modal-previsao-container');
         let itemStatus = {};
 
-        if (isMaterial) { 
-            document.getElementById('modal-etapa-container').style.display = 'none'; 
+        if (isMaterial) {
+            document.getElementById('modal-etapa-container').style.display = 'none';
             itemStatus = targetItem.statusInfo || {};
             prazoContainer.classList.add('hidden');
             previsaoContainer.classList.remove('hidden');
@@ -808,10 +854,10 @@ document.addEventListener('DOMContentLoaded', () => {
             previsaoInicialInput.value = itemStatus.previsaoDisponibilidadeInicial || '';
             previsaoInicialInput.disabled = !!itemStatus.previsaoDisponibilidadeInicial;
             document.getElementById('modal-previsao-disponibilidade-reagendado').value = itemStatus.previsaoDisponibilidadeReagendado || '';
-        } else { 
-            document.getElementById('modal-etapa-container').style.display = 'inline'; 
-            const etapa = ETAPAS_ITEM.find(e => e.id === etapaId); 
-            document.getElementById('modal-etapa-nome').textContent = etapa.nome; 
+        } else {
+            document.getElementById('modal-etapa-container').style.display = 'inline';
+            const etapa = ETAPAS_ITEM.find(e => e.id === etapaId);
+            document.getElementById('modal-etapa-nome').textContent = etapa.nome;
             itemStatus = targetItem.etapas[etapaId] || {};
             prazoContainer.classList.remove('hidden');
             previsaoContainer.classList.add('hidden');
@@ -825,52 +871,106 @@ document.addEventListener('DOMContentLoaded', () => {
         statusSelect.value = itemStatus.status || Object.keys(statusMap).find(k => k !== 'default');
         document.getElementById('modal-data').value = itemStatus.data || new Date().toISOString().split('T')[0];
         document.getElementById('modal-obs').value = itemStatus.observacao || '';
-        
+
         modal.classList.remove('hidden');
         setTimeout(() => { modal.classList.remove('opacity-0'); modalContent.classList.remove('scale-95'); }, 10);
     };
-    
+
     const fecharModal = () => { modal.classList.add('opacity-0'); modalContent.classList.add('scale-95'); setTimeout(() => modal.classList.add('hidden'), 300); };
 
-    const salvarStatus = () => {
+    const salvarStatus = async () => {
         const { obraId, itemId, etapaId, materialId } = edicaoAtual;
         const obra = obras.find(o => o.id === obraId);
-        const item = obra.itens.find(p => p.id === itemId);
-        const novoStatus = { 
-            status: document.getElementById('modal-status').value, 
-            data: document.getElementById('modal-data').value, 
-            observacao: document.getElementById('modal-obs').value.trim() 
+        if (!obra) return;
+
+        const novoStatus = {
+            status: document.getElementById('modal-status').value,
+            data: document.getElementById('modal-data').value,
+            observacao: document.getElementById('modal-obs').value.trim()
         };
-        if (materialId) { 
+
+        let updatedItens;
+
+        if (materialId) {
+            const item = obra.itens.find(p => p.id === itemId);
+            if (!item) return;
             const material = item.materiais.find(m => m.id === materialId);
+            if (!material) return;
+
             if (!document.getElementById('modal-previsao-disponibilidade-inicial').disabled) {
                 novoStatus.previsaoDisponibilidadeInicial = document.getElementById('modal-previsao-disponibilidade-inicial').value;
             }
             novoStatus.previsaoDisponibilidadeReagendado = document.getElementById('modal-previsao-disponibilidade-reagendado').value;
-            material.statusInfo = {...material.statusInfo, ...novoStatus};
-        } else { 
+
+            const updatedMaterial = { ...material, statusInfo: { ...material.statusInfo, ...novoStatus } };
+            const updatedMaterials = item.materiais.map(m => m.id === materialId ? updatedMaterial : m);
+            const updatedItem = { ...item, materiais: updatedMaterials };
+            updatedItens = obra.itens.map(it => it.id === itemId ? updatedItem : it);
+
+        } else {
+            const item = obra.itens.find(p => p.id === itemId);
+            if (!item) return;
+
             if (!document.getElementById('modal-prazo-inicial').disabled) {
                 novoStatus.prazoConclusaoInicial = document.getElementById('modal-prazo-inicial').value;
             }
-            novoStatus.prazoConclusaoReagendado = document.getElementById('modal-prazo-reagendado').value; 
-            item.etapas[etapaId] = {...item.etapas[etapaId], ...novoStatus};
+            novoStatus.prazoConclusaoReagendado = document.getElementById('modal-prazo-reagendado').value;
+
+            const updatedEtapas = { ...item.etapas, [etapaId]: { ...(item.etapas[etapaId] || {}), ...novoStatus } };
+            const updatedItem = { ...item, etapas: updatedEtapas };
+            updatedItens = obra.itens.map(it => it.id === itemId ? updatedItem : it);
         }
-        salvarDados(); 
-        aplicarFiltrosERenderizar(); 
-        fecharModal();
+
+        const obraRef = window.doc(window.db, 'obras', obraId);
+        try {
+            await window.setDoc(obraRef, { itens: updatedItens }, { merge: true });
+            fecharModal();
+        } catch (error) {
+            console.error("Erro ao salvar status: ", error);
+            alert("Não foi possível salvar o status. Tente novamente.");
+        }
     };
 
-    const limparStatus = () => {
-        if(confirm('Deseja limpar o status deste item?')) {
+    const limparStatus = async () => {
+        if (confirm('Deseja limpar o status deste item?')) {
             const { obraId, itemId, etapaId, materialId } = edicaoAtual;
             const obra = obras.find(o => o.id === obraId);
-            const item = obra.itens.find(p => p.id === itemId);
-            if (materialId) { const material = item.materiais.find(m => m.id === materialId); delete material.statusInfo;
-            } else { delete item.etapas[etapaId]; }
-            salvarDados(); aplicarFiltrosERenderizar(); fecharModal();
+            if (!obra) return;
+
+            let updatedItens;
+
+            if (materialId) {
+                const item = obra.itens.find(p => p.id === itemId);
+                if (!item) return;
+                const material = item.materiais.find(m => m.id === materialId);
+                if (!material) return;
+
+                const updatedMaterial = { ...material };
+                delete updatedMaterial.statusInfo;
+                const updatedMaterials = item.materiais.map(m => m.id === materialId ? updatedMaterial : m);
+                const updatedItem = { ...item, materiais: updatedMaterials };
+                updatedItens = obra.itens.map(it => it.id === itemId ? updatedItem : it);
+            } else {
+                const item = obra.itens.find(p => p.id === itemId);
+                if (!item) return;
+
+                const updatedEtapas = { ...item.etapas };
+                delete updatedEtapas[etapaId];
+                const updatedItem = { ...item, etapas: updatedEtapas };
+                updatedItens = obra.itens.map(it => it.id === itemId ? updatedItem : it);
+            }
+
+            const obraRef = window.doc(window.db, 'obras', obraId);
+            try {
+                await window.setDoc(obraRef, { itens: updatedItens }, { merge: true });
+                fecharModal();
+            } catch (error) {
+                console.error("Erro ao limpar status: ", error);
+                alert("Não foi possível limpar o status. Tente novamente.");
+            }
         }
     };
-    
+
     const toggleProjetoFieldsModal = (tipo) => {
         const fieldsContainer = document.getElementById('edit-item-projeto-fields');
         if (tipo === 'Projeto') {
@@ -879,17 +979,17 @@ document.addEventListener('DOMContentLoaded', () => {
             fieldsContainer.classList.add('hidden');
         }
     };
-    
+
     const abrirModalAlterarItem = (obraId, itemId) => {
         edicaoItemAtual = { obraId, itemId };
         const obra = obras.find(o => o.id === obraId);
         const item = obra.itens.find(p => p.id === itemId);
-        
+
         const tipoSelect = document.getElementById('edit-item-tipo');
         tipoSelect.value = item.tipo;
         document.getElementById('edit-item-codigo').value = item.codigo;
         document.getElementById('edit-item-descricao').value = item.descricao;
-        
+
         toggleProjetoFieldsModal(item.tipo);
 
         if (item.tipo === 'Projeto') {
@@ -906,31 +1006,41 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const fecharModalAlterarItem = () => { editItemModal.classList.add('opacity-0'); editItemModalContent.classList.add('scale-95'); setTimeout(() => editItemModal.classList.add('hidden'), 300); };
-    
-    const salvarAlteracaoItem = () => {
+
+    const salvarAlteracaoItem = async () => {
         const { obraId, itemId } = edicaoItemAtual;
         const obra = obras.find(o => o.id === obraId);
+        if (!obra) return;
         const item = obra.itens.find(p => p.id === itemId);
+        if (!item) return;
+
         const novoCodigo = document.getElementById('edit-item-codigo').value.trim();
         const novaDescricao = document.getElementById('edit-item-descricao').value.trim();
-        
-        if (novoCodigo && novaDescricao) { 
-            item.tipo = document.getElementById('edit-item-tipo').value;
-            item.codigo = novoCodigo; 
-            item.descricao = novaDescricao;
 
-            if (item.tipo === 'Projeto') {
-                item.largura = document.getElementById('edit-item-largura').value;
-                item.altura = document.getElementById('edit-item-altura').value;
-                item.m2Total = document.getElementById('edit-item-m2-total').value;
-                item.cor = document.getElementById('edit-item-cor').value;
-                item.vidro = document.getElementById('edit-item-vidro').value;
-                item.m2Vidro = document.getElementById('edit-item-m2-vidro').value;
+        if (novoCodigo && novaDescricao) {
+            const updatedItem = { ...item };
+            updatedItem.tipo = document.getElementById('edit-item-tipo').value;
+            updatedItem.codigo = novoCodigo;
+            updatedItem.descricao = novaDescricao;
+
+            if (updatedItem.tipo === 'Projeto') {
+                updatedItem.largura = document.getElementById('edit-item-largura').value;
+                updatedItem.altura = document.getElementById('edit-item-altura').value;
+                updatedItem.m2Total = document.getElementById('edit-item-m2-total').value;
+                updatedItem.cor = document.getElementById('edit-item-cor').value;
+                updatedItem.vidro = document.getElementById('edit-item-vidro').value;
+                updatedItem.m2Vidro = document.getElementById('edit-item-m2-vidro').value;
             }
 
-            salvarDados(); 
-            aplicarFiltrosERenderizar(); 
-            fecharModalAlterarItem();
+            const updatedItens = obra.itens.map(it => it.id === itemId ? updatedItem : it);
+            const obraRef = window.doc(window.db, 'obras', obraId);
+            try {
+                await window.setDoc(obraRef, { itens: updatedItens }, { merge: true });
+                fecharModalAlterarItem();
+            } catch (error) {
+                console.error("Erro ao salvar alteração do item: ", error);
+                alert("Não foi possível salvar as alterações do item.");
+            }
         } else { alert('Código e Descrição não podem estar vazios.'); }
     };
 
@@ -956,29 +1066,43 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => { editMaterialModal.classList.remove('opacity-0'); editMaterialModalContent.classList.remove('scale-95'); }, 10);
     };
     const fecharModalAlterarMaterial = () => { editMaterialModal.classList.add('opacity-0'); editMaterialModalContent.classList.add('scale-95'); setTimeout(() => editMaterialModal.classList.add('hidden'), 300); };
-    const salvarAlteracaoMaterial = () => {
+    const salvarAlteracaoMaterial = async () => {
         const { obraId, itemId, materialId } = edicaoMaterialAtual;
         const obra = obras.find(o => o.id === obraId);
+        if (!obra) return;
         const item = obra.itens.find(p => p.id === itemId);
+        if (!item) return;
         const material = item.materiais.find(m => m.id === materialId);
+        if (!material) return;
+
         const novoTipo = document.getElementById('edit-material-tipo').value.trim();
         const novaDescricao = document.getElementById('edit-material-descricao').value.trim();
-        
-        if (novoTipo && novaDescricao) { 
-            material.tipo = novoTipo; 
-            material.descricao = novaDescricao; 
+
+        if (novoTipo && novaDescricao) {
+            const updatedMaterial = { ...material };
+            updatedMaterial.tipo = novoTipo;
+            updatedMaterial.descricao = novaDescricao;
 
             if (item.tipo === 'Compra Inicial' || item.tipo === 'Projeto') {
-                material.qtdeOrcada = document.getElementById('edit-material-qtde-orcada').value;
-                material.qtdeDisponivel = document.getElementById('edit-material-qtde-disponivel').value;
+                updatedMaterial.qtdeOrcada = document.getElementById('edit-material-qtde-orcada').value;
+                updatedMaterial.qtdeDisponivel = document.getElementById('edit-material-qtde-disponivel').value;
             }
 
-            salvarDados(); 
-            aplicarFiltrosERenderizar(); 
-            fecharModalAlterarMaterial();
+            const updatedMaterials = item.materiais.map(m => m.id === materialId ? updatedMaterial : m);
+            const updatedItem = { ...item, materiais: updatedMaterials };
+            const updatedItens = obra.itens.map(it => it.id === itemId ? updatedItem : it);
+
+            const obraRef = window.doc(window.db, 'obras', obraId);
+            try {
+                await window.setDoc(obraRef, { itens: updatedItens }, { merge: true });
+                fecharModalAlterarMaterial();
+            } catch (error) {
+                console.error("Erro ao salvar alteração do material: ", error);
+                alert("Não foi possível salvar as alterações do material.");
+            }
         } else { alert('Tipo e Descrição não podem estar vazios.'); }
     };
-    
+
     const abrirModalAlterarObra = (obraId) => {
         edicaoObraAtual = { obraId };
         const obra = obras.find(o => o.id === obraId);
@@ -1005,29 +1129,42 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => { editObraModal.classList.remove('opacity-0'); editObraModalContent.classList.remove('scale-95'); }, 10);
     };
     const fecharModalAlterarObra = () => { editObraModal.classList.add('opacity-0'); editObraModalContent.classList.add('scale-95'); setTimeout(() => editObraModal.classList.add('hidden'), 300); };
-    const salvarAlteracaoObra = () => {
+    const salvarAlteracaoObra = async () => {
         const { obraId } = edicaoObraAtual;
+        const obraRef = window.doc(window.db, 'obras', obraId);
         const obra = obras.find(o => o.id === obraId);
         const nome = document.getElementById('edit-obra-nome').value.trim();
         const cliente = document.getElementById('edit-obra-cliente').value.trim();
         if (nome && cliente) {
-            obra.nome = nome;
-            obra.cliente = cliente;
-            obra.endereco = document.getElementById('edit-obra-endereco').value.trim();
+            const updatedData = {
+                ...obra,
+                nome: nome,
+                cliente: cliente,
+                endereco: document.getElementById('edit-obra-endereco').value.trim(),
+                novaPrevisaoMedicao: document.getElementById('edit-obra-nova-previsao-medicao').value,
+                medicaoEfetuada: document.getElementById('edit-obra-medicao-efetuada').value,
+                novaPrevisaoEntrega: document.getElementById('edit-obra-nova-previsao-entrega').value,
+                entregaRealizada: document.getElementById('edit-obra-entrega-realizada').value,
+                obsMedicao: document.getElementById('edit-obra-obs-medicao').value,
+                obsEntrega: document.getElementById('edit-obra-obs-entrega').value
+            };
             if (!document.getElementById('edit-obra-previsao-inicial-medicao').disabled) {
-                obra.previsaoInicialMedicao = document.getElementById('edit-obra-previsao-inicial-medicao').value;
+                updatedData.previsaoInicialMedicao = document.getElementById('edit-obra-previsao-inicial-medicao').value;
             }
             if (!document.getElementById('edit-obra-previsao-inicial-entrega').disabled) {
-                obra.previsaoInicialEntrega = document.getElementById('edit-obra-previsao-inicial-entrega').value;
+                updatedData.previsaoInicialEntrega = document.getElementById('edit-obra-previsao-inicial-entrega').value;
             }
-            obra.novaPrevisaoMedicao = document.getElementById('edit-obra-nova-previsao-medicao').value;
-            obra.medicaoEfetuada = document.getElementById('edit-obra-medicao-efetuada').value;
-            obra.novaPrevisaoEntrega = document.getElementById('edit-obra-nova-previsao-entrega').value;
-            obra.entregaRealizada = document.getElementById('edit-obra-entrega-realizada').value;
-            obra.obsMedicao = document.getElementById('edit-obra-obs-medicao').value;
-            obra.obsEntrega = document.getElementById('edit-obra-obs-entrega').value;
-            salvarDados(); aplicarFiltrosERenderizar(); fecharModalAlterarObra();
-        } else { alert('Nome da Obra e do Cliente não podem estar vazios.'); }
+
+            try {
+                await window.setDoc(obraRef, updatedData, { merge: true });
+                fecharModalAlterarObra();
+            } catch (error) {
+                console.error("Erro ao salvar alterações da obra: ", error);
+                alert("Não foi possível salvar as alterações. Tente novamente.");
+            }
+        } else {
+            alert('Nome da Obra e do Cliente não podem estar vazios.');
+        }
     };
 
     const renderizarFormulario = () => {
@@ -1053,7 +1190,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const obra = obras.find(o => o.id === obraId);
             if(obra) {
                 obra.dadosExpanded = !obra.dadosExpanded;
-                salvarDados();
                 aplicarFiltrosERenderizar();
             }
         } else if (button.classList.contains('btn-toggle-itens')) {
@@ -1062,14 +1198,54 @@ document.addEventListener('DOMContentLoaded', () => {
                 const newState = !clickedObra.isExpanded;
                 obras.forEach(obra => obra.isExpanded = false);
                 clickedObra.isExpanded = newState;
-                salvarDados();
                 aplicarFiltrosERenderizar();
             }
-        } else if (button.classList.contains('btn-excluir-obra')) { if (confirm('Deseja EXCLUIR esta obra e todos os seus itens permanentemente?')) { obras = obras.filter(o => o.id !== obraId); salvarDados(); aplicarFiltrosERenderizar(); }
+        } else if (button.classList.contains('btn-excluir-obra')) {
+            if (confirm('Deseja EXCLUIR esta obra e todos os seus itens permanentemente?')) {
+                const obraDocRef = window.doc(window.db, 'obras', obraId);
+                window.deleteDoc(obraDocRef).catch(error => {
+                    console.error("Erro ao excluir a obra: ", error);
+                    alert("Não foi possível excluir a obra. Tente novamente.");
+                });
+            }
         } else if (button.classList.contains('btn-alterar-obra')) { abrirModalAlterarObra(obraId);
-        } else if (button.id === 'btnAdicionarObra') { const nome = document.getElementById('inputNomeObra').value.trim(); const cliente = document.getElementById('inputClienteObra').value.trim(); if (nome && cliente) { obras.push({ id: Date.now().toString(), nome, cliente, endereco: document.getElementById('inputEnderecoObra').value.trim(), previsaoInicialMedicao: document.getElementById('inputPrevisaoInicialMedicao').value, novaPrevisaoMedicao: document.getElementById('inputNovaPrevisaoMedicao').value, medicaoEfetuada: document.getElementById('inputMedicaoEfetuada').value, previsaoInicialEntrega: document.getElementById('inputPrevisaoInicialEntrega').value, novaPrevisaoEntrega: document.getElementById('inputNovaPrevisaoEntrega').value, entregaRealizada: document.getElementById('inputEntregaRealizada').value, obsMedicao: document.getElementById('inputObsMedicao').value.trim(), obsEntrega: document.getElementById('inputObsEntrega').value.trim(), itens: [], itemExpandidoId: null, isExpanded: false, dadosExpanded: false }); ['inputNomeObra', 'inputClienteObra', 'inputEnderecoObra', 'inputPrevisaoInicialMedicao', 'inputNovaPrevisaoMedicao', 'inputMedicaoEfetuada', 'inputPrevisaoInicialEntrega', 'inputNovaPrevisaoEntrega', 'inputEntregaRealizada', 'inputObsMedicao', 'inputObsEntrega'].forEach(id => document.getElementById(id).value = ''); salvarDados(); isFormularioNovaObraVisivel = false; renderizarFormulario(); aplicarFiltrosERenderizar(); } else { alert('Preencha pelo menos o Nome da Obra e do Cliente.'); }
+        } else if (button.id === 'btnAdicionarObra') {
+            const nome = document.getElementById('inputNomeObra').value.trim();
+            const cliente = document.getElementById('inputClienteObra').value.trim();
+            if (nome && cliente) {
+                const newObra = {
+                    nome,
+                    cliente,
+                    endereco: document.getElementById('inputEnderecoObra').value.trim(),
+                    previsaoInicialMedicao: document.getElementById('inputPrevisaoInicialMedicao').value,
+                    novaPrevisaoMedicao: document.getElementById('inputNovaPrevisaoMedicao').value,
+                    medicaoEfetuada: document.getElementById('inputMedicaoEfetuada').value,
+                    previsaoInicialEntrega: document.getElementById('inputPrevisaoInicialEntrega').value,
+                    novaPrevisaoEntrega: document.getElementById('inputNovaPrevisaoEntrega').value,
+                    entregaRealizada: document.getElementById('inputEntregaRealizada').value,
+                    obsMedicao: document.getElementById('inputObsMedicao').value.trim(),
+                    obsEntrega: document.getElementById('inputObsEntrega').value.trim(),
+                    itens: [],
+                    createdAt: window.serverTimestamp()
+                };
+
+                window.addDoc(window.collection(window.db, 'obras'), newObra)
+                    .then(() => {
+                        ['inputNomeObra', 'inputClienteObra', 'inputEnderecoObra', 'inputPrevisaoInicialMedicao', 'inputNovaPrevisaoMedicao', 'inputMedicaoEfetuada', 'inputPrevisaoInicialEntrega', 'inputNovaPrevisaoEntrega', 'inputEntregaRealizada', 'inputObsMedicao', 'inputObsEntrega'].forEach(id => document.getElementById(id).value = '');
+                        isFormularioNovaObraVisivel = false;
+                        renderizarFormulario();
+                    })
+                    .catch(error => {
+                        console.error("Erro ao adicionar nova obra: ", error);
+                        alert("Não foi possível adicionar a obra. Tente novamente.");
+                    });
+            } else {
+                alert('Preencha pelo menos o Nome da Obra e do Cliente.');
+            }
         } else if (button.classList.contains('btn-add-item')) {
             const obra = obras.find(o => o.id === obraId);
+            if (!obra) return;
+
             const tipo = document.querySelector(`.input-add-item-tipo[data-obra-id="${obraId}"]`).value;
             const codigo = document.querySelector(`.input-add-item-codigo[data-obra-id="${obraId}"]`).value.trim();
             const descricao = document.querySelector(`.input-add-item-descricao[data-obra-id="${obraId}"]`).value.trim();
@@ -1084,29 +1260,90 @@ document.addEventListener('DOMContentLoaded', () => {
                     novoItem.vidro = document.querySelector(`.input-add-item-vidro[data-obra-id="${obraId}"]`).value.trim();
                     novoItem.m2Vidro = document.querySelector(`.input-add-item-m2-vidro[data-obra-id="${obraId}"]`).value.trim();
                 }
-                obra.itens.push(novoItem);
-                
-                // Limpar campos
-                document.querySelector(`.input-add-item-codigo[data-obra-id="${obraId}"]`).value = '';
-                document.querySelector(`.input-add-item-descricao[data-obra-id="${obraId}"]`).value = '';
-                if (tipo === 'Projeto') {
-                    document.querySelector(`.input-add-item-largura[data-obra-id="${obraId}"]`).value = '';
-                    document.querySelector(`.input-add-item-altura[data-obra-id="${obraId}"]`).value = '';
-                    document.querySelector(`.input-add-item-m2-total[data-obra-id="${obraId}"]`).value = '';
-                    document.querySelector(`.input-add-item-cor[data-obra-id="${obraId}"]`).value = '';
-                    document.querySelector(`.input-add-item-vidro[data-obra-id="${obraId}"]`).value = '';
-                    document.querySelector(`.input-add-item-m2-vidro[data-obra-id="${obraId}"]`).value = '';
-                }
-                salvarDados();
-                aplicarFiltrosERenderizar();
+
+                const obraRef = window.doc(window.db, 'obras', obraId);
+                const updatedItens = [...(obra.itens || []), novoItem];
+
+                window.setDoc(obraRef, { itens: updatedItens }, { merge: true })
+                    .then(() => {
+                        // Limpar campos
+                        document.querySelector(`.input-add-item-codigo[data-obra-id="${obraId}"]`).value = '';
+                        document.querySelector(`.input-add-item-descricao[data-obra-id="${obraId}"]`).value = '';
+                         if (tipo === 'Projeto') {
+                            document.querySelector(`.input-add-item-largura[data-obra-id="${obraId}"]`).value = '';
+                            document.querySelector(`.input-add-item-altura[data-obra-id="${obraId}"]`).value = '';
+                            document.querySelector(`.input-add-item-m2-total[data-obra-id="${obraId}"]`).value = '';
+                            document.querySelector(`.input-add-item-cor[data-obra-id="${obraId}"]`).value = '';
+                            document.querySelector(`.input-add-item-vidro[data-obra-id="${obraId}"]`).value = '';
+                            document.querySelector(`.input-add-item-m2-vidro[data-obra-id="${obraId}"]`).value = '';
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Erro ao adicionar item: ", error);
+                        alert("Não foi possível adicionar o item. Tente novamente.");
+                    });
             } else {
                 alert('Preencha o Código e a Descrição do item.');
             }
-        } else if (button.classList.contains('btn-add-material')) { const tipoInput = document.querySelector(`.input-material-tipo[data-item-id="${itemId}"]`); const descInput = document.querySelector(`.input-material-desc[data-item-id="${itemId}"]`); if (tipoInput.value.trim() && descInput.value.trim()) { const obra = obras.find(o => o.id === obraId); const item = obra.itens.find(p => p.id === itemId); const novoMaterial = { id: Date.now().toString(), tipo: tipoInput.value.trim(), descricao: descInput.value.trim(), statusInfo: {}}; if (item.tipo === 'Compra Inicial' || item.tipo === 'Projeto') { novoMaterial.qtdeOrcada = document.querySelector(`.input-material-qtde-orcada[data-item-id="${itemId}"]`).value.trim(); novoMaterial.qtdeDisponivel = document.querySelector(`.input-material-qtde-disponivel[data-item-id="${itemId}"]`).value.trim(); } item.materiais.push(novoMaterial); salvarDados(); aplicarFiltrosERenderizar(); }
-        } else if (button.classList.contains('btn-excluir-item')) { if (confirm('Deseja EXCLUIR este item permanentemente?')) { const obra = obras.find(o => o.id === obraId); if(obra) { obra.itens = obra.itens.filter(p => p.id !== itemId); salvarDados(); aplicarFiltrosERenderizar(); } }
+        } else if (button.classList.contains('btn-add-material')) {
+            const obra = obras.find(o => o.id === obraId);
+            const item = obra?.itens.find(p => p.id === itemId);
+            if (!obra || !item) return;
+
+            const tipoInput = document.querySelector(`.input-material-tipo[data-item-id="${itemId}"]`);
+            const descInput = document.querySelector(`.input-material-desc[data-item-id="${itemId}"]`);
+
+            if (tipoInput.value.trim() && descInput.value.trim()) {
+                const novoMaterial = { id: Date.now().toString(), tipo: tipoInput.value.trim(), descricao: descInput.value.trim(), statusInfo: {}};
+                if (item.tipo === 'Compra Inicial' || item.tipo === 'Projeto') {
+                    novoMaterial.qtdeOrcada = document.querySelector(`.input-material-qtde-orcada[data-item-id="${itemId}"]`).value.trim();
+                    novoMaterial.qtdeDisponivel = document.querySelector(`.input-material-qtde-disponivel[data-item-id="${itemId}"]`).value.trim();
+                }
+
+                const updatedItem = { ...item, materiais: [...(item.materiais || []), novoMaterial] };
+                const updatedItens = obra.itens.map(it => it.id === itemId ? updatedItem : it);
+
+                const obraRef = window.doc(window.db, 'obras', obraId);
+                window.setDoc(obraRef, { itens: updatedItens }, { merge: true }).catch(error => {
+                    console.error("Erro ao adicionar material: ", error);
+                    alert("Não foi possível adicionar o material. Tente novamente.");
+                });
+            }
+        } else if (button.classList.contains('btn-excluir-item')) {
+            if (confirm('Deseja EXCLUIR este item permanentemente?')) {
+                const obra = obras.find(o => o.id === obraId);
+                if(obra) {
+                    const updatedItens = obra.itens.filter(p => p.id !== itemId);
+                    const obraRef = window.doc(window.db, 'obras', obraId);
+                    window.setDoc(obraRef, { itens: updatedItens }, { merge: true }).catch(error => {
+                        console.error("Erro ao excluir item: ", error);
+                        alert("Não foi possível excluir o item. Tente novamente.");
+                    });
+                }
+            }
         } else if (button.classList.contains('btn-alterar-item')) { abrirModalAlterarItem(obraId, itemId);
-        } else if (button.classList.contains('btn-toggle-materiais')) { const obra = obras.find(o => o.id === obraId); obra.itemExpandidoId = obra.itemExpandidoId === itemId ? null : itemId; salvarDados(); aplicarFiltrosERenderizar();
-        } else if (button.classList.contains('btn-excluir-material')) { if(confirm('Deseja EXCLUIR este material?')) { const obra = obras.find(o => o.id === obraId); const item = obra.itens.find(p => p.id === itemId); item.materiais = item.materiais.filter(m => m.id !== materialId); salvarDados(); aplicarFiltrosERenderizar(); }
+        } else if (button.classList.contains('btn-toggle-materiais')) {
+            const obra = obras.find(o => o.id === obraId);
+            if (obra) {
+                obra.itemExpandidoId = obra.itemExpandidoId === itemId ? null : itemId;
+                aplicarFiltrosERenderizar();
+            }
+        } else if (button.classList.contains('btn-excluir-material')) {
+            if(confirm('Deseja EXCLUIR este material?')) {
+                const obra = obras.find(o => o.id === obraId);
+                const item = obra?.itens.find(p => p.id === itemId);
+                if (obra && item) {
+                    const updatedMaterials = item.materiais.filter(m => m.id !== materialId);
+                    const updatedItem = { ...item, materiais: updatedMaterials };
+                    const updatedItens = obra.itens.map(it => it.id === itemId ? updatedItem : it);
+
+                    const obraRef = window.doc(window.db, 'obras', obraId);
+                    window.setDoc(obraRef, { itens: updatedItens }, { merge: true }).catch(error => {
+                        console.error("Erro ao excluir material: ", error);
+                        alert("Não foi possível excluir o material. Tente novamente.");
+                    });
+                }
+            }
         } else if (button.classList.contains('btn-alterar-material')) { abrirModalAlterarMaterial(obraId, itemId, materialId); }
     }
 
@@ -1177,7 +1414,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = headerRowIndex + 1; i < sheetData.length; i++) {
             const row = sheetData[i];
             if (!row || row.length === 0 || row.every(cell => cell === null || cell === '')) continue;
-            
+
             const qtde = parseFloat(String(row[headerMap['Qtde']]).trim());
             if (isNaN(qtde) || qtde < 1 || qtde > 10) {
                 continue;
@@ -1201,15 +1438,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if(newItems.length > 0) {
-            obra.itens.push(...newItems);
-            salvarDados();
-            aplicarFiltrosERenderizar();
-            alert(`${newItems.length} itens foram adicionados com sucesso!`);
+            const updatedItens = [...(obra.itens || []), ...newItems];
+            const obraRef = window.doc(window.db, 'obras', obraId);
+            window.setDoc(obraRef, { itens: updatedItens }, { merge: true })
+                .then(() => {
+                     alert(`${newItems.length} itens foram adicionados com sucesso!`);
+                })
+                .catch(error => {
+                    console.error("Erro ao importar itens: ", error);
+                    alert("Ocorreu um erro ao importar os itens. Tente novamente.");
+                });
         } else {
             alert("Nenhum item com Qtde entre 1 e 10 foi encontrado na planilha para importar.");
         }
     };
-    
+
     document.addEventListener('click', (e) => {
         handleButtonClick(e);
         const badge = e.target.closest('.status-badge');
@@ -1218,7 +1461,7 @@ document.addEventListener('DOMContentLoaded', () => {
             abrirModal(obraId, itemId, etapaId, materialId);
         }
     });
-    
+
     const toggleProjetoFields = (tipo, obraId) => {
         const fieldsContainer = document.getElementById(`add-item-projeto-fields-${obraId}`);
         const uploadContainer = document.getElementById(`upload-itens-container-${obraId}`);
@@ -1235,7 +1478,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
-    
+
     document.addEventListener('change', (e) => {
         if (e.target.matches('input[id^="upload-itens-"]')) {
             handleItemFileUpload(e);
@@ -1299,11 +1542,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 </select>
             </div>
         `).join('');
-        
+
         filtros = {
             nomeObra: '',
-            tipoItem: [], 
-            statusMaterial: [], 
+            tipoItem: [],
+            statusMaterial: [],
             statusItem: ETAPAS_ITEM.reduce((acc, etapa) => ({...acc, [etapa.id]: 'todos'}), {})
         };
     };
@@ -1321,7 +1564,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const todosCheckbox = document.getElementById('filtro-tipo-todos');
             const tipoCheckboxes = document.querySelectorAll('.filtro-tipo-checkbox');
-            
+
             if (target.id === 'filtro-tipo-todos') {
                 tipoCheckboxes.forEach(cb => cb.checked = target.checked);
             } else {
@@ -1329,7 +1572,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             filtros.tipoItem = [...document.querySelectorAll('.filtro-tipo-checkbox:checked')].map(cb => cb.value);
-            
+
             if (todosCheckbox.checked) {
                 filtros.tipoItem = [];
             }
@@ -1386,7 +1629,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('edit-obra-btn-cancelar').addEventListener('click', fecharModalAlterarObra);
     editObraModal.addEventListener('click', (e) => e.target === editObraModal && fecharModalAlterarObra());
 
-    carregarDados();
+    listenToObras();
     popularFiltros();
     adicionarListenersFiltros();
     aplicarFiltrosERenderizar();
