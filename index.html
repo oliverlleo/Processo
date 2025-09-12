@@ -6,6 +6,8 @@
     <title>GESTÃO DE OBRAS - Perfecta</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.2.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -272,6 +274,22 @@
     </div>
 
 
+<script>
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDyNk5BJscelHhxjKRHKlOZpYnNKgnh3B4",
+      authDomain: "controle-gc.firebaseapp.com",
+      projectId: "controle-gc",
+      storageBucket: "controle-gc.firebasestorage.app",
+      messagingSenderId: "197002816768",
+      appId: "1:197002816768:web:a6a56f47421ea52961d7e5",
+      measurementId: "G-EJN7NMWZ6P"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    window.db = firebase.firestore();
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONFIGURAÇÕES ---

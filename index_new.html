@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GESTÃO DE OBRAS - Perfecta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.2.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* gray-100 */
+        }
+        .status-badge {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            border: 2px solid transparent;
+            position: relative;
+        }
+        .status-badge:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .action-btn {
+            padding: 0.3rem;
+            border-radius: 0.375rem; /* rounded-md */
+            transition: background-color 0.2s;
+        }
+        .action-btn:hover {
+            opacity: 0.8;
+        }
+
+        /* --- STATUS DOS ITENS --- */
+        .status-item-nao-iniciado { background-color: #ffffff; color: #1f2937; border: 1px solid #d1d5db; }
+        .status-item-iniciado { background-color: #38bdf8; color: white; } /* Azul claro */
+        .status-item-parado { background-color: #111827; color: white; } /* Preto */
+        .status-item-concluido { background-color: #22c55e; color: white; } /* Verde */
+        .status-item-cancelado { background-color: #64748b; color: white; } /* Cinza */
+
+        /* --- STATUS DOS MATERIAIS --- */
+        .status-mat-branco { background-color: #ffffff; color: #1f2937; border: 1px solid #d1d5db; }
+        .status-mat-amarelo { background-color: #f59e0b; color: white; }
+        .status-mat-verde { background-color: #22c55e; color: white; }
+        .status-mat-vermelho { background-color: #dc2626; color: white; }
+        .status-mat-preto { background-color: #111827; color: white; }
+
+        .modal { transition: opacity 0.3s ease; }
+        .modal-content { transition: transform 0.3s ease; }
+        .table-container { overflow-x: auto; }
+        .materiais-row td { padding: 0 !important; border: 0; }
+        .material-status-badge { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+
+        .material-cell {
+            font-size: 0.7rem; /* 30% menor que o padrão (aprox. 1rem) */
+            vertical-align: middle;
+        }
+
+        /* --- CLASSES PARA A BARRA DE PROGRESSO --- */
+        .progress-bar-container {
+            position: relative;
+            overflow: hidden; /* Garante que o preenchimento fique dentro das bordas arredondadas */
+        }
+        .progress-bar-text {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.5); /* Melhora a legibilidade sobre cores claras */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app" class="container mx-auto p-4 sm:p-6 md:p-8">
+        <header class="mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800">GESTÃO DE OBRAS - Perfecta</h1>
+            </div>
+            <button id="btn-toggle-form-obra" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition shadow flex-shrink-0">NOVA OBRA</button>
+        </header>
+
+        <div id="form-nova-obra-container" class="hidden">
+            <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Adicionar Nova Obra</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <input type="text" id="inputNomeObra" placeholder="Nome da Obra ou Projeto*" class="p-3 border rounded-lg">
+                    <input type="text" id="inputClienteObra" placeholder="Nome do Cliente*" class="p-3 border rounded-lg">
+                    <input type="text" id="inputEnderecoObra" placeholder="Endereço" class="md:col-span-2 p-3 border rounded-lg">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t border-b py-4 mb-4">
+                    <div>
+                        <h4 class="font-semibold text-gray-700 mb-2">MEDIÇÃO</h4>
+                        <label for="inputPrevisaoInicialMedicao" class="text-sm font-medium text-gray-600">Previsão Inicial</label>
+                        <input type="date" id="inputPrevisaoInicialMedicao" class="w-full p-2 border rounded-lg mt-1">
+                        <label for="inputNovaPrevisaoMedicao" class="text-sm font-medium text-gray-600 mt-2 block">Nova Previsão</label>
+                        <input type="date" id="inputNovaPrevisaoMedicao" class="w-full p-2 border rounded-lg mt-1">
+                        <label for="inputMedicaoEfetuada" class="text-sm font-medium text-gray-600 mt-2 block">Realizada</label>
+                        <input type="date" id="inputMedicaoEfetuada" class="w-full p-2 border rounded-lg mt-1">
+                        <label for="inputObsMedicao" class="text-sm font-medium text-gray-600 mt-2 block">Observações</label>
+                        <textarea id="inputObsMedicao" rows="2" class="w-full p-2 border rounded-lg mt-1"></textarea>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-700 mb-2">ENTREGA</h4>
+                        <label for="inputPrevisaoInicialEntrega" class="text-sm font-medium text-gray-600">Previsão Inicial</label>
+                        <input type="date" id="inputPrevisaoInicialEntrega" class="w-full p-2 border rounded-lg mt-1">
+                        <label for="inputNovaPrevisaoEntrega" class="text-sm font-medium text-gray-600 mt-2 block">Nova Previsão</label>
+                        <input type="date" id="inputNovaPrevisaoEntrega" class="w-full p-2 border rounded-lg mt-1">
+                        <label for="inputEntregaRealizada" class="text-sm font-medium text-gray-600 mt-2 block">Realizada</label>
+                        <input type="date" id="inputEntregaRealizada" class="w-full p-2 border rounded-lg mt-1">
+                        <label for="inputObsEntrega" class="text-sm font-medium text-gray-600 mt-2 block">Observações</label>
+                        <textarea id="inputObsEntrega" rows="2" class="w-full p-2 border rounded-lg mt-1"></textarea>
+                    </div>
+                </div>
+                <button id="btnAdicionarObra" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition shadow w-full">Adicionar Obra</button>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow-md mb-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4">Filtros de Consulta</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label for="filtro-nome-obra" class="text-sm font-medium text-gray-600">Nome da Obra</label>
+                    <input type="text" id="filtro-nome-obra" class="w-full p-2 border rounded-lg mt-1">
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-600">Tipo de Item</label>
+                    <div id="filtro-tipo-item-container" class="flex flex-wrap gap-x-4 gap-y-2 mt-2 p-2 border rounded-lg">
+                        </div>
+                </div>
+                <div id="filtros-status-item-container" class="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4 border-t pt-4">
+                 <div>
+                    <label class="text-sm font-medium text-gray-600">Status do Material</label>
+                    <div id="filtro-status-material-container" class="flex flex-wrap gap-x-4 gap-y-2 mt-2 p-2 border rounded-lg">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="obras-container" class="space-y-2"></div>
+    </div>
+
+    <div id="status-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden modal">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg mx-auto modal-content transform scale-95">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2" id="modal-header">Atualizar Status</h2>
+            <p class="text-gray-600 mb-6" id="modal-title">Item: <span class="font-semibold" id="modal-item-nome"></span><span id="modal-etapa-container"> | Etapa: <span class="font-semibold" id="modal-etapa-nome"></span></span></p>
+            <div class="space-y-4">
+                <div><label for="modal-status" class="block text-sm font-medium text-gray-700 mb-1">Status</label><select id="modal-status" class="w-full p-3 border rounded-lg"></select></div>
+                <div><label for="modal-data" class="block text-sm font-medium text-gray-700 mb-1">Data</label><input type="date" id="modal-data" class="w-full p-3 border rounded-lg"></div>
+
+                <div id="modal-prazo-container" class="hidden">
+                    <label for="modal-prazo-inicial" class="block text-sm font-medium text-gray-700 mb-1">Prazo Conclusão - Inicial</label>
+                    <input type="date" id="modal-prazo-inicial" class="w-full p-3 border rounded-lg">
+                    <label for="modal-prazo-reagendado" class="block text-sm font-medium text-gray-700 mb-1 mt-2">Prazo Conclusão - Reagendado</label>
+                    <input type="date" id="modal-prazo-reagendado" class="w-full p-3 border rounded-lg">
+                </div>
+
+                <div id="modal-previsao-container" class="hidden">
+                    <label for="modal-previsao-disponibilidade-inicial" class="block text-sm font-medium text-gray-700 mb-1">Previsão Disponibilidade - Inicial</label>
+                    <input type="date" id="modal-previsao-disponibilidade-inicial" class="w-full p-3 border rounded-lg">
+                    <label for="modal-previsao-disponibilidade-reagendado" class="block text-sm font-medium text-gray-700 mb-1 mt-2">Previsão Disponibilidade - Reagendado</label>
+                    <input type="date" id="modal-previsao-disponibilidade-reagendado" class="w-full p-3 border rounded-lg">
+                </div>
+
+                <div><label for="modal-obs" class="block text-sm font-medium text-gray-700 mb-1">Observação</label><textarea id="modal-obs" rows="4" placeholder="Adicione uma observação..." class="w-full p-3 border rounded-lg"></textarea></div>
+            </div>
+            <div class="flex justify-between items-center mt-8">
+                <button id="modal-btn-limpar" class="bg-yellow-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-yellow-600 transition">Limpar Status</button>
+                <div class="flex gap-4">
+                    <button id="modal-btn-cancelar" class="bg-gray-200 text-gray-800 font-semibold py-2 px-6 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
+                    <button id="modal-btn-salvar" class="bg-green-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-green-700 transition">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-item-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden modal">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg mx-auto modal-content transform scale-95 overflow-y-auto max-h-screen">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Alterar Item</h2>
+            <div class="space-y-4">
+                <div>
+                    <label for="edit-item-tipo" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                    <select id="edit-item-tipo" class="w-full p-3 border rounded-lg">
+                        <option value="Projeto">Projeto</option>
+                        <option value="Orçamento">Orçamento</option>
+                        <option value="Terceiros">Terceiros</option>
+                        <option value="Compra Inicial">Compra Inicial</option>
+                    </select>
+                </div>
+                <div><label for="edit-item-codigo" class="block text-sm font-medium text-gray-700 mb-1">Código</label><input type="text" id="edit-item-codigo" class="w-full p-3 border rounded-lg"></div>
+                <div><label for="edit-item-descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label><input type="text" id="edit-item-descricao" class="w-full p-3 border rounded-lg"></div>
+
+                <div id="edit-item-projeto-fields" class="hidden space-y-4 border-t pt-4">
+                     <div><label for="edit-item-largura" class="block text-sm font-medium text-gray-700 mb-1">Largura</label><input type="text" id="edit-item-largura" class="w-full p-3 border rounded-lg"></div>
+                     <div><label for="edit-item-altura" class="block text-sm font-medium text-gray-700 mb-1">Altura</label><input type="text" id="edit-item-altura" class="w-full p-3 border rounded-lg"></div>
+                     <div><label for="edit-item-m2-total" class="block text-sm font-medium text-gray-700 mb-1">M² Total</label><input type="text" id="edit-item-m2-total" class="w-full p-3 border rounded-lg"></div>
+                     <div><label for="edit-item-cor" class="block text-sm font-medium text-gray-700 mb-1">Cor</label><input type="text" id="edit-item-cor" class="w-full p-3 border rounded-lg"></div>
+                     <div><label for="edit-item-vidro" class="block text-sm font-medium text-gray-700 mb-1">Vidro</label><input type="text" id="edit-item-vidro" class="w-full p-3 border rounded-lg"></div>
+                     <div><label for="edit-item-m2-vidro" class="block text-sm font-medium text-gray-700 mb-1">M² Vidro</label><input type="text" id="edit-item-m2-vidro" class="w-full p-3 border rounded-lg"></div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-4 mt-8">
+                <button id="edit-item-btn-cancelar" class="bg-gray-200 text-gray-800 font-semibold py-2 px-6 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
+                <button id="edit-item-btn-salvar" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-material-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden modal">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg mx-auto modal-content transform scale-95 overflow-y-auto max-h-screen">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Alterar Material</h2>
+            <div class="space-y-4">
+                <div><label for="edit-material-tipo" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label><input type="text" id="edit-material-tipo" class="w-full p-3 border rounded-lg"></div>
+                <div><label for="edit-material-descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label><input type="text" id="edit-material-descricao" class="w-full p-3 border rounded-lg"></div>
+
+                <div id="edit-material-compra-fields" class="hidden space-y-4 border-t pt-4">
+                    <div><label for="edit-material-qtde-orcada" class="block text-sm font-medium text-gray-700 mb-1">Qtde Orçada</label><input type="number" id="edit-material-qtde-orcada" class="w-full p-3 border rounded-lg"></div>
+                    <div><label for="edit-material-qtde-disponivel" class="block text-sm font-medium text-gray-700 mb-1">Qtde Disponível</label><input type="number" id="edit-material-qtde-disponivel" class="w-full p-3 border rounded-lg"></div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-4 mt-8">
+                <button id="edit-material-btn-cancelar" class="bg-gray-200 text-gray-800 font-semibold py-2 px-6 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
+                <button id="edit-material-btn-salvar" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-obra-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden modal">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-3xl mx-auto modal-content transform scale-95">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Alterar Obra</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div><label for="edit-obra-nome" class="block text-sm font-medium text-gray-700 mb-1">Nome da Obra</label><input type="text" id="edit-obra-nome" class="w-full p-3 border rounded-lg"></div>
+                <div><label for="edit-obra-cliente" class="block text-sm font-medium text-gray-700 mb-1">Nome do Cliente</label><input type="text" id="edit-obra-cliente" class="w-full p-3 border rounded-lg"></div>
+                <div class="md:col-span-2"><label for="edit-obra-endereco" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="edit-obra-endereco" class="w-full p-3 border rounded-lg"></div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t pt-4">
+                <div>
+                    <h4 class="font-semibold text-gray-700 mb-2">MEDIÇÃO</h4>
+                    <label for="edit-obra-previsao-inicial-medicao" class="text-sm font-medium text-gray-600">Previsão Inicial</label>
+                    <input type="date" id="edit-obra-previsao-inicial-medicao" class="w-full p-2 border rounded-lg mt-1">
+                    <label for="edit-obra-nova-previsao-medicao" class="text-sm font-medium text-gray-600 mt-2 block">Nova Previsão</label>
+                    <input type="date" id="edit-obra-nova-previsao-medicao" class="w-full p-2 border rounded-lg mt-1">
+                    <label for="edit-obra-medicao-efetuada" class="text-sm font-medium text-gray-600 mt-2 block">Realizada</label>
+                    <input type="date" id="edit-obra-medicao-efetuada" class="w-full p-2 border rounded-lg mt-1">
+                    <label for="edit-obra-obs-medicao" class="text-sm font-medium text-gray-600 mt-2 block">Observações</label>
+                    <textarea id="edit-obra-obs-medicao" rows="2" class="w-full p-2 border rounded-lg mt-1"></textarea>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-700 mb-2">ENTREGA</h4>
+                    <label for="edit-obra-previsao-inicial-entrega" class="text-sm font-medium text-gray-600">Previsão Inicial</label>
+                    <input type="date" id="edit-obra-previsao-inicial-entrega" class="w-full p-2 border rounded-lg mt-1">
+                    <label for="edit-obra-nova-previsao-entrega" class="text-sm font-medium text-gray-600 mt-2 block">Nova Previsão</label>
+                    <input type="date" id="edit-obra-nova-previsao-entrega" class="w-full p-2 border rounded-lg mt-1">
+                    <label for="edit-obra-entrega-realizada" class="text-sm font-medium text-gray-600 mt-2 block">Realizada</label>
+                    <input type="date" id="edit-obra-entrega-realizada" class="w-full p-2 border rounded-lg mt-1">
+                    <label for="edit-obra-obs-entrega" class="text-sm font-medium text-gray-600 mt-2 block">Observações</label>
+                    <textarea id="edit-obra-obs-entrega" rows="2" class="w-full p-2 border rounded-lg mt-1"></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end gap-4 mt-8">
+                <button id="edit-obra-btn-cancelar" class="bg-gray-200 text-gray-800 font-semibold py-2 px-6 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
+                <button id="edit-obra-btn-salvar" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition">Salvar</button>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="firebase.js"></script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
