@@ -903,7 +903,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const { obraId, itemId, materialId } = button.dataset;
         if (button.classList.contains('btn-toggle-dados')) { uiState[obraId] = { ...uiState[obraId], dadosExpanded: !uiState[obraId]?.dadosExpanded }; aplicarFiltrosERenderizar(); } 
         else if (button.classList.contains('btn-toggle-itens')) { const newState = !uiState[obraId]?.isExpanded; Object.keys(uiState).forEach(id => uiState[id] = {...uiState[id], isExpanded: false }); uiState[obraId] = { ...uiState[obraId], isExpanded: newState }; aplicarFiltrosERenderizar(); } 
-        else if (button.classList.contains('btn-excluir-obra')) { if (confirm('Deseja EXCLUIR esta obra e todos os seus itens permanentemente?')) await deleteDoc(doc(db, 'obras', obraId)); } 
+        else if (button.classList.contains('btn-excluir-obra')) {
+            // AVISO DE SEGURANÇA: A senha está hardcoded no código do cliente.
+            // Para um ambiente de produção, isso deve ser substituído por um método de autenticação seguro no servidor.
+            const senha = prompt('Para excluir a obra, digite a senha de confirmação:');
+            if (senha === '5866') {
+                if (confirm('Tem certeza que deseja EXCLUIR esta obra e todos os seus itens permanentemente? Esta ação não pode ser desfeita.')) {
+                    await deleteDoc(doc(db, 'obras', obraId));
+                }
+            } else if (senha !== null) { // se senha for null, o usuário clicou em Cancelar
+                alert('Senha incorreta.');
+            }
+        }
         else if (button.classList.contains('btn-alterar-obra')) { abrirModalAlterarObra(obraId); } 
         else if (button.id === 'btnAdicionarObra') { 
             const nome = document.getElementById('inputNomeObra').value.trim(); const cliente = document.getElementById('inputClienteObra').value.trim(); 
@@ -935,7 +946,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 await updateDoc(doc(db, 'obras', obraId), { itens: obra.itens });
                 tipoInput.value = ''; descInput.value = '';
             }
-        } else if (button.classList.contains('btn-excluir-item')) { if (confirm('Deseja EXCLUIR este item permanentemente?')) { const obra = obras.find(o => o.id === obraId); if(obra) { const itensAtualizados = obra.itens.filter(p => p.id !== itemId); await updateDoc(doc(db, 'obras', obraId), { itens: itensAtualizados }); } } } 
+        } else if (button.classList.contains('btn-excluir-item')) {
+            if (confirm('Tem certeza que deseja excluir este item?')) {
+                const obra = obras.find(o => o.id === obraId);
+                if(obra) {
+                    const itensAtualizados = obra.itens.filter(p => p.id !== itemId);
+                    await updateDoc(doc(db, 'obras', obraId), { itens: itensAtualizados });
+                }
+            }
+        }
         else if (button.classList.contains('btn-alterar-item')) { abrirModalAlterarItem(obraId, itemId); } 
         else if (button.classList.contains('btn-toggle-materiais')) { const currentExpanded = uiState[obraId]?.itemExpandidoId; uiState[obraId] = { ...uiState[obraId], itemExpandidoId: currentExpanded === itemId ? null : itemId }; aplicarFiltrosERenderizar(); } 
         else if (button.classList.contains('btn-excluir-material')) { if(confirm('Deseja EXCLUIR este material?')) { const obra = obras.find(o => o.id === obraId); const item = obra.itens.find(p => p.id === itemId); item.materiais = (item.materiais || []).filter(m => m.id !== materialId); await updateDoc(doc(db, 'obras', obraId), { itens: obra.itens }); } } 
