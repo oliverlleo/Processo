@@ -19,38 +19,38 @@
             position: relative;
         }
         .status-badge:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            /* Efeito de hover sutil para design flat */
+            filter: brightness(110%);
         }
         .action-btn {
             padding: 0.3rem;
             border-radius: 0.375rem; /* rounded-md */
-            transition: background-color 0.2s;
+            transition: background-color 0.2s, border-color 0.2s;
         }
         .action-btn:hover {
-            opacity: 0.8;
+            /* O feedback de hover será tratado por classes do Tailwind diretamente no HTML */
         }
-        
-        /* --- STATUS DOS ITENS --- */
+
+        /* --- STATUS DOS ITENS (Cores Vibrantes) --- */
         .status-item-nao-iniciado { background-color: #ffffff; color: #1f2937; border: 1px solid #d1d5db; }
-        .status-item-iniciado { background-color: #38bdf8; color: white; } /* Azul claro */
-        .status-item-parado { background-color: #111827; color: white; } /* Preto */
-        .status-item-concluido { background-color: #22c55e; color: white; } /* Verde */
-        .status-item-cancelado { background-color: #64748b; color: white; } /* Cinza */
+        .status-item-iniciado { background-color: #0ea5e9; color: white; } /* sky-500 */
+        .status-item-parado { background-color: #1f2937; color: white; } /* gray-800 */
+        .status-item-concluido { background-color: #16a34a; color: white; } /* green-600 */
+        .status-item-cancelado { background-color: #6b7280; color: white; } /* gray-500 */
 
-        /* --- STATUS DOS MATERIAIS --- */
+        /* --- STATUS DOS MATERIAIS (Cores Vibrantes) --- */
         .status-mat-branco { background-color: #ffffff; color: #1f2937; border: 1px solid #d1d5db; }
-        .status-mat-amarelo { background-color: #f59e0b; color: white; }
-        .status-mat-verde { background-color: #22c55e; color: white; }
-        .status-mat-vermelho { background-color: #dc2626; color: white; }
-        .status-mat-preto { background-color: #111827; color: white; }
+        .status-mat-amarelo { background-color: #f97316; color: white; } /* orange-500 */
+        .status-mat-verde { background-color: #16a34a; color: white; } /* green-600 */
+        .status-mat-vermelho { background-color: #ef4444; color: white; } /* red-500 */
+        .status-mat-preto { background-color: #1f2937; color: white; } /* gray-800 */
 
-        .modal { transition: opacity 0.3s ease; }
-        .modal-content { transition: transform 0.3s ease; }
+        .modal { transition: opacity 0.2s ease-in-out; }
+        .modal-content { transition: opacity 0.2s ease-in-out; }
         .table-container { overflow-x: auto; }
         .materiais-row td { padding: 0 !important; border: 0; }
         .material-status-badge { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
-        
+
         .material-cell {
             font-size: 0.7rem; /* 30% menor que o padrão (aprox. 1rem) */
             vertical-align: middle;
@@ -82,202 +82,202 @@
             <div>
                 <h1 class="text-xl md:text-2xl font-bold text-gray-800">GESTÃO DE OBRAS - Perfecta (Firebase)</h1>
             </div>
-            <button id="btn-toggle-form-obra" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition shadow flex-shrink-0">NOVA OBRA</button>
+            <button id="btn-toggle-form-obra" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-800 transition flex-shrink-0">NOVA OBRA</button>
         </header>
 
         <div id="form-nova-obra-container" class="hidden">
-            <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+            <div class="bg-white p-6 rounded-xl mb-6 border border-gray-200">
                 <h2 class="text-xl font-semibold mb-4 text-gray-700">Adicionar Nova Obra</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <input type="text" id="inputNomeObra" placeholder="Nome da Obra ou Projeto*" class="p-3 border rounded-lg">
-                    <input type="text" id="inputClienteObra" placeholder="Nome do Cliente*" class="p-3 border rounded-lg">
-                    <input type="text" id="inputEnderecoObra" placeholder="Endereço" class="md:col-span-2 p-3 border rounded-lg">
+                    <input type="text" id="inputNomeObra" placeholder="Nome da Obra ou Projeto*" class="p-3 border rounded-lg focus:border-blue-500 focus:ring-0">
+                    <input type="text" id="inputClienteObra" placeholder="Nome do Cliente*" class="p-3 border rounded-lg focus:border-blue-500 focus:ring-0">
+                    <input type="text" id="inputEnderecoObra" placeholder="Endereço" class="md:col-span-2 p-3 border rounded-lg focus:border-blue-500 focus:ring-0">
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t border-b py-4 mb-4">
                     <div>
                         <h4 class="font-semibold text-gray-700 mb-2">MEDIÇÃO</h4>
                         <label for="inputPrevisaoInicialMedicao" class="text-sm font-medium text-gray-600">Previsão Inicial</label>
-                        <input type="date" id="inputPrevisaoInicialMedicao" class="w-full p-2 border rounded-lg mt-1">
+                        <input type="date" id="inputPrevisaoInicialMedicao" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0">
                         <label for="inputNovaPrevisaoMedicao" class="text-sm font-medium text-gray-600 mt-2 block">Nova Previsão</label>
-                        <input type="date" id="inputNovaPrevisaoMedicao" class="w-full p-2 border rounded-lg mt-1">
+                        <input type="date" id="inputNovaPrevisaoMedicao" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0">
                         <label for="inputMedicaoEfetuada" class="text-sm font-medium text-gray-600 mt-2 block">Realizada</label>
-                        <input type="date" id="inputMedicaoEfetuada" class="w-full p-2 border rounded-lg mt-1">
+                        <input type="date" id="inputMedicaoEfetuada" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0">
                         <label for="inputObsMedicao" class="text-sm font-medium text-gray-600 mt-2 block">Observações</label>
-                        <textarea id="inputObsMedicao" rows="2" class="w-full p-2 border rounded-lg mt-1"></textarea>
+                        <textarea id="inputObsMedicao" rows="2" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0"></textarea>
                     </div>
                     <div>
                         <h4 class="font-semibold text-gray-700 mb-2">ENTREGA</h4>
                         <label for="inputPrevisaoInicialEntrega" class="text-sm font-medium text-gray-600">Previsão Inicial</label>
-                        <input type="date" id="inputPrevisaoInicialEntrega" class="w-full p-2 border rounded-lg mt-1">
+                        <input type="date" id="inputPrevisaoInicialEntrega" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0">
                         <label for="inputNovaPrevisaoEntrega" class="text-sm font-medium text-gray-600 mt-2 block">Nova Previsão</label>
-                        <input type="date" id="inputNovaPrevisaoEntrega" class="w-full p-2 border rounded-lg mt-1">
+                        <input type="date" id="inputNovaPrevisaoEntrega" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0">
                         <label for="inputEntregaRealizada" class="text-sm font-medium text-gray-600 mt-2 block">Realizada</label>
-                        <input type="date" id="inputEntregaRealizada" class="w-full p-2 border rounded-lg mt-1">
+                        <input type="date" id="inputEntregaRealizada" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0">
                         <label for="inputObsEntrega" class="text-sm font-medium text-gray-600 mt-2 block">Observações</label>
-                        <textarea id="inputObsEntrega" rows="2" class="w-full p-2 border rounded-lg mt-1"></textarea>
+                        <textarea id="inputObsEntrega" rows="2" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0"></textarea>
                     </div>
                 </div>
-                <button id="btnAdicionarObra" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition shadow w-full">Adicionar Obra</button>
+                <button id="btnAdicionarObra" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-800 transition w-full">Adicionar Obra</button>
             </div>
         </div>
-        
-        <div class="bg-white p-4 rounded-xl shadow-md mb-6">
+
+        <div class="bg-white p-6 rounded-xl mb-8 border border-gray-200">
             <h3 class="text-lg font-semibold text-gray-700 mb-4">Filtros de Consulta</h3>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-4">
                 <div>
                     <label for="filtro-nome-obra" class="text-sm font-medium text-gray-600">Nome da Obra</label>
-                    <input type="text" id="filtro-nome-obra" class="w-full p-2 border rounded-lg mt-1">
+                    <input type="text" id="filtro-nome-obra" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0">
                 </div>
-                <div>
+                <div class="md:col-span-3">
                     <label class="text-sm font-medium text-gray-600">Tipo de Item</label>
-                    <div id="filtro-tipo-item-container" class="flex flex-wrap gap-x-4 gap-y-2 mt-2 p-2 border rounded-lg">
+                    <div id="filtro-tipo-item-container" class="flex flex-wrap gap-x-4 gap-y-2 mt-2">
                     </div>
                 </div>
-                <div id="filtros-status-item-container" class="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
+                <div id="filtros-status-item-container" class="md:col-span-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-x-6 gap-y-4 pt-4 border-t"></div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4 border-t pt-4">
                 <div class="md:col-span-4">
                     <label class="text-sm font-medium text-gray-600">Status do Material</label>
-                    <div id="filtro-status-material-container" class="grid grid-cols-5 gap-x-4 gap-y-1 mt-2 p-2 border rounded-lg">
+                    <div id="filtro-status-material-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-x-4 gap-y-2 mt-2">
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="obras-container" class="space-y-2">
-            <div class="text-center p-8 bg-white rounded-lg shadow-sm"><h3 class="text-lg font-medium text-gray-700">Carregando dados do Firebase...</h3><p class="text-gray-500 mt-1">Por favor, aguarde.</p></div>
+        <div id="obras-container" class="space-y-4">
+            <div class="text-center p-8 bg-white rounded-lg border border-gray-200"><h3 class="text-lg font-medium text-gray-700">Carregando dados do Firebase...</h3><p class="text-gray-500 mt-1">Por favor, aguarde.</p></div>
         </div>
     </div>
 
-    <div id="status-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden modal">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg mx-auto modal-content transform scale-95">
+    <div id="status-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden modal">
+        <div class="bg-white rounded-2xl p-8 w-full max-w-lg mx-auto modal-content">
             <h2 class="text-2xl font-bold text-gray-800 mb-2" id="modal-header">Atualizar Status</h2>
             <p class="text-gray-600 mb-6" id="modal-title">Item: <span class="font-semibold" id="modal-item-nome"></span><span id="modal-etapa-container"> | Etapa: <span class="font-semibold" id="modal-etapa-nome"></span></span></p>
             <div class="space-y-4">
-                <div><label for="modal-status" class="block text-sm font-medium text-gray-700 mb-1">Status</label><select id="modal-status" class="w-full p-3 border rounded-lg"></select></div>
-                <div><label for="modal-data" class="block text-sm font-medium text-gray-700 mb-1">Data</label><input type="date" id="modal-data" class="w-full p-3 border rounded-lg"></div>
-                
+                <div><label for="modal-status" class="block text-sm font-medium text-gray-700 mb-1">Status</label><select id="modal-status" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></select></div>
+                <div><label for="modal-data" class="block text-sm font-medium text-gray-700 mb-1">Data</label><input type="date" id="modal-data" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></div>
+
                 <div id="modal-prazo-container" class="hidden">
                     <label for="modal-prazo-inicial" class="block text-sm font-medium text-gray-700 mb-1">Prazo Conclusão - Inicial</label>
-                    <input type="date" id="modal-prazo-inicial" class="w-full p-3 border rounded-lg">
+                    <input type="date" id="modal-prazo-inicial" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0">
                     <label for="modal-prazo-reagendado" class="block text-sm font-medium text-gray-700 mb-1 mt-2">Prazo Conclusão - Reagendado</label>
-                    <input type="date" id="modal-prazo-reagendado" class="w-full p-3 border rounded-lg">
+                    <input type="date" id="modal-prazo-reagendado" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0">
                 </div>
-                
+
                 <div id="modal-conclusao-efetiva-container" class="hidden">
                     <label for="modal-conclusao-efetiva" class="block text-sm font-medium text-gray-700 mb-1 mt-2">Conclusão Efetiva</label>
-                    <input type="date" id="modal-conclusao-efetiva" class="w-full p-3 border rounded-lg">
+                    <input type="date" id="modal-conclusao-efetiva" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0">
                 </div>
 
                 <div id="modal-previsao-container" class="hidden">
                     <label for="modal-previsao-disponibilidade-inicial" class="block text-sm font-medium text-gray-700 mb-1">Previsão Disponibilidade - Inicial</label>
-                    <input type="date" id="modal-previsao-disponibilidade-inicial" class="w-full p-3 border rounded-lg">
+                    <input type="date" id="modal-previsao-disponibilidade-inicial" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0">
                     <label for="modal-previsao-disponibilidade-reagendado" class="block text-sm font-medium text-gray-700 mb-1 mt-2">Previsão Disponibilidade - Reagendado</label>
-                    <input type="date" id="modal-previsao-disponibilidade-reagendado" class="w-full p-3 border rounded-lg">
+                    <input type="date" id="modal-previsao-disponibilidade-reagendado" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0">
                 </div>
-                
-                <div><label for="modal-obs" class="block text-sm font-medium text-gray-700 mb-1">Observação</label><textarea id="modal-obs" rows="4" placeholder="Adicione uma observação..." class="w-full p-3 border rounded-lg"></textarea></div>
+
+                <div><label for="modal-obs" class="block text-sm font-medium text-gray-700 mb-1">Observação</label><textarea id="modal-obs" rows="4" placeholder="Adicione uma observação..." class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></textarea></div>
             </div>
             <div class="flex justify-between items-center mt-8">
-                <button id="modal-btn-limpar" class="bg-yellow-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-yellow-600 transition">Limpar Status</button>
+                <button id="modal-btn-limpar" class="bg-transparent text-gray-700 font-semibold py-2 px-6 rounded-lg hover:bg-gray-100 border border-gray-300 transition">Limpar Status</button>
                 <div class="flex gap-4">
-                    <button id="modal-btn-cancelar" class="bg-gray-200 text-gray-800 font-semibold py-2 px-6 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
+                    <button id="modal-btn-cancelar" class="bg-transparent text-gray-700 font-semibold py-2 px-6 rounded-lg hover:bg-gray-100 border border-gray-300 transition">Cancelar</button>
                     <button id="modal-btn-salvar" class="bg-green-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-green-700 transition">Salvar</button>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <div id="edit-item-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden modal">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg mx-auto modal-content transform scale-95 overflow-y-auto max-h-screen">
+        <div class="bg-white rounded-2xl p-8 w-full max-w-lg mx-auto modal-content overflow-y-auto max-h-screen">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">Alterar Item</h2>
             <div class="space-y-4">
                 <div>
                     <label for="edit-item-tipo" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-                    <select id="edit-item-tipo" class="w-full p-3 border rounded-lg bg-gray-100 cursor-not-allowed">
+                    <select id="edit-item-tipo" class="w-full p-3 border rounded-lg bg-gray-100 cursor-not-allowed focus:border-blue-500 focus:ring-0">
                         <option value="Projeto">Projeto</option>
                         <option value="Orçamento">Orçamento</option>
                         <option value="Terceiros">Terceiros</option>
                         <option value="Compra Inicial">Compra Inicial</option>
                     </select>
                 </div>
-                <div><label for="edit-item-codigo" class="block text-sm font-medium text-gray-700 mb-1">Código</label><input type="text" id="edit-item-codigo" class="w-full p-3 border rounded-lg"></div>
-                <div><label for="edit-item-descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label><input type="text" id="edit-item-descricao" class="w-full p-3 border rounded-lg"></div>
-                
+                <div><label for="edit-item-codigo" class="block text-sm font-medium text-gray-700 mb-1">Código</label><input type="text" id="edit-item-codigo" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></div>
+                <div><label for="edit-item-descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label><input type="text" id="edit-item-descricao" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></div>
+
                 <div id="edit-item-projeto-fields" class="hidden space-y-4 border-t pt-4">
-                     <div><label for="edit-item-largura" class="block text-sm font-medium text-gray-700 mb-1">Largura</label><input type="text" id="edit-item-largura" class="w-full p-3 border rounded-lg"></div>
-                     <div><label for="edit-item-altura" class="block text-sm font-medium text-gray-700 mb-1">Altura</label><input type="text" id="edit-item-altura" class="w-full p-3 border rounded-lg"></div>
-                     <div><label for="edit-item-m2-total" class="block text-sm font-medium text-gray-700 mb-1">M² Total</label><input type="text" id="edit-item-m2-total" class="w-full p-3 border rounded-lg"></div>
-                     <div><label for="edit-item-cor" class="block text-sm font-medium text-gray-700 mb-1">Cor</label><input type="text" id="edit-item-cor" class="w-full p-3 border rounded-lg"></div>
-                     <div><label for="edit-item-vidro" class="block text-sm font-medium text-gray-700 mb-1">Vidro</label><input type="text" id="edit-item-vidro" class="w-full p-3 border rounded-lg"></div>
-                     <div><label for="edit-item-m2-vidro" class="block text-sm font-medium text-gray-700 mb-1">M² Vidro</label><input type="text" id="edit-item-m2-vidro" class="w-full p-3 border rounded-lg"></div>
+                     <div><label for="edit-item-largura" class="block text-sm font-medium text-gray-700 mb-1">Largura</label><input type="text" id="edit-item-largura" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></div>
+                     <div><label for="edit-item-altura" class="block text-sm font-medium text-gray-700 mb-1">Altura</label><input type="text" id="edit-item-altura" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></div>
+                     <div><label for="edit-item-m2-total" class="block text-sm font-medium text-gray-700 mb-1">M² Total</label><input type="text" id="edit-item-m2-total" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></div>
+                     <div><label for="edit-item-cor" class="block text-sm font-medium text-gray-700 mb-1">Cor</label><input type="text" id="edit-item-cor" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></div>
+                     <div><label for="edit-item-vidro" class="block text-sm font-medium text-gray-700 mb-1">Vidro</label><input type="text" id="edit-item-vidro" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></div>
+                     <div><label for="edit-item-m2-vidro" class="block text-sm font-medium text-gray-700 mb-1">M² Vidro</label><input type="text" id="edit-item-m2-vidro" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></div>
                 </div>
             </div>
             <div class="flex justify-end gap-4 mt-8">
-                <button id="edit-item-btn-cancelar" class="bg-gray-200 text-gray-800 font-semibold py-2 px-6 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
-                <button id="edit-item-btn-salvar" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition">Salvar</button>
+                <button id="edit-item-btn-cancelar" class="bg-transparent text-gray-700 font-semibold py-2 px-6 rounded-lg hover:bg-gray-100 border border-gray-300 transition">Cancelar</button>
+                <button id="edit-item-btn-salvar" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-800 transition">Salvar</button>
             </div>
         </div>
     </div>
 
     <div id="edit-material-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden modal">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg mx-auto modal-content transform scale-95 overflow-y-auto max-h-screen">
+        <div class="bg-white rounded-2xl p-8 w-full max-w-lg mx-auto modal-content overflow-y-auto max-h-screen">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">Alterar Material</h2>
             <div class="space-y-4">
-                <div><label for="edit-material-tipo" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label><input type="text" id="edit-material-tipo" class="w-full p-3 border rounded-lg"></div>
-                <div><label for="edit-material-descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label><input type="text" id="edit-material-descricao" class="w-full p-3 border rounded-lg"></div>
-                
+                <div><label for="edit-material-tipo" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label><input type="text" id="edit-material-tipo" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></div>
+                <div><label for="edit-material-descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label><input type="text" id="edit-material-descricao" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></div>
+
                 <div id="edit-material-compra-fields" class="hidden space-y-4 border-t pt-4">
-                    <div><label for="edit-material-qtde-orcada" class="block text-sm font-medium text-gray-700 mb-1">Qtde Orçada</label><input type="number" id="edit-material-qtde-orcada" class="w-full p-3 border rounded-lg"></div>
-                    <div><label for="edit-material-qtde-disponivel" class="block text-sm font-medium text-gray-700 mb-1">Qtde Disponível</label><input type="number" id="edit-material-qtde-disponivel" class="w-full p-3 border rounded-lg"></div>
+                    <div><label for="edit-material-qtde-orcada" class="block text-sm font-medium text-gray-700 mb-1">Qtde Orçada</label><input type="number" id="edit-material-qtde-orcada" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></div>
+                    <div><label for="edit-material-qtde-disponivel" class="block text-sm font-medium text-gray-700 mb-1">Qtde Disponível</label><input type="number" id="edit-material-qtde-disponivel" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></div>
                 </div>
             </div>
             <div class="flex justify-end gap-4 mt-8">
-                <button id="edit-material-btn-cancelar" class="bg-gray-200 text-gray-800 font-semibold py-2 px-6 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
-                <button id="edit-material-btn-salvar" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition">Salvar</button>
+                <button id="edit-material-btn-cancelar" class="bg-transparent text-gray-700 font-semibold py-2 px-6 rounded-lg hover:bg-gray-100 border border-gray-300 transition">Cancelar</button>
+                <button id="edit-material-btn-salvar" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-800 transition">Salvar</button>
             </div>
         </div>
     </div>
-    
+
     <div id="edit-obra-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden modal">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-3xl mx-auto modal-content transform scale-95 flex flex-col max-h-[90vh]">
+        <div class="bg-white rounded-2xl p-8 w-full max-w-3xl mx-auto modal-content flex flex-col max-h-[90vh]">
             <h2 class="text-2xl font-bold text-gray-800 mb-6 flex-shrink-0">Alterar Obra</h2>
-            
+
             <div class="overflow-y-auto pr-2">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div><label for="edit-obra-nome" class="block text-sm font-medium text-gray-700 mb-1">Nome da Obra</label><input type="text" id="edit-obra-nome" class="w-full p-3 border rounded-lg"></div>
-                    <div><label for="edit-obra-cliente" class="block text-sm font-medium text-gray-700 mb-1">Nome do Cliente</label><input type="text" id="edit-obra-cliente" class="w-full p-3 border rounded-lg"></div>
-                    <div class="md:col-span-2"><label for="edit-obra-endereco" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="edit-obra-endereco" class="w-full p-3 border rounded-lg"></div>
+                    <div><label for="edit-obra-nome" class="block text-sm font-medium text-gray-700 mb-1">Nome da Obra</label><input type="text" id="edit-obra-nome" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></div>
+                    <div><label for="edit-obra-cliente" class="block text-sm font-medium text-gray-700 mb-1">Nome do Cliente</label><input type="text" id="edit-obra-cliente" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></div>
+                    <div class="md:col-span-2"><label for="edit-obra-endereco" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="edit-obra-endereco" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t pt-4">
                     <div>
                         <h4 class="font-semibold text-gray-700 mb-2">MEDIÇÃO</h4>
                         <label for="edit-obra-previsao-inicial-medicao" class="text-sm font-medium text-gray-600">Previsão Inicial</label>
-                        <input type="date" id="edit-obra-previsao-inicial-medicao" class="w-full p-2 border rounded-lg mt-1">
+                        <input type="date" id="edit-obra-previsao-inicial-medicao" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0">
                         <label for="edit-obra-nova-previsao-medicao" class="text-sm font-medium text-gray-600 mt-2 block">Nova Previsão</label>
-                        <input type="date" id="edit-obra-nova-previsao-medicao" class="w-full p-2 border rounded-lg mt-1">
+                        <input type="date" id="edit-obra-nova-previsao-medicao" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0">
                         <label for="edit-obra-medicao-efetuada" class="text-sm font-medium text-gray-600 mt-2 block">Realizada</label>
-                        <input type="date" id="edit-obra-medicao-efetuada" class="w-full p-2 border rounded-lg mt-1">
+                        <input type="date" id="edit-obra-medicao-efetuada" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0">
                         <label for="edit-obra-obs-medicao" class="text-sm font-medium text-gray-600 mt-2 block">Observações</label>
-                        <textarea id="edit-obra-obs-medicao" rows="2" class="w-full p-2 border rounded-lg mt-1"></textarea>
+                        <textarea id="edit-obra-obs-medicao" rows="2" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0"></textarea>
                     </div>
                     <div>
                         <h4 class="font-semibold text-gray-700 mb-2">ENTREGA</h4>
                         <label for="edit-obra-previsao-inicial-entrega" class="text-sm font-medium text-gray-600">Previsão Inicial</label>
-                        <input type="date" id="edit-obra-previsao-inicial-entrega" class="w-full p-2 border rounded-lg mt-1">
+                        <input type="date" id="edit-obra-previsao-inicial-entrega" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0">
                         <label for="edit-obra-nova-previsao-entrega" class="text-sm font-medium text-gray-600 mt-2 block">Nova Previsão</label>
-                        <input type="date" id="edit-obra-nova-previsao-entrega" class="w-full p-2 border rounded-lg mt-1">
+                        <input type="date" id="edit-obra-nova-previsao-entrega" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0">
                         <label for="edit-obra-entrega-realizada" class="text-sm font-medium text-gray-600 mt-2 block">Realizada</label>
-                        <input type="date" id="edit-obra-entrega-realizada" class="w-full p-2 border rounded-lg mt-1">
+                        <input type="date" id="edit-obra-entrega-realizada" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0">
                         <label for="edit-obra-obs-entrega" class="text-sm font-medium text-gray-600 mt-2 block">Observações</label>
-                        <textarea id="edit-obra-obs-entrega" rows="2" class="w-full p-2 border rounded-lg mt-1"></textarea>
+                        <textarea id="edit-obra-obs-entrega" rows="2" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0"></textarea>
                     </div>
                 </div>
             </div>
-            
+
             <div class="flex justify-end gap-4 mt-auto border-t pt-6 flex-shrink-0">
-                <button id="edit-obra-btn-cancelar" class="bg-gray-200 text-gray-800 font-semibold py-2 px-6 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
-                <button id="edit-obra-btn-salvar" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition">Salvar</button>
+                <button id="edit-obra-btn-cancelar" class="bg-transparent text-gray-700 font-semibold py-2 px-6 rounded-lg hover:bg-gray-100 border border-gray-300 transition">Cancelar</button>
+                <button id="edit-obra-btn-salvar" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-800 transition">Salvar</button>
             </div>
         </div>
     </div>
@@ -289,7 +289,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    
+
     // Configuração do seu projeto Firebase.
     const firebaseConfig = {
         apiKey: "AIzaSyDyNk5BJscelHhxjKRHKlOZpYnNKgnh3B4",
@@ -350,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
             aplicarFiltrosERenderizar();
         }, (error) => {
             console.error("Erro ao buscar obras do Firestore: ", error);
-            obrasContainer.innerHTML = `<div class="text-center p-8 bg-white rounded-lg shadow-sm"><h3 class="text-lg font-medium text-red-700">Erro ao carregar dados.</h3><p class="text-gray-500 mt-1">Não foi possível conectar ao banco de dados.</p></div>`;
+            obrasContainer.innerHTML = `<div class="text-center p-8 bg-white rounded-lg border border-gray-200"><h3 class="text-lg font-medium text-red-700">Erro ao carregar dados.</h3><p class="text-gray-500 mt-1">Não foi possível conectar ao banco de dados.</p></div>`;
         });
     };
 
@@ -384,8 +384,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let obrasFiltradas = [...obras];
         const nomeObraFiltro = filtros.nomeObra?.toLowerCase();
         if (nomeObraFiltro) {
-            obrasFiltradas = obrasFiltradas.filter(obra => 
-                obra.nome.toLowerCase().includes(nomeObraFiltro) || 
+            obrasFiltradas = obrasFiltradas.filter(obra =>
+                obra.nome.toLowerCase().includes(nomeObraFiltro) ||
                 obra.cliente.toLowerCase().includes(nomeObraFiltro)
             );
         }
@@ -412,14 +412,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     return true;
                 });
                 return { ...obra, itens: itensFiltrados };
-            }).filter(obra => obra.itens.length > 0); 
+            }).filter(obra => obra.itens.length > 0);
         }
         renderizarObras(obrasFiltradas);
     }
 
     const renderizarObras = (listaObras = obras) => {
-        obrasContainer.innerHTML = listaObras.length === 0 
-            ? `<div class="text-center p-8 bg-white rounded-lg shadow-sm"><h3 class="text-lg font-medium text-gray-700">Nenhuma obra encontrada.</h3><p class="text-gray-500 mt-1">Ajuste os filtros ou adicione uma nova obra.</p></div>`
+        obrasContainer.innerHTML = listaObras.length === 0
+            ? `<div class="text-center p-8 bg-white rounded-lg border border-gray-200"><h3 class="text-lg font-medium text-gray-700">Nenhuma obra encontrada.</h3><p class="text-gray-500 mt-1">Ajuste os filtros ou adicione uma nova obra.</p></div>`
             : listaObras.map(obra => {
                 const totais = calcularTotaisItens(obra);
                 const estadoUIObra = uiState[obra.id] || { dadosExpanded: false, isExpanded: false, itemExpandidoId: null };
@@ -476,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>` : '';
                 return `
-                <div class="bg-white rounded-xl shadow-md py-2 px-3">
+                <div class="bg-white rounded-xl border border-gray-200 py-2 px-3">
                     <div class="flex flex-col sm:flex-row justify-between sm:items-start">
                         <div class="flex-grow">
                             <div class="flex items-center gap-4 mb-1">
@@ -512,7 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const splitIndex = ETAPAS_ITEM.findIndex(e => e.id === 'emProducao');
         const primeiraParteEtapas = ETAPAS_ITEM.slice(0, splitIndex);
         const segundaParteEtapas = ETAPAS_ITEM.slice(splitIndex);
-        header.innerHTML = `<tr>
+        header.innerHTML = `<tr class="border-b">
                 <th class="p-3 text-left text-xs font-semibold text-gray-500 uppercase sticky left-0 bg-white z-10 w-1/4">Item</th>
                 ${primeiraParteEtapas.map(e => `<th class="p-3 text-center text-xs font-semibold text-gray-500 uppercase">${e.nome}</th>`).join('')}
                 <th class="p-3 text-center text-xs font-semibold text-gray-500 uppercase">Materiais</th>
@@ -550,7 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         </td>`;
     };
-	
+
 	const renderizarAcoesItem = (obra, item) => `
         <td class="p-3 text-center">
             <div class="flex justify-center items-center gap-3">
@@ -598,7 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p><strong>Largura:</strong> ${item.largura || '---'}</p><p><strong>Altura:</strong> ${item.altura || '---'}</p><p><strong>M² Total:</strong> ${item.m2Total || '---'}</p><p><strong>Cor:</strong> ${item.cor || '---'}</p><p><strong>Vidro:</strong> ${item.vidro || '---'}</p><p><strong>M² Vidro:</strong> ${item.m2Vidro || '---'}</p>
                 </div>` : '';
             return `
-                <tr class="border-t hover:bg-gray-50">
+                <tr class="border-b hover:bg-gray-50">
                     <td class="p-3 font-medium text-gray-800 sticky left-0 bg-white hover:bg-gray-50 z-10">
                         <div>
                             <div class="flex items-center space-x-2"><span class="font-bold text-gray-900">${item.codigo}</span><span class="text-xs font-semibold px-2 py-0.5 rounded-full ${tipoStyle}">${item.tipo}</span></div>
@@ -619,7 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let additionalHeaders = '', additionalInputsHtml = '';
         if (item.tipo === 'Compra Inicial' || item.tipo === 'Projeto') {
             additionalHeaders = `<th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Qtde Orçada</th><th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Qtde Disponível</th><th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">%</th>`;
-            additionalInputsHtml = `<input type="number" placeholder="Qtde Orçada" class="input-material-qtde-orcada flex-grow p-2 border rounded-md" data-item-id="${item.id}"><input type="number" placeholder="Qtde Disponível" class="input-material-qtde-disponivel flex-grow p-2 border rounded-md" data-item-id="${item.id}">`;
+            additionalInputsHtml = `<input type="number" placeholder="Qtde Orçada" class="input-material-qtde-orcada flex-grow p-2 border rounded-md focus:border-blue-500 focus:ring-0" data-item-id="${item.id}"><input type="number" placeholder="Qtde Disponível" class="input-material-qtde-disponivel flex-grow p-2 border rounded-md focus:border-blue-500 focus:ring-0" data-item-id="${item.id}">`;
         }
         const renderAdditionalCells = (mat) => {
             if (item.tipo === 'Compra Inicial' || item.tipo === 'Projeto') {
@@ -629,12 +629,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 return `<td class="p-2 text-gray-600">${mat.qtdeOrcada || ''}</td><td class="p-2 text-gray-600">${mat.qtdeDisponivel || ''}</td><td class="p-2"><div class="progress-bar-container bg-gray-300 rounded-full h-4 w-full"><div class="h-full rounded-full transition-all duration-500" style="width: ${barWidth}%; background-color: hsl(${hue}, 80%, 40%);"></div><span class="progress-bar-text text-xs font-bold">${percentual}%</span></div></td>`;
             } return '';
         };
-        return `<tr class="materiais-row"><td colspan="100%" class="bg-gray-100 p-4"><div class="p-4"><h4 class="font-bold text-gray-700 mb-3">Materiais: ${item.codigo} - ${item.descricao}</h4><div class="table-container"><table class="min-w-full bg-white rounded-lg shadow"><thead><tr><th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Tipo</th><th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Descrição</th>${additionalHeaders}<th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Prev. Inicial</th><th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Prev. Reag.</th><th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">Status</th><th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">Ação</th></tr></thead><tbody>
+        return `<tr class="materiais-row"><td colspan="100%" class="bg-gray-100 p-4"><div class="p-4"><h4 class="font-bold text-gray-700 mb-3">Materiais: ${item.codigo} - ${item.descricao}</h4><div class="table-container"><table class="min-w-full bg-white rounded-lg"><thead><tr class="border-b"><th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Tipo</th><th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Descrição</th>${additionalHeaders}<th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Prev. Inicial</th><th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Prev. Reag.</th><th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">Status</th><th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">Ação</th></tr></thead><tbody>
                 ${(item.materiais || []).map(mat => {
                     const statusInfo = mat.statusInfo || {}, statusData = statusInfo.status ? STATUS_MATERIAL_MAP[statusInfo.status] : STATUS_MATERIAL_MAP['default'];
-                    return `<tr class="border-t"><td class="p-2 font-medium text-gray-800">${mat.tipo}</td><td class="p-2 text-gray-600">${mat.descricao}</td>${renderAdditionalCells(mat)}<td class="p-2 text-gray-600">${formatarData(statusInfo.previsaoDisponibilidadeInicial)}</td><td class="p-2 text-gray-600">${formatarData(statusInfo.previsaoDisponibilidadeReagendado)}</td><td class="p-2 text-center"><div class="status-badge rounded-md ${statusData.classe} material-status-badge" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}" title="${statusInfo.observacao || ''}">${statusData.texto}</div></td><td class="p-2"><div class="flex justify-center items-center gap-3"><button title="Alterar Material" class="btn-alterar-material action-btn bg-yellow-400 text-white" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg></button><button title="Excluir Material" class="btn-excluir-material action-btn bg-red-500 text-white" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></button></div></td></tr>`;
+                    return `<tr class="border-b"><td class="p-2 font-medium text-gray-800">${mat.tipo}</td><td class="p-2 text-gray-600">${mat.descricao}</td>${renderAdditionalCells(mat)}<td class="p-2 text-gray-600">${formatarData(statusInfo.previsaoDisponibilidadeInicial)}</td><td class="p-2 text-gray-600">${formatarData(statusInfo.previsaoDisponibilidadeReagendado)}</td><td class="p-2 text-center"><div class="status-badge rounded-md ${statusData.classe} material-status-badge" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}" title="${statusInfo.observacao || ''}">${statusData.texto}</div></td><td class="p-2"><div class="flex justify-center items-center gap-3"><button title="Alterar Material" class="btn-alterar-material action-btn bg-yellow-400 text-white" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg></button><button title="Excluir Material" class="btn-excluir-material action-btn bg-red-500 text-white" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></button></div></td></tr>`;
                 }).join('')}
-                </tbody></table></div><div class="mt-4 flex flex-col sm:flex-row gap-2 flex-wrap items-center"><input type="text" placeholder="Tipo (ex: Perfil)" class="input-material-tipo flex-grow p-2 border rounded-md" data-item-id="${item.id}"><input type="text" placeholder="Descrição (ex: PVC Branco)" class="input-material-desc flex-grow p-2 border rounded-md" data-item-id="${item.id}">${additionalInputsHtml}<button class="btn-add-material bg-indigo-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-600" data-obra-id="${obra.id}" data-item-id="${item.id}">Adicionar</button><label for="upload-materiais-${item.id}" class="bg-teal-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-teal-600 cursor-pointer">Importar Material</label><input type="file" id="upload-materiais-${item.id}" class="hidden" accept=".xlsx, .xls" data-obra-id="${obra.id}" data-item-id="${item.id}"></div></div></td></tr>`;
+                </tbody></table></div><div class="mt-4 flex flex-col sm:flex-row gap-2 flex-wrap items-center"><input type="text" placeholder="Tipo (ex: Perfil)" class="input-material-tipo flex-grow p-2 border rounded-md focus:border-blue-500 focus:ring-0" data-item-id="${item.id}"><input type="text" placeholder="Descrição (ex: PVC Branco)" class="input-material-desc flex-grow p-2 border rounded-md focus:border-blue-500 focus:ring-0" data-item-id="${item.id}">${additionalInputsHtml}<button class="btn-add-material bg-indigo-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-600" data-obra-id="${obra.id}" data-item-id="${item.id}">Adicionar</button><label for="upload-materiais-${item.id}" class="bg-teal-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-teal-600 cursor-pointer">Importar Material</label><input type="file" id="upload-materiais-${item.id}" class="hidden" accept=".xlsx, .xls" data-obra-id="${obra.id}" data-item-id="${item.id}"></div></div></td></tr>`;
     }
 
     // --- FUNÇÕES DE MODAL ---
@@ -653,8 +653,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const previsaoContainer = document.getElementById('modal-previsao-container');
         const conclusaoEfetivaContainer = document.getElementById('modal-conclusao-efetiva-container');
         let itemStatus = {};
-        if (isMaterial) { 
-            document.getElementById('modal-etapa-container').style.display = 'none'; 
+        if (isMaterial) {
+            document.getElementById('modal-etapa-container').style.display = 'none';
             itemStatus = targetItem.statusInfo || {};
             prazoContainer.classList.add('hidden');
             previsaoContainer.classList.remove('hidden');
@@ -671,10 +671,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 alocadoTotalOption.disabled = !podeAlocarTotal;
                 alocadoTotalOption.textContent = podeAlocarTotal ? "Alocado Total" : "Alocado Total (Qtde incompatível)";
             }
-        } else { 
-            document.getElementById('modal-etapa-container').style.display = 'inline'; 
-            const etapa = ETAPAS_ITEM.find(e => e.id === etapaId); 
-            document.getElementById('modal-etapa-nome').textContent = etapa.nome; 
+        } else {
+            document.getElementById('modal-etapa-container').style.display = 'inline';
+            const etapa = ETAPAS_ITEM.find(e => e.id === etapaId);
+            document.getElementById('modal-etapa-nome').textContent = etapa.nome;
             itemStatus = targetItem.etapas[etapaId] || {};
             prazoContainer.classList.remove('hidden');
             previsaoContainer.classList.add('hidden');
@@ -693,30 +693,30 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('modal-data').value = itemStatus.data || new Date().toISOString().split('T')[0];
         document.getElementById('modal-obs').value = itemStatus.observacao || '';
         modal.classList.remove('hidden');
-        setTimeout(() => { modal.classList.remove('opacity-0'); modalContent.classList.remove('scale-95'); }, 10);
+        setTimeout(() => { modal.classList.remove('opacity-0'); }, 10);
     };
-    
-    const fecharModal = () => { modal.classList.add('opacity-0'); modalContent.classList.add('scale-95'); setTimeout(() => modal.classList.add('hidden'), 300); };
+
+    const fecharModal = () => { modal.classList.add('opacity-0'); setTimeout(() => modal.classList.add('hidden'), 200); };
 
     const salvarStatus = async () => {
         const { obraId, itemId, etapaId, materialId } = edicaoAtual;
         const obra = obras.find(o => o.id === obraId);
         const itemIndex = obra.itens.findIndex(p => p.id === itemId);
-        const novoStatus = { 
-            status: document.getElementById('modal-status').value, 
-            data: document.getElementById('modal-data').value, 
-            observacao: document.getElementById('modal-obs').value.trim() 
+        const novoStatus = {
+            status: document.getElementById('modal-status').value,
+            data: document.getElementById('modal-data').value,
+            observacao: document.getElementById('modal-obs').value.trim()
         };
         const obraDocRef = doc(db, 'obras', obraId);
-        if (materialId) { 
+        if (materialId) {
             const materialIndex = obra.itens[itemIndex].materiais.findIndex(m => m.id === materialId);
             const material = obra.itens[itemIndex].materiais[materialIndex];
             if (!document.getElementById('modal-previsao-disponibilidade-inicial').disabled) novoStatus.previsaoDisponibilidadeInicial = document.getElementById('modal-previsao-disponibilidade-inicial').value;
             novoStatus.previsaoDisponibilidadeReagendado = document.getElementById('modal-previsao-disponibilidade-reagendado').value;
             material.statusInfo = {...material.statusInfo, ...novoStatus};
-        } else { 
+        } else {
             if (!document.getElementById('modal-prazo-inicial').disabled) novoStatus.prazoConclusaoInicial = document.getElementById('modal-prazo-inicial').value;
-            novoStatus.prazoConclusaoReagendado = document.getElementById('modal-prazo-reagendado').value; 
+            novoStatus.prazoConclusaoReagendado = document.getElementById('modal-prazo-reagendado').value;
             if (etapaId === 'emProducao') novoStatus.conclusaoEfetiva = document.getElementById('modal-conclusao-efetiva').value;
             obra.itens[itemIndex].etapas[etapaId] = {...obra.itens[itemIndex].etapas[etapaId], ...novoStatus};
         }
@@ -733,14 +733,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (materialId) {
                 const materialIndex = obra.itens[itemIndex].materiais.findIndex(m => m.id === materialId);
                 obra.itens[itemIndex].materiais[materialIndex].statusInfo = {};
-            } else { 
+            } else {
                 delete obra.itens[itemIndex].etapas[etapaId];
             }
             await updateDoc(obraDocRef, { itens: obra.itens });
             fecharModal();
         }
     };
-    
+
     const abrirModalAlterarItem = (obraId, itemId) => {
         edicaoItemAtual = { obraId, itemId };
         const obra = obras.find(o => o.id === obraId);
@@ -760,25 +760,24 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('edit-item-m2-vidro').value = item.m2Vidro || '';
         }
         editItemModal.classList.remove('hidden');
-        setTimeout(() => { editItemModal.classList.remove('opacity-0'); editItemModalContent.classList.remove('scale-95'); }, 10);
+        setTimeout(() => { editItemModal.classList.remove('opacity-0'); }, 10);
     };
 
     const fecharModalAlterarItem = () => {
         document.getElementById('edit-item-tipo').disabled = false;
-        editItemModal.classList.add('opacity-0'); 
-        editItemModalContent.classList.add('scale-95'); 
-        setTimeout(() => editItemModal.classList.add('hidden'), 300); 
+        editItemModal.classList.add('opacity-0');
+        setTimeout(() => editItemModal.classList.add('hidden'), 200);
     };
-    
+
     const salvarAlteracaoItem = async () => {
         const { obraId, itemId } = edicaoItemAtual;
         const obra = obras.find(o => o.id === obraId);
         const itemIndex = obra.itens.findIndex(p => p.id === itemId);
         const novoCodigo = document.getElementById('edit-item-codigo').value.trim();
         const novaDescricao = document.getElementById('edit-item-descricao').value.trim();
-        if (novoCodigo && novaDescricao) { 
+        if (novoCodigo && novaDescricao) {
             const item = obra.itens[itemIndex];
-            item.codigo = novoCodigo; 
+            item.codigo = novoCodigo;
             item.descricao = novaDescricao;
             if (item.tipo === 'Projeto') {
                 item.largura = document.getElementById('edit-item-largura').value;
@@ -809,11 +808,11 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('edit-material-qtde-disponivel').value = material.qtdeDisponivel || '';
         }
         editMaterialModal.classList.remove('hidden');
-        setTimeout(() => { editMaterialModal.classList.remove('opacity-0'); editMaterialModalContent.classList.remove('scale-95'); }, 10);
+        setTimeout(() => { editMaterialModal.classList.remove('opacity-0'); }, 10);
     };
 
-    const fecharModalAlterarMaterial = () => { editMaterialModal.classList.add('opacity-0'); editMaterialModalContent.classList.add('scale-95'); setTimeout(() => editMaterialModal.classList.add('hidden'), 300); };
-    
+    const fecharModalAlterarMaterial = () => { editMaterialModal.classList.add('opacity-0'); setTimeout(() => editMaterialModal.classList.add('hidden'), 200); };
+
     const salvarAlteracaoMaterial = async () => {
         const { obraId, itemId, materialId } = edicaoMaterialAtual;
         const obra = obras.find(o => o.id === obraId);
@@ -823,8 +822,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const novaDescricao = document.getElementById('edit-material-descricao').value.trim();
         if (novoTipo && novaDescricao) {
             const material = obra.itens[itemIndex].materiais[materialIndex];
-            material.tipo = novoTipo; 
-            material.descricao = novaDescricao; 
+            material.tipo = novoTipo;
+            material.descricao = novaDescricao;
             if (obra.itens[itemIndex].tipo === 'Compra Inicial' || obra.itens[itemIndex].tipo === 'Projeto') {
                 material.qtdeOrcada = document.getElementById('edit-material-qtde-orcada').value;
                 material.qtdeDisponivel = document.getElementById('edit-material-qtde-disponivel').value;
@@ -834,7 +833,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fecharModalAlterarMaterial();
         } else { alert('Tipo e Descrição não podem estar vazios.'); }
     };
-    
+
     const abrirModalAlterarObra = (obraId) => {
         edicaoObraAtual = { obraId };
         const obra = obras.find(o => o.id === obraId);
@@ -854,11 +853,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('edit-obra-obs-medicao').value = obra.obsMedicao || '';
         document.getElementById('edit-obra-obs-entrega').value = obra.obsEntrega || '';
         editObraModal.classList.remove('hidden');
-        setTimeout(() => { editObraModal.classList.remove('opacity-0'); editObraModalContent.classList.remove('scale-95'); }, 10);
+        setTimeout(() => { editObraModal.classList.remove('opacity-0'); }, 10);
     };
 
-    const fecharModalAlterarObra = () => { editObraModal.classList.add('opacity-0'); editObraModalContent.classList.add('scale-95'); setTimeout(() => editObraModal.classList.add('hidden'), 300); };
-    
+    const fecharModalAlterarObra = () => { editObraModal.classList.add('opacity-0'); setTimeout(() => editObraModal.classList.add('hidden'), 200); };
+
     const salvarAlteracaoObra = async () => {
         const { obraId } = edicaoObraAtual;
         const nome = document.getElementById('edit-obra-nome').value.trim();
@@ -896,13 +895,13 @@ document.addEventListener('DOMContentLoaded', () => {
             btnToggleFormObra.classList.replace('hover:bg-gray-600', 'hover:bg-blue-700');
         }
     };
-    
+
     // --- LÓGICA DE EVENTOS ---
     async function handleButtonClick(e) {
         const button = e.target.closest('button'); if (!button) return;
         const { obraId, itemId, materialId } = button.dataset;
-        if (button.classList.contains('btn-toggle-dados')) { uiState[obraId] = { ...uiState[obraId], dadosExpanded: !uiState[obraId]?.dadosExpanded }; aplicarFiltrosERenderizar(); } 
-        else if (button.classList.contains('btn-toggle-itens')) { const newState = !uiState[obraId]?.isExpanded; Object.keys(uiState).forEach(id => uiState[id] = {...uiState[id], isExpanded: false }); uiState[obraId] = { ...uiState[obraId], isExpanded: newState }; aplicarFiltrosERenderizar(); } 
+        if (button.classList.contains('btn-toggle-dados')) { uiState[obraId] = { ...uiState[obraId], dadosExpanded: !uiState[obraId]?.dadosExpanded }; aplicarFiltrosERenderizar(); }
+        else if (button.classList.contains('btn-toggle-itens')) { const newState = !uiState[obraId]?.isExpanded; Object.keys(uiState).forEach(id => uiState[id] = {...uiState[id], isExpanded: false }); uiState[obraId] = { ...uiState[obraId], isExpanded: newState }; aplicarFiltrosERenderizar(); }
         else if (button.classList.contains('btn-excluir-obra')) {
             // AVISO DE SEGURANÇA: A senha está hardcoded no código do cliente.
             // Para um ambiente de produção, isso deve ser substituído por um método de autenticação seguro no servidor.
@@ -915,13 +914,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Senha incorreta.');
             }
         }
-        else if (button.classList.contains('btn-alterar-obra')) { abrirModalAlterarObra(obraId); } 
-        else if (button.id === 'btnAdicionarObra') { 
-            const nome = document.getElementById('inputNomeObra').value.trim(); const cliente = document.getElementById('inputClienteObra').value.trim(); 
+        else if (button.classList.contains('btn-alterar-obra')) { abrirModalAlterarObra(obraId); }
+        else if (button.id === 'btnAdicionarObra') {
+            const nome = document.getElementById('inputNomeObra').value.trim(); const cliente = document.getElementById('inputClienteObra').value.trim();
             if (nome && cliente) {
                 const novaObra = { nome, cliente, endereco: document.getElementById('inputEnderecoObra').value.trim(), previsaoInicialMedicao: document.getElementById('inputPrevisaoInicialMedicao').value, novaPrevisaoMedicao: document.getElementById('inputNovaPrevisaoMedicao').value, medicaoEfetuada: document.getElementById('inputMedicaoEfetuada').value, previsaoInicialEntrega: document.getElementById('inputPrevisaoInicialEntrega').value, novaPrevisaoEntrega: document.getElementById('inputNovaPrevisaoEntrega').value, entregaRealizada: document.getElementById('inputEntregaRealizada').value, obsMedicao: document.getElementById('inputObsMedicao').value.trim(), obsEntrega: document.getElementById('inputObsEntrega').value.trim(), itens: [] };
                 await addDoc(obrasCollection, novaObra);
-                ['inputNomeObra', 'inputClienteObra', 'inputEnderecoObra', 'inputPrevisaoInicialMedicao', 'inputNovaPrevisaoMedicao', 'inputMedicaoEfetuada', 'inputPrevisaoInicialEntrega', 'inputNovaPrevisaoEntrega', 'inputEntregaRealizada', 'inputObsMedicao', 'inputObsEntrega'].forEach(id => document.getElementById(id).value = ''); 
+                ['inputNomeObra', 'inputClienteObra', 'inputEnderecoObra', 'inputPrevisaoInicialMedicao', 'inputNovaPrevisaoMedicao', 'inputMedicaoEfetuada', 'inputPrevisaoInicialEntrega', 'inputNovaPrevisaoEntrega', 'inputEntregaRealizada', 'inputObsMedicao', 'inputObsEntrega'].forEach(id => document.getElementById(id).value = '');
                 isFormularioNovaObraVisivel = false; renderizarFormulario();
             } else { alert('Preencha pelo menos o Nome da Obra e do Cliente.'); }
         } else if (button.classList.contains('btn-add-item')) {
@@ -936,12 +935,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 await updateDoc(doc(db, 'obras', obraId), { itens: itensAtualizados });
                 document.querySelector(`.input-add-item-codigo[data-obra-id="${obraId}"]`).value = ''; document.querySelector(`.input-add-item-descricao[data-obra-id="${obraId}"]`).value = '';
             } else { alert('Preencha o Código e a Descrição do item.'); }
-        } else if (button.classList.contains('btn-add-material')) { 
-            const tipoInput = document.querySelector(`.input-material-tipo[data-item-id="${itemId}"]`); const descInput = document.querySelector(`.input-material-desc[data-item-id="${itemId}"]`); 
-            if (tipoInput.value.trim() && descInput.value.trim()) { 
-                const obra = obras.find(o => o.id === obraId); const item = obra.itens.find(p => p.id === itemId); 
+        } else if (button.classList.contains('btn-add-material')) {
+            const tipoInput = document.querySelector(`.input-material-tipo[data-item-id="${itemId}"]`); const descInput = document.querySelector(`.input-material-desc[data-item-id="${itemId}"]`);
+            if (tipoInput.value.trim() && descInput.value.trim()) {
+                const obra = obras.find(o => o.id === obraId); const item = obra.itens.find(p => p.id === itemId);
                 const novoMaterial = { id: Date.now().toString(), tipo: tipoInput.value.trim(), descricao: descInput.value.trim(), statusInfo: {}};
-                if (item.tipo === 'Compra Inicial' || item.tipo === 'Projeto') { novoMaterial.qtdeOrcada = document.querySelector(`.input-material-qtde-orcada[data-item-id="${itemId}"]`).value.trim(); novoMaterial.qtdeDisponivel = document.querySelector(`.input-material-qtde-disponivel[data-item-id="${itemId}"]`).value.trim(); } 
+                if (item.tipo === 'Compra Inicial' || item.tipo === 'Projeto') { novoMaterial.qtdeOrcada = document.querySelector(`.input-material-qtde-orcada[data-item-id="${itemId}"]`).value.trim(); novoMaterial.qtdeDisponivel = document.querySelector(`.input-material-qtde-disponivel[data-item-id="${itemId}"]`).value.trim(); }
                 item.materiais = [...(item.materiais || []), novoMaterial];
                 await updateDoc(doc(db, 'obras', obraId), { itens: obra.itens });
                 tipoInput.value = ''; descInput.value = '';
@@ -955,9 +954,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-        else if (button.classList.contains('btn-alterar-item')) { abrirModalAlterarItem(obraId, itemId); } 
-        else if (button.classList.contains('btn-toggle-materiais')) { const currentExpanded = uiState[obraId]?.itemExpandidoId; uiState[obraId] = { ...uiState[obraId], itemExpandidoId: currentExpanded === itemId ? null : itemId }; aplicarFiltrosERenderizar(); } 
-        else if (button.classList.contains('btn-excluir-material')) { if(confirm('Deseja EXCLUIR este material?')) { const obra = obras.find(o => o.id === obraId); const item = obra.itens.find(p => p.id === itemId); item.materiais = (item.materiais || []).filter(m => m.id !== materialId); await updateDoc(doc(db, 'obras', obraId), { itens: obra.itens }); } } 
+        else if (button.classList.contains('btn-alterar-item')) { abrirModalAlterarItem(obraId, itemId); }
+        else if (button.classList.contains('btn-toggle-materiais')) { const currentExpanded = uiState[obraId]?.itemExpandidoId; uiState[obraId] = { ...uiState[obraId], itemExpandidoId: currentExpanded === itemId ? null : itemId }; aplicarFiltrosERenderizar(); }
+        else if (button.classList.contains('btn-excluir-material')) { if(confirm('Deseja EXCLUIR este material?')) { const obra = obras.find(o => o.id === obraId); const item = obra.itens.find(p => p.id === itemId); item.materiais = (item.materiais || []).filter(m => m.id !== materialId); await updateDoc(doc(db, 'obras', obraId), { itens: obra.itens }); } }
         else if (button.classList.contains('btn-alterar-material')) { abrirModalAlterarMaterial(obraId, itemId, materialId); }
     }
 
@@ -1007,7 +1006,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(`${newItems.length} itens foram adicionados com sucesso!`);
         } else { alert("Nenhum item válido encontrado na planilha."); }
     };
-    
+
     const handleMaterialFileUpload = (e) => {
         const file = e.target.files[0]; if (!file) return; const { obraId, itemId } = e.target.dataset;
         const reader = new FileReader();
@@ -1051,7 +1050,7 @@ document.addEventListener('DOMContentLoaded', () => {
             abrirModal(obraId, itemId, etapaId, materialId);
         }
     });
-    
+
     const toggleProjetoFields = (tipo, obraId) => {
         const fieldsContainer = document.getElementById(`add-item-projeto-fields-${obraId}`);
         const uploadContainer = document.getElementById(`upload-itens-container-${obraId}`);
@@ -1061,7 +1060,7 @@ document.addEventListener('DOMContentLoaded', () => {
             uploadContainer.classList.toggle('hidden', tipo !== 'Projeto');
         }
     };
-    
+
     document.addEventListener('change', (e) => {
         if (e.target.matches('input[id^="upload-itens-"]')) handleItemFileUpload(e);
         if (e.target.matches('input[id^="upload-materiais-"]')) handleMaterialFileUpload(e);
