@@ -39,11 +39,19 @@
         .status-item-cancelado { background-color: #6b7280; color: white; } /* gray-500 */
 
         /* --- STATUS DOS MATERIAIS (Cores Vibrantes) --- */
-        .status-mat-branco { background-color: #ffffff; color: #1f2937; border: 1px solid #d1d5db; }
-        .status-mat-amarelo { background-color: #f97316; color: white; } /* orange-500 */
-        .status-mat-verde { background-color: #16a34a; color: white; } /* green-600 */
-        .status-mat-vermelho { background-color: #ef4444; color: white; } /* red-500 */
-        .status-mat-preto { background-color: #1f2937; color: white; } /* gray-800 */
+        .status-mat-conferenciaEstoque { background-color: #14b8a6; color: white; } /* teal-500 */
+        .status-mat-emCotacao { background-color: #ffffff; color: #1f2937; border: 1px solid #d1d5db; }
+        .status-mat-compraParcial { background-color: #f97316; color: white; } /* orange-500 */
+        .status-mat-compraTotal { background-color: #16a34a; color: white; } /* green-600 */
+        .status-mat-recebidoParcial { background-color: #f97316; color: white; } /* orange-500 */
+        .status-mat-recebidoTotal { background-color: #16a34a; color: white; } /* green-600 */
+        .status-mat-conferidoFalta { background-color: #ef4444; color: white; } /* red-500 */
+        .status-mat-conferidoParcial { background-color: #f97316; color: white; } /* orange-500 */
+        .status-mat-conferidoTotal { background-color: #16a34a; color: white; } /* green-600 */
+        .status-mat-alocadoParcial { background-color: #f97316; color: white; } /* orange-500 */
+        .status-mat-alocadoTotal { background-color: #16a34a; color: white; } /* green-600 */
+        .status-mat-cancelado { background-color: #1f2937; color: white; } /* gray-800 */
+
 
         .modal { transition: opacity 0.2s ease-in-out; }
         .modal-content { transition: opacity 0.2s ease-in-out; }
@@ -150,35 +158,62 @@
     </div>
 
     <div id="status-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden modal">
-        <div class="bg-white rounded-2xl p-8 w-full max-w-lg mx-auto modal-content">
-            <h2 class="text-2xl font-bold text-gray-800 mb-2" id="modal-header">Atualizar Status</h2>
-            <p class="text-gray-600 mb-6" id="modal-title">Item: <span class="font-semibold" id="modal-item-nome"></span><span id="modal-etapa-container"> | Etapa: <span class="font-semibold" id="modal-etapa-nome"></span></span></p>
-            <div class="space-y-4">
-                <div><label for="modal-status" class="block text-sm font-medium text-gray-700 mb-1">Status</label><select id="modal-status" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></select></div>
-                <div><label for="modal-data" class="block text-sm font-medium text-gray-700 mb-1">Data</label><input type="date" id="modal-data" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></div>
-
-                <div id="modal-prazo-container" class="hidden">
-                    <label for="modal-prazo-inicial" class="block text-sm font-medium text-gray-700 mb-1">Prazo Conclusão - Inicial</label>
-                    <input type="date" id="modal-prazo-inicial" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0">
-                    <label for="modal-prazo-reagendado" class="block text-sm font-medium text-gray-700 mb-1 mt-2">Prazo Conclusão - Reagendado</label>
-                    <input type="date" id="modal-prazo-reagendado" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0">
-                </div>
-
-                <div id="modal-conclusao-efetiva-container" class="hidden">
-                    <label for="modal-conclusao-efetiva" class="block text-sm font-medium text-gray-700 mb-1 mt-2">Conclusão Efetiva</label>
-                    <input type="date" id="modal-conclusao-efetiva" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0">
-                </div>
-
-                <div id="modal-previsao-container" class="hidden">
-                    <label for="modal-previsao-disponibilidade-inicial" class="block text-sm font-medium text-gray-700 mb-1">Previsão Disponibilidade - Inicial</label>
-                    <input type="date" id="modal-previsao-disponibilidade-inicial" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0">
-                    <label for="modal-previsao-disponibilidade-reagendado" class="block text-sm font-medium text-gray-700 mb-1 mt-2">Previsão Disponibilidade - Reagendado</label>
-                    <input type="date" id="modal-previsao-disponibilidade-reagendado" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0">
-                </div>
-
-                <div><label for="modal-obs" class="block text-sm font-medium text-gray-700 mb-1">Observação</label><textarea id="modal-obs" rows="4" placeholder="Adicione uma observação..." class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></textarea></div>
+        <div class="bg-white rounded-2xl p-8 w-full max-w-lg mx-auto modal-content flex flex-col max-h-[90vh]">
+            
+            <div class="flex-shrink-0">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2" id="modal-header">Atualizar Status</h2>
+                <p class="text-gray-600 mb-6" id="modal-title">Item: <span class="font-semibold" id="modal-item-nome"></span><span id="modal-etapa-container"> | Etapa: <span class="font-semibold" id="modal-etapa-nome"></span></span></p>
             </div>
-            <div class="flex justify-between items-center mt-8">
+            
+            <div class="overflow-y-auto pr-4">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                        <div id="modal-status-container" class="space-y-2">
+                            </div>
+                    </div>
+
+                    <div id="modal-prazo-container" class="hidden">
+                        <label for="modal-prazo-inicial" class="block text-sm font-medium text-gray-700 mb-1">Prazo Conclusão - Inicial</label>
+                        <input type="date" id="modal-prazo-inicial" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0">
+                        <label for="modal-prazo-reagendado" class="block text-sm font-medium text-gray-700 mb-1 mt-2">Prazo Conclusão - Reagendado</label>
+                        <input type="date" id="modal-prazo-reagendado" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0">
+                    </div>
+
+                    <div id="modal-conclusao-final-container" class="hidden">
+                        <label for="modal-conclusao-final" class="block text-sm font-medium text-gray-700 mb-1 mt-2">Conclusão Final</label>
+                        <input type="date" id="modal-conclusao-final" class="w-full p-3 border rounded-lg bg-gray-100 focus:ring-0" readonly>
+                    </div>
+
+                    <div id="modal-conclusao-efetiva-container" class="hidden">
+                        <label for="modal-conclusao-efetiva" class="block text-sm font-medium text-gray-700 mb-1 mt-2">Conclusão Efetiva</label>
+                        <input type="date" id="modal-conclusao-efetiva" class="w-full p-3 border rounded-lg bg-gray-100 focus:ring-0" readonly>
+                    </div>
+
+                    <div id="modal-entrega-final-container" class="hidden">
+                        <label for="modal-entrega-final" class="block text-sm font-medium text-gray-700 mb-1 mt-2">Entrega Final</label>
+                        <input type="date" id="modal-entrega-final" class="w-full p-3 border rounded-lg bg-gray-100 focus:ring-0" readonly>
+                    </div>
+
+                    <div id="modal-instalacao-final-container" class="hidden">
+                        <label for="modal-instalacao-final" class="block text-sm font-medium text-gray-700 mb-1 mt-2">Instalação Final</label>
+                        <input type="date" id="modal-instalacao-final" class="w-full p-3 border rounded-lg bg-gray-100 focus:ring-0" readonly>
+                    </div>
+
+                    <div id="modal-previsao-container" class="hidden">
+                        <label for="modal-previsao-disponibilidade-inicial" class="block text-sm font-medium text-gray-700 mb-1">Previsão Disponibilidade - Inicial</label>
+                        <input type="date" id="modal-previsao-disponibilidade-inicial" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0">
+                        <label for="modal-previsao-disponibilidade-reagendado" class="block text-sm font-medium text-gray-700 mb-1 mt-2">Previsão Disponibilidade - Reagendado</label>
+                        <input type="date" id="modal-previsao-disponibilidade-reagendado" class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0">
+                        <label for="modal-disponibilidade-total" class="block text-sm font-medium text-gray-700 mb-1 mt-2">Disponibilidade Total</label>
+                        <input type="date" id="modal-disponibilidade-total" class="w-full p-3 border rounded-lg bg-gray-100 focus:ring-0" readonly>
+                    </div>
+
+                    <div><label for="modal-obs" class="block text-sm font-medium text-gray-700 mb-1">Observação</label><textarea id="modal-obs" rows="4" placeholder="Adicione uma observação..." class="w-full p-3 border rounded-lg focus:border-blue-500 focus:ring-0"></textarea></div>
+                </div>
+            </div>
+            
+            <div class="flex justify-between items-center mt-auto pt-6 border-t flex-shrink-0">
                 <button id="modal-btn-limpar" class="bg-transparent text-gray-700 font-semibold py-2 px-6 rounded-lg hover:bg-gray-100 border border-gray-300 transition">Limpar Status</button>
                 <div class="flex gap-4">
                     <button id="modal-btn-cancelar" class="bg-transparent text-gray-700 font-semibold py-2 px-6 rounded-lg hover:bg-gray-100 border border-gray-300 transition">Cancelar</button>
@@ -311,9 +346,9 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONFIGURAÇÕES GLOBAIS ---
-    const ETAPAS_ITEM = [ { id: 'alteracaoProjeto', nome: 'Alterações' }, { id: 'projetoFinal', nome: 'Projeto Final' }, { id: 'emProducao', nome: 'PRODUÇÃO' }, { id: 'entregue', nome: 'Entrega' }, { id: 'instalado', nome: 'Instalação' }];
+    const ETAPAS_ITEM = [ { id: 'alteracaoProjeto', nome: 'ORÇAMENTO' }, { id: 'projetoFinal', nome: 'Projeto Final' }, { id: 'emProducao', nome: 'PRODUÇÃO' }, { id: 'entregue', nome: 'Entrega' }, { id: 'instalado', nome: 'Instalação' }];
     const STATUS_ITEM_MAP = { 'nao-iniciado': { texto: 'Não iniciado', classe: 'status-item-nao-iniciado' }, 'iniciado': { texto: 'Iniciado', classe: 'status-item-iniciado' }, 'parado': { texto: 'Parado', classe: 'status-item-parado' }, 'concluido': { texto: 'Concluído', classe: 'status-item-concluido' }, 'cancelado': { texto: 'Cancelado', classe: 'status-item-cancelado' }, 'default': { texto: 'Não iniciado', classe: 'status-item-nao-iniciado' } };
-    const STATUS_MATERIAL_MAP = { 'emCotacao': { texto: 'Em cotação', classe: 'status-mat-branco' }, 'compraParcial': { texto: 'Compra Parcial', classe: 'status-mat-amarelo' }, 'compraTotal': { texto: 'Compra Total', classe: 'status-mat-verde' }, 'recebidoParcial': { texto: 'Recebido Parcial', classe: 'status-mat-amarelo' }, 'recebidoTotal': { texto: 'Recebido Total', classe: 'status-mat-verde' }, 'conferidoFalta': { texto: 'Conferido Falta', classe: 'status-mat-vermelho' }, 'conferidoParcial': { texto: 'Conferido Parcial', classe: 'status-mat-amarelo' }, 'conferidoTotal': { texto: 'Conferido Total', classe: 'status-mat-verde' }, 'alocadoParcial': { texto: 'Alocado Parcial', classe: 'status-mat-amarelo' }, 'alocadoTotal': { texto: 'Alocado Total', classe: 'status-mat-verde' }, 'cancelado': { texto: 'Cancelado', classe: 'status-mat-preto' }, 'default': { texto: 'Em cotação', classe: 'status-mat-branco' } };
+    const STATUS_MATERIAL_MAP = { 'conferenciaEstoque': { texto: 'Conferência Estoque', classe: 'status-mat-conferenciaEstoque' }, 'emCotacao': { texto: 'Em cotação', classe: 'status-mat-emCotacao' }, 'compraParcial': { texto: 'Compra Parcial', classe: 'status-mat-compraParcial' }, 'compraTotal': { texto: 'Compra Total', classe: 'status-mat-compraTotal' }, 'recebidoParcial': { texto: 'Recebido Parcial', classe: 'status-mat-recebidoParcial' }, 'recebidoTotal': { texto: 'Recebido Total', classe: 'status-mat-recebidoTotal' }, 'conferidoFalta': { texto: 'Conferido Falta', classe: 'status-mat-conferidoFalta' }, 'conferidoParcial': { texto: 'Conferido Parcial', classe: 'status-mat-conferidoParcial' }, 'conferidoTotal': { texto: 'Conferido Total', classe: 'status-mat-conferidoTotal' }, 'alocadoParcial': { texto: 'Alocado Parcial', classe: 'status-mat-alocadoParcial' }, 'alocadoTotal': { texto: 'Alocado Total', classe: 'status-mat-alocadoTotal' }, 'cancelado': { texto: 'Cancelado', classe: 'status-mat-cancelado' }, 'default': { texto: 'Em cotação', classe: 'status-mat-emCotacao' } };
     const TIPO_ITEM_STYLE_MAP = { 'Projeto': 'bg-blue-100 text-blue-800', 'Orçamento': 'bg-green-100 text-green-800', 'Terceiros': 'bg-purple-100 text-purple-800', 'Compra Inicial': 'bg-orange-100 text-orange-800' };
 
     // --- VARIÁVEIS DE ESTADO ---
@@ -392,12 +427,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const tipoItemFiltro = filtros.tipoItem || [];
         const statusMaterialFiltro = filtros.statusMaterial || [];
         const statusItemFiltros = filtros.statusItem || {};
-        const temFiltroDeItem = tipoItemFiltro.length > 0 || statusMaterialFiltro.length > 0 || Object.values(statusItemFiltros).some(v => v !== 'todos');
+        const estoqueFiltro = filtros.estoque;
+        const temFiltroDeItem = tipoItemFiltro.length > 0 || statusMaterialFiltro.length > 0 || estoqueFiltro || Object.values(statusItemFiltros).some(v => v !== 'todos');
+        
         if (temFiltroDeItem) {
             obrasFiltradas = obrasFiltradas.map(obra => {
                 if (!obra.itens) return { ...obra, itens: [] };
                 const itensFiltrados = obra.itens.filter(item => {
                     if (tipoItemFiltro.length > 0 && !tipoItemFiltro.includes(item.tipo)) return false;
+                    
                     for (const etapaId in statusItemFiltros) {
                         const statusFiltro = statusItemFiltros[etapaId];
                         if (statusFiltro !== 'todos') {
@@ -405,10 +443,16 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (itemStatus !== statusFiltro) return false;
                         }
                     }
-                    if (statusMaterialFiltro.length > 0) {
-                        const temMaterialComStatus = (item.materiais || []).some(mat => statusMaterialFiltro.includes(mat.statusInfo?.status || 'emCotacao'));
-                        if (!temMaterialComStatus) return false;
+                    
+                    if (statusMaterialFiltro.length > 0 || estoqueFiltro) {
+                        const temMaterialCorrespondente = (item.materiais || []).some(mat => {
+                            const statusMatch = statusMaterialFiltro.length === 0 || statusMaterialFiltro.includes(mat.statusInfo?.status || 'emCotacao');
+                            const estoqueMatch = !estoqueFiltro || mat.statusInfo?.statusDates?.conferenciaEstoque;
+                            return statusMatch && estoqueMatch;
+                        });
+                        if (!temMaterialCorrespondente) return false;
                     }
+                    
                     return true;
                 });
                 return { ...obra, itens: itensFiltrados };
@@ -528,25 +572,35 @@ document.addEventListener('DOMContentLoaded', () => {
         if (item.tipo === 'Compra Inicial') return `<td class="p-3 text-center text-gray-300">-</td>`;
         if ((item.tipo === 'Projeto' || item.tipo === 'Terceiros') && etapa.id === 'alteracaoProjeto') return `<td class="p-3 text-center text-gray-300">-</td>`;
         if (item.tipo === 'Orçamento' && etapa.id !== 'alteracaoProjeto') return `<td class="p-3 text-center text-gray-300">-</td>`;
+        
         const statusInfo = item.etapas[etapa.id];
-        const statusData = statusInfo ? STATUS_ITEM_MAP[statusInfo.status] : STATUS_ITEM_MAP['default'];
+        const statusData = statusInfo ? STATUS_ITEM_MAP[statusInfo.status] || STATUS_ITEM_MAP['default'] : STATUS_ITEM_MAP['default'];
         const dataFormatada = statusInfo?.data ? formatarData(statusInfo.data) : '';
-        const prazoFormatado = statusInfo?.prazoConclusaoInicial ? formatarData(statusInfo.prazoConclusaoInicial) : '';
-        const conclusaoEfetivaFormatada = (etapa.id === 'emProducao' && statusInfo?.conclusaoEfetiva) ? formatarData(statusInfo.conclusaoEfetiva) : '';
+        const prazoFormatado = statusInfo?.prazoConclusaoReagendado ? formatarData(statusInfo.prazoConclusaoReagendado) : (statusInfo?.prazoConclusaoInicial ? formatarData(statusInfo.prazoConclusaoInicial) : '');
+
+        let dataFinalFormatada = '';
+        if(etapa.id === 'alteracaoProjeto' || etapa.id === 'projetoFinal') dataFinalFormatada = statusInfo?.conclusaoFinal ? formatarData(statusInfo.conclusaoFinal) : '';
+        if(etapa.id === 'emProducao') dataFinalFormatada = statusInfo?.conclusaoEfetiva ? formatarData(statusInfo.conclusaoEfetiva) : '';
+        if(etapa.id === 'entregue') dataFinalFormatada = statusInfo?.entregaFinal ? formatarData(statusInfo.entregaFinal) : '';
+        if(etapa.id === 'instalado') dataFinalFormatada = statusInfo?.instalacaoFinal ? formatarData(statusInfo.instalacaoFinal) : '';
+        
         let statusTextStyle = '';
-        if (statusInfo?.prazoConclusaoInicial && statusInfo.status !== 'concluido' && statusInfo.status !== 'cancelado') {
+        if (prazoFormatado && statusInfo.status !== 'concluido' && statusInfo.status !== 'cancelado') {
             const hoje = new Date(); hoje.setHours(0,0,0,0);
-            const prazo = new Date(statusInfo.prazoConclusaoInicial + 'T00:00:00');
-            if (prazo < hoje) statusTextStyle = 'color: #dc2626; font-weight: bold;';
+            const prazoDate = new Date((statusInfo.prazoConclusaoReagendado || statusInfo.prazoConclusaoInicial) + 'T00:00:00');
+            if (prazoDate < hoje) statusTextStyle = 'color: #dc2626; font-weight: bold;';
         }
+
         let tooltipText = statusInfo?.observacao || 'Sem observações';
-        if (prazoFormatado !== '---') { tooltipText += `\nPrazo: ${prazoFormatado}`; }
+        if (prazoFormatado) { tooltipText += `\nPrazo: ${prazoFormatado}`; }
+        if(dataFinalFormatada) { tooltipText += `\nConclusão: ${dataFinalFormatada}`;}
+
         return `<td class="p-3 text-center">
             <div class="status-badge rounded-lg p-2 text-sm font-semibold ${statusData.classe}" data-obra-id="${obraId}" data-item-id="${item.id}" data-etapa-id="${etapa.id}" title="${tooltipText}">
                 <span style="${statusTextStyle}">${statusData.texto}</span>
                 ${dataFormatada ? `<div class="text-xs font-normal">Data: ${dataFormatada}</div>` : ''}
-                ${conclusaoEfetivaFormatada ? `<div class="text-xs font-normal" style="color: #166534; font-weight: bold;">Concluído: ${conclusaoEfetivaFormatada}</div>` : ''}
-                ${prazoFormatado !== '---' ? `<div class="text-xs font-normal">Prazo: ${prazoFormatado}</div>` : ''}
+                ${dataFinalFormatada ? `<div class="text-xs font-normal" style="color: #166534; font-weight: bold;">Final: ${dataFinalFormatada}</div>` : ''}
+                ${prazoFormatado ? `<div class="text-xs font-normal">Prazo: ${prazoFormatado}</div>` : ''}
             </div>
         </td>`;
     };
@@ -618,7 +672,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderizarMateriais = (obra, item) => {
         let additionalHeaders = '', additionalInputsHtml = '';
         if (item.tipo === 'Compra Inicial' || item.tipo === 'Projeto') {
-            additionalHeaders = `<th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Qtde Orçada</th><th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Qtde Disponível</th><th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">%</th>`;
+            additionalHeaders = `<th class="p-2 text-center text-xs font-semibold text-gray-500">Estoque</th><th class="p-2 text-left text-xs font-semibold text-gray-500">Orçado</th><th class="p-2 text-left text-xs font-semibold text-gray-500">Disp.</th><th class="p-2 text-center text-xs font-semibold text-gray-500">%</th>`;
             additionalInputsHtml = `<input type="number" placeholder="Qtde Orçada" class="input-material-qtde-orcada flex-grow p-2 border rounded-md focus:border-blue-500 focus:ring-0" data-item-id="${item.id}"><input type="number" placeholder="Qtde Disponível" class="input-material-qtde-disponivel flex-grow p-2 border rounded-md focus:border-blue-500 focus:ring-0" data-item-id="${item.id}">`;
         }
         const renderAdditionalCells = (mat) => {
@@ -626,13 +680,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 const qtdeOrcada = parseFloat(mat.qtdeOrcada) || 0, qtdeDisponivel = parseFloat(mat.qtdeDisponivel) || 0;
                 const percentual = qtdeOrcada > 0 ? Math.round((qtdeDisponivel / qtdeOrcada) * 100) : 0;
                 const barWidth = Math.min(100, percentual); let hue = (barWidth / 100) * 120;
-                return `<td class="p-2 text-gray-600">${mat.qtdeOrcada || ''}</td><td class="p-2 text-gray-600">${mat.qtdeDisponivel || ''}</td><td class="p-2"><div class="progress-bar-container bg-gray-300 rounded-full h-4 w-full"><div class="h-full rounded-full transition-all duration-500" style="width: ${barWidth}%; background-color: hsl(${hue}, 80%, 40%);"></div><span class="progress-bar-text text-xs font-bold">${percentual}%</span></div></td>`;
+                const isEstoqueChecked = mat.statusInfo?.statusDates?.conferenciaEstoque ? 'checked' : '';
+                return `<td class="p-2 text-center align-middle"><input type="checkbox" class="h-4 w-4 rounded" ${isEstoqueChecked} disabled></td><td class="p-2 text-gray-600">${mat.qtdeOrcada || ''}</td><td class="p-2 text-gray-600">${mat.qtdeDisponivel || ''}</td><td class="p-2"><div class="progress-bar-container bg-gray-300 rounded-full h-4 w-full"><div class="h-full rounded-full transition-all duration-500" style="width: ${barWidth}%; background-color: hsl(${hue}, 80%, 40%);"></div><span class="progress-bar-text text-xs font-bold">${percentual}%</span></div></td>`;
             } return '';
         };
-        return `<tr class="materiais-row"><td colspan="100%" class="bg-gray-100 p-4"><div class="p-4"><h4 class="font-bold text-gray-700 mb-3">Materiais: ${item.codigo} - ${item.descricao}</h4><div class="table-container"><table class="min-w-full bg-white rounded-lg"><thead><tr class="border-b"><th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Tipo</th><th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Descrição</th>${additionalHeaders}<th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Prev. Inicial</th><th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Prev. Reag.</th><th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">Status</th><th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">Ação</th></tr></thead><tbody>
-                ${(item.materiais || []).map(mat => {
+        
+        let materiaisParaRenderizar = item.materiais || [];
+        const statusMaterialFiltro = filtros.statusMaterial || [];
+        const estoqueFiltro = filtros.estoque;
+
+        if (statusMaterialFiltro.length > 0 || estoqueFiltro) {
+            materiaisParaRenderizar = materiaisParaRenderizar.filter(mat => {
+                const statusMatch = statusMaterialFiltro.length === 0 || statusMaterialFiltro.includes(mat.statusInfo?.status || 'emCotacao');
+                const estoqueMatch = !estoqueFiltro || mat.statusInfo?.statusDates?.conferenciaEstoque;
+                return statusMatch && estoqueMatch;
+            });
+        }
+
+        return `<tr class="materiais-row"><td colspan="100%" class="bg-gray-100 p-4"><div class="p-4"><h4 class="font-bold text-gray-700 mb-3">Materiais: ${item.codigo} - ${item.descricao}</h4><div class="table-container"><table class="min-w-full bg-white rounded-lg"><thead><tr class="border-b"><th class="p-2 text-left text-xs font-semibold text-gray-500">Tipo</th><th class="p-2 text-left text-xs font-semibold text-gray-500">Descrição</th>${additionalHeaders}<th class="p-2 text-left text-xs font-semibold text-gray-500">Prev. Inicial</th><th class="p-2 text-left text-xs font-semibold text-gray-500">Prev. Reag.</th><th class="p-2 text-left text-xs font-semibold text-gray-500">Disp. Total</th><th class="p-2 text-center text-xs font-semibold text-gray-500">Status</th><th class="p-2 text-center text-xs font-semibold text-gray-500">Ação</th></tr></thead><tbody>
+                ${(materiaisParaRenderizar).map(mat => {
                     const statusInfo = mat.statusInfo || {}, statusData = statusInfo.status ? STATUS_MATERIAL_MAP[statusInfo.status] : STATUS_MATERIAL_MAP['default'];
-                    return `<tr class="border-b"><td class="p-2 font-medium text-gray-800">${mat.tipo}</td><td class="p-2 text-gray-600">${mat.descricao}</td>${renderAdditionalCells(mat)}<td class="p-2 text-gray-600">${formatarData(statusInfo.previsaoDisponibilidadeInicial)}</td><td class="p-2 text-gray-600">${formatarData(statusInfo.previsaoDisponibilidadeReagendado)}</td><td class="p-2 text-center"><div class="status-badge rounded-md ${statusData.classe} material-status-badge" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}" title="${statusInfo.observacao || ''}">${statusData.texto}</div></td><td class="p-2"><div class="flex justify-center items-center gap-3"><button title="Alterar Material" class="btn-alterar-material action-btn bg-yellow-400 text-white" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg></button><button title="Excluir Material" class="btn-excluir-material action-btn bg-red-500 text-white" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></button></div></td></tr>`;
+                    return `<tr class="border-b"><td class="p-2 font-medium text-gray-800">${mat.tipo}</td><td class="p-2 text-gray-600">${mat.descricao}</td>${renderAdditionalCells(mat)}<td class="p-2 text-gray-600">${formatarData(statusInfo.previsaoDisponibilidadeInicial)}</td><td class="p-2 text-gray-600">${formatarData(statusInfo.previsaoDisponibilidadeReagendado)}</td><td class="p-2 text-gray-600">${formatarData(statusInfo.disponibilidadeTotal)}</td><td class="p-2 text-center"><div class="status-badge rounded-md ${statusData.classe} material-status-badge" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}" title="${statusInfo.observacao || ''}">${statusData.texto}</div></td><td class="p-2"><div class="flex justify-center items-center gap-3"><button title="Alterar Material" class="btn-alterar-material action-btn bg-yellow-400 text-white" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg></button><button title="Excluir Material" class="btn-excluir-material action-btn bg-red-500 text-white" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></button></div></td></tr>`;
                 }).join('')}
                 </tbody></table></div><div class="mt-4 flex flex-col sm:flex-row gap-2 flex-wrap items-center"><input type="text" placeholder="Tipo (ex: Perfil)" class="input-material-tipo flex-grow p-2 border rounded-md focus:border-blue-500 focus:ring-0" data-item-id="${item.id}"><input type="text" placeholder="Descrição (ex: PVC Branco)" class="input-material-desc flex-grow p-2 border rounded-md focus:border-blue-500 focus:ring-0" data-item-id="${item.id}">${additionalInputsHtml}<button class="btn-add-material bg-indigo-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-600" data-obra-id="${obra.id}" data-item-id="${item.id}">Adicionar</button><label for="upload-materiais-${item.id}" class="bg-teal-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-teal-600 cursor-pointer">Importar Material</label><input type="file" id="upload-materiais-${item.id}" class="hidden" accept=".xlsx, .xls" data-obra-id="${obra.id}" data-item-id="${item.id}"></div></div></td></tr>`;
     }
@@ -644,54 +712,136 @@ document.addEventListener('DOMContentLoaded', () => {
         const item = obra.itens.find(p => p.id === itemId); if (!item) return;
         const isMaterial = !!materialId;
         const targetItem = isMaterial ? (item.materiais || []).find(m => m.id === materialId) : item; if (!targetItem) return;
+        
+        const statusContainer = document.getElementById('modal-status-container');
+        statusContainer.innerHTML = ''; 
+
+        // Limpa listeners antigos para evitar duplicação
+        const newStatusContainer = statusContainer.cloneNode(true);
+        statusContainer.parentNode.replaceChild(newStatusContainer, statusContainer);
+
         const statusMap = isMaterial ? STATUS_MATERIAL_MAP : STATUS_ITEM_MAP;
-        const statusSelect = document.getElementById('modal-status');
-        statusSelect.innerHTML = Object.keys(statusMap).filter(key => key !== 'default').map(key => `<option value="${key}">${statusMap[key].texto}</option>`).join('');
+        
+        let itemStatus = isMaterial ? (targetItem.statusInfo || {}) : (targetItem.etapas[etapaId] || {});
+        let statusAtual = itemStatus.status || (isMaterial ? 'conferenciaEstoque' : 'nao-iniciado');
+        
+        let statusDates = itemStatus.statusDates || {};
+        if (!statusDates[statusAtual] && itemStatus.data) {
+             statusDates[statusAtual] = itemStatus.data;
+        }
+
+        Object.keys(statusMap).filter(key => key !== 'default').forEach(key => {
+            const statusInfo = statusMap[key];
+            const isChecked = statusAtual === key;
+            const dateValue = statusDates[key] || (isChecked ? itemStatus.data : '') || '';
+            
+            const elementHtml = `
+                <div class="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+                    <div class="flex items-center">
+                        <input type="radio" id="status-radio-${key}" name="modal-status-radio" value="${key}" class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500" ${isChecked ? 'checked' : ''}>
+                        <label for="status-radio-${key}" class="ml-3 text-sm font-medium text-gray-800">${statusInfo.texto}</label>
+                    </div>
+                    <input type="date" value="${dateValue}" class="p-1 border rounded-md text-sm w-36 status-date-input" data-status-key="${key}">
+                </div>
+            `;
+            newStatusContainer.innerHTML += elementHtml;
+        });
+
         document.getElementById('modal-header').textContent = `Atualizar Status de ${isMaterial ? 'Material' : 'Item'}`;
         document.getElementById('modal-item-nome').textContent = isMaterial ? `${targetItem.tipo}: ${targetItem.descricao}` : `${targetItem.codigo}: ${targetItem.descricao}`;
+
         const prazoContainer = document.getElementById('modal-prazo-container');
         const previsaoContainer = document.getElementById('modal-previsao-container');
         const conclusaoEfetivaContainer = document.getElementById('modal-conclusao-efetiva-container');
-        let itemStatus = {};
+        const conclusaoFinalContainer = document.getElementById('modal-conclusao-final-container');
+        const entregaFinalContainer = document.getElementById('modal-entrega-final-container');
+        const instalacaoFinalContainer = document.getElementById('modal-instalacao-final-container');
+
+        // Resetar visibilidade de todos os containers especiais
+        [prazoContainer, previsaoContainer, conclusaoEfetivaContainer, conclusaoFinalContainer, entregaFinalContainer, instalacaoFinalContainer].forEach(el => el.classList.add('hidden'));
+
+        // LÓGICA DE AUTOMAÇÃO DE DATAS
+        const updateFinalDates = () => {
+            const selectedStatusRadio = newStatusContainer.querySelector('input[name="modal-status-radio"]:checked');
+            if (!selectedStatusRadio) return;
+            const selectedStatus = selectedStatusRadio.value;
+
+            if (isMaterial) {
+                const alocadoTotalDateInput = newStatusContainer.querySelector('.status-date-input[data-status-key="alocadoTotal"]');
+                const disponibilidadeTotalInput = document.getElementById('modal-disponibilidade-total');
+                disponibilidadeTotalInput.value = (selectedStatus === 'alocadoTotal') ? alocadoTotalDateInput.value : '';
+            } else { // É um ITEM
+                const concluidoDateInput = newStatusContainer.querySelector('.status-date-input[data-status-key="concluido"]');
+                const updateValue = (selectedStatus === 'concluido') ? concluidoDateInput.value : '';
+                
+                if (etapaId === 'alteracaoProjeto' || etapaId === 'projetoFinal') {
+                    document.getElementById('modal-conclusao-final').value = updateValue;
+                } else if (etapaId === 'emProducao') {
+                    document.getElementById('modal-conclusao-efetiva').value = updateValue;
+                } else if (etapaId === 'entregue') {
+                    document.getElementById('modal-entrega-final').value = updateValue;
+                } else if (etapaId === 'instalado') {
+                    document.getElementById('modal-instalacao-final').value = updateValue;
+                }
+            }
+        };
+
+        newStatusContainer.addEventListener('change', (e) => {
+            if (e.target.name === 'modal-status-radio') {
+                updateFinalDates();
+            }
+        });
+        newStatusContainer.addEventListener('input', (e) => {
+            if (e.target.classList.contains('status-date-input')) {
+                const statusKey = e.target.dataset.statusKey;
+                if ((isMaterial && statusKey === 'alocadoTotal') || (!isMaterial && statusKey === 'concluido')) {
+                    updateFinalDates();
+                }
+            }
+        });
+
         if (isMaterial) {
             document.getElementById('modal-etapa-container').style.display = 'none';
-            itemStatus = targetItem.statusInfo || {};
-            prazoContainer.classList.add('hidden');
             previsaoContainer.classList.remove('hidden');
-            conclusaoEfetivaContainer.classList.add('hidden');
+
             const previsaoInicialInput = document.getElementById('modal-previsao-disponibilidade-inicial');
             previsaoInicialInput.value = itemStatus.previsaoDisponibilidadeInicial || '';
             previsaoInicialInput.disabled = !!itemStatus.previsaoDisponibilidadeInicial;
+            
             document.getElementById('modal-previsao-disponibilidade-reagendado').value = itemStatus.previsaoDisponibilidadeReagendado || '';
-            const qtdeOrcada = parseFloat(targetItem.qtdeOrcada) || 0;
-            const qtdeDisponivel = parseFloat(targetItem.qtdeDisponivel) || 0;
-            const podeAlocarTotal = qtdeOrcada > 0 && qtdeOrcada === qtdeDisponivel;
-            const alocadoTotalOption = statusSelect.querySelector('option[value="alocadoTotal"]');
-            if (alocadoTotalOption) {
-                alocadoTotalOption.disabled = !podeAlocarTotal;
-                alocadoTotalOption.textContent = podeAlocarTotal ? "Alocado Total" : "Alocado Total (Qtde incompatível)";
-            }
-        } else {
+            document.getElementById('modal-disponibilidade-total').value = itemStatus.disponibilidadeTotal || '';
+        } else { // É um ITEM
             document.getElementById('modal-etapa-container').style.display = 'inline';
             const etapa = ETAPAS_ITEM.find(e => e.id === etapaId);
             document.getElementById('modal-etapa-nome').textContent = etapa.nome;
-            itemStatus = targetItem.etapas[etapaId] || {};
             prazoContainer.classList.remove('hidden');
-            previsaoContainer.classList.add('hidden');
+
             const prazoInicialInput = document.getElementById('modal-prazo-inicial');
             prazoInicialInput.value = itemStatus.prazoConclusaoInicial || '';
             prazoInicialInput.disabled = !!itemStatus.prazoConclusaoInicial;
             document.getElementById('modal-prazo-reagendado').value = itemStatus.prazoConclusaoReagendado || '';
-            if (etapaId === 'emProducao') {
+
+            // Mostrar campos de data final específicos por etapa e preencher com dados salvos
+            if (etapaId === 'alteracaoProjeto' || etapaId === 'projetoFinal') {
+                conclusaoFinalContainer.classList.remove('hidden');
+                document.getElementById('modal-conclusao-final').value = itemStatus.conclusaoFinal || '';
+            } else if (etapaId === 'emProducao') {
                 conclusaoEfetivaContainer.classList.remove('hidden');
                 document.getElementById('modal-conclusao-efetiva').value = itemStatus.conclusaoEfetiva || '';
-            } else {
-                conclusaoEfetivaContainer.classList.add('hidden');
+            } else if (etapaId === 'entregue') {
+                entregaFinalContainer.classList.remove('hidden');
+                document.getElementById('modal-entrega-final').value = itemStatus.entregaFinal || '';
+            } else if (etapaId === 'instalado') {
+                instalacaoFinalContainer.classList.remove('hidden');
+                document.getElementById('modal-instalacao-final').value = itemStatus.instalacaoFinal || '';
             }
         }
-        statusSelect.value = itemStatus.status || Object.keys(statusMap).find(k => k !== 'default');
-        document.getElementById('modal-data').value = itemStatus.data || new Date().toISOString().split('T')[0];
+        
         document.getElementById('modal-obs').value = itemStatus.observacao || '';
+        
+        // Chama a função de automação para garantir que o estado inicial esteja correto
+        updateFinalDates();
+        
         modal.classList.remove('hidden');
         setTimeout(() => { modal.classList.remove('opacity-0'); }, 10);
     };
@@ -702,24 +852,71 @@ document.addEventListener('DOMContentLoaded', () => {
         const { obraId, itemId, etapaId, materialId } = edicaoAtual;
         const obra = obras.find(o => o.id === obraId);
         const itemIndex = obra.itens.findIndex(p => p.id === itemId);
-        const novoStatus = {
-            status: document.getElementById('modal-status').value,
-            data: document.getElementById('modal-data').value,
+        
+        const selectedRadio = document.querySelector('input[name="modal-status-radio"]:checked');
+        if (!selectedRadio) {
+            alert('Por favor, selecione um status.');
+            return;
+        }
+
+        const novoStatus = selectedRadio.value;
+        const dataInputs = document.querySelectorAll('.status-date-input');
+        
+        let dataDoStatus = '';
+        const todasAsDatas = {};
+
+        dataInputs.forEach(input => {
+            const statusKey = input.dataset.statusKey;
+            if(input.value) {
+                todasAsDatas[statusKey] = input.value;
+            }
+            if (statusKey === novoStatus) {
+                dataDoStatus = input.value;
+            }
+        });
+        
+        const dadosParaSalvar = {
+            status: novoStatus,
+            data: dataDoStatus,
+            statusDates: todasAsDatas,
             observacao: document.getElementById('modal-obs').value.trim()
         };
+
         const obraDocRef = doc(db, 'obras', obraId);
+
         if (materialId) {
             const materialIndex = obra.itens[itemIndex].materiais.findIndex(m => m.id === materialId);
             const material = obra.itens[itemIndex].materiais[materialIndex];
-            if (!document.getElementById('modal-previsao-disponibilidade-inicial').disabled) novoStatus.previsaoDisponibilidadeInicial = document.getElementById('modal-previsao-disponibilidade-inicial').value;
-            novoStatus.previsaoDisponibilidadeReagendado = document.getElementById('modal-previsao-disponibilidade-reagendado').value;
-            material.statusInfo = {...material.statusInfo, ...novoStatus};
-        } else {
-            if (!document.getElementById('modal-prazo-inicial').disabled) novoStatus.prazoConclusaoInicial = document.getElementById('modal-prazo-inicial').value;
-            novoStatus.prazoConclusaoReagendado = document.getElementById('modal-prazo-reagendado').value;
-            if (etapaId === 'emProducao') novoStatus.conclusaoEfetiva = document.getElementById('modal-conclusao-efetiva').value;
-            obra.itens[itemIndex].etapas[etapaId] = {...obra.itens[itemIndex].etapas[etapaId], ...novoStatus};
+            
+            if (!document.getElementById('modal-previsao-disponibilidade-inicial').disabled) {
+                dadosParaSalvar.previsaoDisponibilidadeInicial = document.getElementById('modal-previsao-disponibilidade-inicial').value;
+            }
+            dadosParaSalvar.previsaoDisponibilidadeReagendado = document.getElementById('modal-previsao-disponibilidade-reagendado').value;
+            dadosParaSalvar.disponibilidadeTotal = document.getElementById('modal-disponibilidade-total').value;
+            
+            const oldStatusInfo = material.statusInfo || {};
+            material.statusInfo = { ...oldStatusInfo, ...dadosParaSalvar };
+
+        } else { // É um ITEM
+            if (!document.getElementById('modal-prazo-inicial').disabled) {
+                dadosParaSalvar.prazoConclusaoInicial = document.getElementById('modal-prazo-inicial').value;
+            }
+            dadosParaSalvar.prazoConclusaoReagendado = document.getElementById('modal-prazo-reagendado').value;
+            
+            // Salvar os campos de data final específicos de cada etapa
+            if (etapaId === 'alteracaoProjeto' || etapaId === 'projetoFinal') {
+                dadosParaSalvar.conclusaoFinal = document.getElementById('modal-conclusao-final').value;
+            } else if (etapaId === 'emProducao') {
+                dadosParaSalvar.conclusaoEfetiva = document.getElementById('modal-conclusao-efetiva').value;
+            } else if (etapaId === 'entregue') {
+                dadosParaSalvar.entregaFinal = document.getElementById('modal-entrega-final').value;
+            } else if (etapaId === 'instalado') {
+                dadosParaSalvar.instalacaoFinal = document.getElementById('modal-instalacao-final').value;
+            }
+            
+            obra.itens[itemIndex].etapas[etapaId] = {...obra.itens[itemIndex].etapas[etapaId], ...dadosParaSalvar};
         }
+
         await updateDoc(obraDocRef, { itens: obra.itens });
         fecharModal();
     };
@@ -732,14 +929,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const obraDocRef = doc(db, 'obras', obraId);
             if (materialId) {
                 const materialIndex = obra.itens[itemIndex].materiais.findIndex(m => m.id === materialId);
-                obra.itens[itemIndex].materiais[materialIndex].statusInfo = {};
+                obra.itens[itemIndex].materiais[materialIndex].statusInfo = {}; // Limpa tudo
             } else {
-                delete obra.itens[itemIndex].etapas[etapaId];
+                delete obra.itens[itemIndex].etapas[etapaId]; // Remove a etapa
             }
             await updateDoc(obraDocRef, { itens: obra.itens });
             fecharModal();
         }
     };
+
 
     const abrirModalAlterarItem = (obraId, itemId) => {
         edicaoItemAtual = { obraId, itemId };
@@ -936,14 +1134,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelector(`.input-add-item-codigo[data-obra-id="${obraId}"]`).value = ''; document.querySelector(`.input-add-item-descricao[data-obra-id="${obraId}"]`).value = '';
             } else { alert('Preencha o Código e a Descrição do item.'); }
         } else if (button.classList.contains('btn-add-material')) {
-            const tipoInput = document.querySelector(`.input-material-tipo[data-item-id="${itemId}"]`); const descInput = document.querySelector(`.input-material-desc[data-item-id="${itemId}"]`);
+            const tipoInput = document.querySelector(`.input-material-tipo[data-item-id="${itemId}"]`); 
+            const descInput = document.querySelector(`.input-material-desc[data-item-id="${itemId}"]`);
             if (tipoInput.value.trim() && descInput.value.trim()) {
-                const obra = obras.find(o => o.id === obraId); const item = obra.itens.find(p => p.id === itemId);
+                const obra = obras.find(o => o.id === obraId); 
+                const item = obra.itens.find(p => p.id === itemId);
                 const novoMaterial = { id: Date.now().toString(), tipo: tipoInput.value.trim(), descricao: descInput.value.trim(), statusInfo: {}};
-                if (item.tipo === 'Compra Inicial' || item.tipo === 'Projeto') { novoMaterial.qtdeOrcada = document.querySelector(`.input-material-qtde-orcada[data-item-id="${itemId}"]`).value.trim(); novoItem.qtdeDisponivel = document.querySelector(`.input-material-qtde-disponivel[data-item-id="${itemId}"]`).value.trim(); }
+                if (item.tipo === 'Compra Inicial' || item.tipo === 'Projeto') { 
+                    novoMaterial.qtdeOrcada = document.querySelector(`.input-material-qtde-orcada[data-item-id="${itemId}"]`).value.trim(); 
+                    novoMaterial.qtdeDisponivel = document.querySelector(`.input-material-qtde-disponivel[data-item-id="${itemId}"]`).value.trim(); 
+                }
                 item.materiais = [...(item.materiais || []), novoMaterial];
                 await updateDoc(doc(db, 'obras', obraId), { itens: obra.itens });
-                tipoInput.value = ''; descInput.value = '';
+                tipoInput.value = ''; 
+                descInput.value = '';
+                const qtdeOrcadaInput = document.querySelector(`.input-material-qtde-orcada[data-item-id="${itemId}"]`);
+                const qtdeDisponivelInput = document.querySelector(`.input-material-qtde-disponivel[data-item-id="${itemId}"]`);
+                if (qtdeOrcadaInput) qtdeOrcadaInput.value = '';
+                if (qtdeDisponivelInput) qtdeDisponivelInput.value = '';
             }
         } else if (button.classList.contains('btn-excluir-item')) {
             if (confirm('Tem certeza que deseja excluir este item?')) {
@@ -1050,6 +1258,14 @@ document.addEventListener('DOMContentLoaded', () => {
             abrirModal(obraId, itemId, etapaId, materialId);
         }
     });
+    
+    const toggleProjetoFieldsModal = (tipo) => {
+        const fieldsContainer = document.getElementById('edit-item-projeto-fields');
+        if (fieldsContainer) {
+            fieldsContainer.classList.toggle('hidden', tipo !== 'Projeto');
+            fieldsContainer.classList.toggle('space-y-4', tipo === 'Projeto');
+        }
+    };
 
     const toggleProjetoFields = (tipo, obraId) => {
         const fieldsContainer = document.getElementById(`add-item-projeto-fields-${obraId}`);
@@ -1074,14 +1290,18 @@ document.addEventListener('DOMContentLoaded', () => {
         let tipoCheckboxesHtml = `<div class="flex items-center"><input type="checkbox" id="filtro-tipo-todos" class="filtro-tipo-checkbox-todos h-4 w-4 rounded"><label for="filtro-tipo-todos" class="ml-2 text-sm font-semibold">Todos</label></div>`;
         tipos.forEach(tipo => { tipoCheckboxesHtml += `<div class="flex items-center"><input type="checkbox" id="filtro-tipo-${tipo}" value="${tipo}" class="filtro-tipo-checkbox h-4 w-4 rounded"><label for="filtro-tipo-${tipo}" class="ml-2 text-sm">${tipo}</label></div>`; });
         tipoItemContainer.innerHTML = tipoCheckboxesHtml;
+        
         const statusMaterialContainer = document.getElementById('filtro-status-material-container');
         const statusMateriais = Object.entries(STATUS_MATERIAL_MAP).filter(([key]) => key !== 'default');
         let matCheckboxesHtml = `<div class="flex items-center"><input type="checkbox" id="filtro-mat-todos" class="filtro-mat-checkbox-todos h-4 w-4 rounded"><label for="filtro-mat-todos" class="ml-2 text-sm font-semibold">Todos</label></div>`;
-        statusMateriais.forEach(([key, value]) => { matCheckboxesHtml += `<div class="flex items-center"><input type="checkbox" id="filtro-mat-${key}" value="${key}" class="filtro-mat-checkbox h-4 w-4 rounded"><label for="filtro-mat-${key}" class="ml-2 text-sm">${value.texto}</label></div>`; });
+        matCheckboxesHtml += `<div class="flex items-center"><input type="checkbox" id="filtro-mat-estoque" class="h-4 w-4 rounded"><label for="filtro-mat-estoque" class="ml-2 text-sm font-bold text-green-700 uppercase">CONFERIDO ESTOQUE</label></div>`;
+        statusMateriais.forEach(([key, value]) => { matCheckboxesHtml += `<div class="flex items-center"><input type="checkbox" id="filtro-mat-${key}" value="${key}" class="filtro-mat-status-checkbox h-4 w-4 rounded"><label for="filtro-mat-${key}" class="ml-2 text-sm">${value.texto}</label></div>`; });
         statusMaterialContainer.innerHTML = matCheckboxesHtml;
+        
         const filtrosStatusContainer = document.getElementById('filtros-status-item-container');
         filtrosStatusContainer.innerHTML = ETAPAS_ITEM.map(etapa => `<div><label for="filtro-status-${etapa.id}" class="text-sm font-medium text-gray-600">${etapa.nome}</label><select id="filtro-status-${etapa.id}" data-etapa-id="${etapa.id}" class="filtro-status-item w-full p-2 border rounded-lg mt-1"><option value="todos">Todos</option>${Object.entries(STATUS_ITEM_MAP).filter(([key]) => key !== 'default').map(([key, value]) => `<option value="${key}">${value.texto}</option>`).join('')}</select></div>`).join('');
-        filtros = { nomeObra: '', tipoItem: [], statusMaterial: [], statusItem: ETAPAS_ITEM.reduce((acc, etapa) => ({...acc, [etapa.id]: 'todos'}), {}) };
+        
+        filtros = { nomeObra: '', tipoItem: [], statusMaterial: [], estoque: false, statusItem: ETAPAS_ITEM.reduce((acc, etapa) => ({...acc, [etapa.id]: 'todos'}), {}) };
     };
 
     const adicionarListenersFiltros = () => {
@@ -1096,10 +1316,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         document.getElementById('filtro-status-material-container').addEventListener('change', (e) => {
             const target = e.target; if (target.type !== 'checkbox') return;
-            const todosCheckbox = document.getElementById('filtro-mat-todos'); const matCheckboxes = document.querySelectorAll('.filtro-mat-checkbox');
-            if (target.id === 'filtro-mat-todos') matCheckboxes.forEach(cb => cb.checked = target.checked); else todosCheckbox.checked = [...matCheckboxes].every(cb => cb.checked);
-            filtros.statusMaterial = [...document.querySelectorAll('.filtro-mat-checkbox:checked')].map(cb => cb.value);
+            const todosCheckbox = document.getElementById('filtro-mat-todos');
+            const statusCheckboxes = document.querySelectorAll('.filtro-mat-status-checkbox');
+            if (target.id === 'filtro-mat-todos') {
+                statusCheckboxes.forEach(cb => cb.checked = target.checked);
+            } else if (target.classList.contains('filtro-mat-status-checkbox')) {
+                todosCheckbox.checked = [...statusCheckboxes].every(cb => cb.checked);
+            }
+            filtros.statusMaterial = [...document.querySelectorAll('.filtro-mat-status-checkbox:checked')].map(cb => cb.value);
             if (todosCheckbox.checked) filtros.statusMaterial = [];
+            filtros.estoque = document.getElementById('filtro-mat-estoque').checked;
             aplicarFiltrosERenderizar();
         });
         document.querySelectorAll('.filtro-status-item').forEach(select => { select.addEventListener('change', (e) => { filtros.statusItem[e.target.dataset.etapaId] = e.target.value; aplicarFiltrosERenderizar(); }); });
