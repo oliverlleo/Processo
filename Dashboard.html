@@ -178,26 +178,15 @@
         itemDetailCloseBtn.addEventListener('click', fecharItemDetailModal);
         itemDetailModal.addEventListener('click', (e) => { if (e.target === itemDetailModal) fecharItemDetailModal(); });
 
-        const showMaterialDetailsForItem = (item) => {
-            const materials = (item.materiais || []).filter(mat => mat.statusInfo?.status !== 'cancelado');
-            const modalContentHtml = generateMaterialListHtml(materials);
-            abrirModal(`Materiais para: "${item.codigo || ''} - ${item.descricao || ''}"`, modalContentHtml);
-        };
-
         modalList.addEventListener('click', (e) => {
             if (currentModalType !== 'item') return;
-            
             const listItem = e.target.closest('li[data-index]');
             if (!listItem) return;
 
             const index = parseInt(listItem.dataset.index, 10);
             const selectedItem = currentModalItems[index];
 
-            if (!selectedItem) return;
-
-            if (e.target.closest('.material-badge-details')) {
-                showMaterialDetailsForItem(selectedItem);
-            } else {
+            if (selectedItem) {
                 abrirItemDetailModal(selectedItem);
             }
         });
@@ -457,44 +446,6 @@
             materialStatusChartInstance = new Chart(document.getElementById('material-status-chart').getContext('2d'), { type: 'bar', data: { labels: materialLabels.map(k => STATUS_MATERIAL_MAP[k]), datasets: [{ label: 'Quantidade', data: Object.values(materialStatusCounts), backgroundColor: backgroundColors }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { font: { size: 10 } } } }, onClick: (e, el) => handleChartClick(e, el, materialStatusChartInstance, 'material') } });
         };
         
-        const generateMaterialListHtml = (materials) => {
-            if (!materials || materials.length === 0) return '';
-            return materials.map(mat => {
-                const currentStatusKey = mat.statusInfo?.status || 'emCotacao';
-                const currentStatusText = STATUS_MATERIAL_MAP[currentStatusKey];
-                const statusBadge = `<span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${currentStatusText}</span>`;
-                
-                let dataDisponibilidadeHtml = '';
-                let dataInfo = null;
-                if (mat.statusInfo?.disponibilidadeTotal) {
-                    dataInfo = { label: 'Disponível em:', date: mat.statusInfo.disponibilidadeTotal };
-                } else if (mat.statusInfo?.previsaoDisponibilidadeReagendado) {
-                    dataInfo = { label: 'Prev. Reagendada:', date: mat.statusInfo.previsaoDisponibilidadeReagendado };
-                } else if (mat.statusInfo?.previsaoDisponibilidadeInicial) {
-                    dataInfo = { label: 'Prev. Inicial:', date: mat.statusInfo.previsaoDisponibilidadeInicial };
-                }
-
-                if (dataInfo) {
-                    const formattedDate = new Date(dataInfo.date + 'T00:00:00').toLocaleDateString('pt-BR');
-                    dataDisponibilidadeHtml = `<span>${dataInfo.label} <span class="font-medium text-blue-600">${formattedDate}</span></span>`;
-                } else {
-                    dataDisponibilidadeHtml = `<span></span>`;
-                }
-
-                return `<li class="p-3 rounded-md hover:bg-gray-100 border-b last:border-b-0">
-                            <div class="flex justify-between items-start">
-                                <p class="font-semibold text-gray-800 flex-1">${mat.tipo} - ${mat.descricao}</p>${statusBadge}
-                            </div>
-                            <div class="mt-2 text-sm grid grid-cols-1 sm:grid-cols-3 gap-x-4 text-gray-600">
-                                <span><strong>Qtd. Orçada:</strong> ${mat.qtdeOrcada || '-'}</span>
-                                <span><strong>Qtd. Disponível:</strong> ${mat.qtdeDisponivel || '-'}</span>
-                                ${dataDisponibilidadeHtml}
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">Item: ${mat.itemCodigo} | Obra: ${mat.obraNome}</p>
-                        </li>`;
-            }).join('');
-        };
-        
         const handleChartClick = (event, elements, chartInstance, chartType) => {
             if (elements.length === 0) return;
             const label = chartInstance.data.labels[elements[0].index];
@@ -527,7 +478,7 @@
                         let badgeClasses = 'bg-yellow-100 text-yellow-800';
                         if (percentual === 100) badgeClasses = 'bg-green-100 text-green-800';
                         else if (percentual === 0) badgeClasses = 'bg-red-100 text-red-800';
-                        badgeHtml = `<span class="${badgeClasses} text-xs font-semibold ml-3 px-2.5 py-0.5 rounded-full material-badge-details">${percentual}% Mat.</span>`;
+                        badgeHtml = `<span class="${badgeClasses} text-xs font-semibold ml-3 px-2.5 py-0.5 rounded-full">${percentual}% Mat.</span>`;
                     }
 
                     let dataProducaoTexto = '';
@@ -543,10 +494,10 @@
                     }
 
                     return `<li data-index="${index}" class="cursor-pointer p-3 rounded-md hover:bg-gray-100 transition-colors">
-                                <div class="flex justify-between items-center">
+                                <div class="flex justify-between items-center pointer-events-none">
                                     <p class="font-semibold text-gray-800">${item.codigo || ''} - ${item.descricao || ''}</p>${badgeHtml}
                                 </div>
-                                <div class="flex justify-between items-center mt-1 text-sm">
+                                <div class="flex justify-between items-center mt-1 text-sm pointer-events-none">
                                     <p class="text-gray-500">Obra: ${item.obraNome}</p>${dataProducaoTexto ? `<p class="font-medium text-blue-600">${dataProducaoTexto}</p>` : ''}
                                 </div>
                             </li>`;
@@ -566,7 +517,41 @@
                         });
                     });
                 });
-                modalContentHtml = generateMaterialListHtml(matchingMaterials);
+                modalContentHtml = matchingMaterials.length > 0 ? matchingMaterials.map(mat => {
+                    const currentStatusKey = mat.statusInfo?.status || 'emCotacao';
+                    const currentStatusText = STATUS_MATERIAL_MAP[currentStatusKey];
+                    const statusBadge = `<span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${currentStatusText}</span>`;
+                    
+                    let dataDisponibilidadeHtml = '';
+                    let dataInfo = null;
+
+                    if (mat.statusInfo?.disponibilidadeTotal) {
+                        dataInfo = { label: 'Disponível em:', date: mat.statusInfo.disponibilidadeTotal };
+                    } else if (mat.statusInfo?.previsaoDisponibilidadeReagendado) {
+                        dataInfo = { label: 'Prev. Reagendada:', date: mat.statusInfo.previsaoDisponibilidadeReagendado };
+                    } else if (mat.statusInfo?.previsaoDisponibilidadeInicial) {
+                        dataInfo = { label: 'Prev. Inicial:', date: mat.statusInfo.previsaoDisponibilidadeInicial };
+                    }
+
+                    if (dataInfo) {
+                        const formattedDate = new Date(dataInfo.date + 'T00:00:00').toLocaleDateString('pt-BR');
+                        dataDisponibilidadeHtml = `<span>${dataInfo.label} <span class="font-medium text-blue-600">${formattedDate}</span></span>`;
+                    } else {
+                        dataDisponibilidadeHtml = `<span></span>`;
+                    }
+
+                    return `<li class="p-3 rounded-md hover:bg-gray-100 border-b last:border-b-0">
+                                <div class="flex justify-between items-start">
+                                    <p class="font-semibold text-gray-800 flex-1">${mat.tipo} - ${mat.descricao}</p>${statusBadge}
+                                </div>
+                                <div class="mt-2 text-sm grid grid-cols-1 sm:grid-cols-3 gap-x-4 text-gray-600">
+                                    <span><strong>Qtd. Orçada:</strong> ${mat.qtdeOrcada || '-'}</span>
+                                    <span><strong>Qtd. Disponível:</strong> ${mat.qtdeDisponivel || '-'}</span>
+                                    ${dataDisponibilidadeHtml}
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Item: ${mat.itemCodigo} | Obra: ${mat.obraNome}</p>
+                            </li>`;
+                }).join('') : '';
             }
             abrirModal(`Detalhes para: "${label}"`, modalContentHtml);
         };
