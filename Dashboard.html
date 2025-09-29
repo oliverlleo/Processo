@@ -23,7 +23,7 @@
         }
         .progress-bar-bg { background-color: #e5e7eb; }
         .progress-bar-fill { transition: width 0.5s ease-in-out; }
-        #item-status-chart, #material-status-chart { cursor: pointer; }
+        #item-status-chart, #material-status-chart, #instalacao-status-chart { cursor: pointer; }
         .obra-card { border: 2px solid transparent; }
         .obra-selecionada {
             border-color: #2563eb;
@@ -62,7 +62,7 @@
             <div id="kpi-card-obras" class="kpi-card bg-white p-6 rounded-xl border border-gray-200 flex items-center gap-5"><div class="bg-blue-100 text-blue-600 rounded-full p-4 text-2xl"><i class="fas fa-ruler-combined"></i></div><div><p class="text-gray-500 text-sm font-medium">Medição - Atraso</p><p id="kpi-total-obras" class="text-3xl font-bold text-gray-800">...</p></div></div>
             <div id="kpi-card-pendentes" class="kpi-card bg-white p-6 rounded-xl border border-gray-200 flex items-center gap-5"><div class="bg-red-100 text-red-600 rounded-full p-4 text-2xl"><i class="fas fa-box-open"></i></div><div><p class="text-gray-500 text-sm font-medium">Materiais - Atraso</p><p id="kpi-materiais-pendentes" class="text-3xl font-bold text-gray-800">...</p></div></div>
             <div id="kpi-card-producao" class="kpi-card bg-white p-6 rounded-xl border border-gray-200 flex items-center gap-5"><div class="bg-green-100 text-green-600 rounded-full p-4 text-2xl"><i class="fas fa-th-large"></i></div><div><p class="text-gray-500 text-sm font-medium">Produção - Atraso</p><p id="kpi-progresso-geral" class="text-3xl font-bold text-gray-800">...</p></div></div>
-            <div id="kpi-card-atrasadas" class="kpi-card bg-white p-6 rounded-xl border border-gray-200 flex items-center gap-5"><div class="bg-yellow-100 text-yellow-600 rounded-full p-4 text-2xl"><i class="fas fa-home"></i></div><div><p class="text-gray-500 text-sm font-medium">Entregas - Atraso</p><p id="kpi-obras-atrasadas" class="text-3xl font-bold text-gray-800">...</p></div></div>
+            <div id="kpi-card-atrasadas" class="kpi-card bg-white p-6 rounded-xl border border-gray-200 flex items-center gap-5"><div class="bg-yellow-100 text-yellow-600 rounded-full p-4 text-2xl"><i class="fas fa-home"></i></div><div><p class="text-gray-500 text-sm font-medium">Finalização - Atraso</p><p id="kpi-obras-atrasadas" class="text-3xl font-bold text-gray-800">...</p></div></div>
         </section>
 
         <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -75,6 +75,10 @@
                 <div class="bg-white p-6 rounded-xl border border-gray-200">
                     <h3 class="text-lg font-bold text-red-600 mb-4">MATERIAIS</h3>
                     <div class="h-64 flex items-center justify-center"><canvas id="material-status-chart"></canvas></div>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-gray-200">
+                    <h3 class="text-lg font-bold text-red-600 mb-4">INSTALAÇÃO</h3>
+                    <div class="h-64 flex items-center justify-center"><canvas id="instalacao-status-chart"></canvas></div>
                 </div>
             </div>
         </main>
@@ -132,13 +136,14 @@
         let filtros = { tipoItem: [], statusItem: null, statusMaterial: null, kpi: null, obraId: null };
         let itemStatusChartInstance = null;
         let materialStatusChartInstance = null;
+        let instalacaoStatusChartInstance = null;
 
         let currentModalItems = [];
         let currentModalType = '';
 
         const TIPO_ITEM_MAP = { 'Compra Inicial': 'bg-orange-100 text-orange-800', 'Projeto': 'bg-blue-100 text-blue-800', 'Terceiros': 'bg-purple-100 text-purple-800' };
         const STATUS_ITEM_MAP = { 'nao-iniciado': 'Não iniciado', 'iniciado': 'Iniciado', 'parado': 'Parado', 'concluido': 'Concluído' };
-        const STATUS_ITEM_COLORS = { 'concluido': '#166534', 'iniciado': '#f59e0b', 'nao-iniciado': '#9ca3af', 'parado': '#ef4444' };
+        const STATUS_ITEM_COLORS = { 'concluido': '#16a34a', 'iniciado': '#f59e0b', 'nao-iniciado': '#9ca3af', 'parado': '#ef4444' };
         const STATUS_MATERIAL_MAP = { 'emCotacao': 'Em cotação', 'compraParcial': 'Compra Parcial', 'compraTotal': 'Compra Total', 'recebidoParcial': 'Recebido Parcial', 'recebidoTotal': 'Recebido Total', 'conferidoFalta': 'Conferido (Falta)', 'conferidoParcial': 'Conferido Parcial', 'conferidoTotal': 'Conferido Total', 'alocadoParcial': 'Alocado Parcial', 'alocadoTotal': 'Alocado Total' };
         const STATUS_MATERIAL_COLORS = { emCotacao: '#60a5fa', compraParcial: '#f59e0b', compraTotal: '#34d399', recebidoParcial: '#f59e0b', recebidoTotal: '#34d399', conferidoFalta: '#ef4444', conferidoParcial: '#f59e0b', conferidoTotal: '#34d399', alocadoParcial: '#f59e0b', alocadoTotal: '#166534' };
         
@@ -154,40 +159,54 @@
         };
         const fecharModal = () => detailsModal.classList.add('hidden');
         modalCloseBtn.addEventListener('click', fecharModal);
-        detailsModal.addEventListener('click', (e) => { if (e.target === detailsModal) fecharModal(); });
+        // A linha abaixo foi removida para impedir o fechamento ao clicar fora do modal.
+        // detailsModal.addEventListener('click', (e) => { if (e.target === detailsModal) fecharModal(); });
         
         const itemDetailModal = document.getElementById('item-detail-modal');
         const itemDetailCloseBtn = document.getElementById('item-detail-close-btn');
 
         const formatDate = (dateString) => dateString ? new Date(dateString + 'T00:00:00').toLocaleDateString('pt-BR') : 'dd/mm/aaaa';
         
-        const abrirItemDetailModal = (item) => {
-            const producaoInfo = item.etapas?.emProducao || {};
+        const abrirItemDetailModal = (item, etapa = 'producao') => {
+            const etapaInfo = etapa === 'instalacao' ? (item.etapas?.instalado || {}) : (item.etapas?.emProducao || {});
+            const etapaNome = etapa === 'instalacao' ? 'INSTALAÇÃO' : 'PRODUÇÃO';
+            
             document.getElementById('item-detail-title').textContent = `Item: ${item.codigo} - ${item.descricao}`;
-            document.getElementById('item-detail-etapa').textContent = 'PRODUÇÃO';
-            document.getElementById('item-detail-status').textContent = STATUS_ITEM_MAP[producaoInfo.status] || 'Não iniciado';
-            document.getElementById('item-detail-data').textContent = formatDate(producaoInfo.data);
-            document.getElementById('item-detail-prazo-inicial').textContent = formatDate(producaoInfo.prazoConclusaoInicial);
-            document.getElementById('item-detail-prazo-reagendado').textContent = formatDate(producaoInfo.prazoConclusaoReagendado);
-            document.getElementById('item-detail-conclusao-efetiva').textContent = formatDate(producaoInfo.conclusaoEfetiva);
-            const obsText = Array.isArray(producaoInfo.observacao) ? producaoInfo.observacao.join('\n') : (producaoInfo.observacao || '');
+            document.getElementById('item-detail-etapa').textContent = etapaNome;
+            document.getElementById('item-detail-status').textContent = STATUS_ITEM_MAP[etapaInfo.status] || 'Não iniciado';
+            document.getElementById('item-detail-data').textContent = formatDate(etapaInfo.data);
+            document.getElementById('item-detail-prazo-inicial').textContent = formatDate(etapaInfo.prazoConclusaoInicial);
+            document.getElementById('item-detail-prazo-reagendado').textContent = formatDate(etapaInfo.prazoConclusaoReagendado);
+            document.getElementById('item-detail-conclusao-efetiva').textContent = formatDate(etapaInfo.conclusaoEfetiva);
+            const obsText = Array.isArray(etapaInfo.observacao) ? etapaInfo.observacao.join('\n') : (etapaInfo.observacao || '');
             document.getElementById('item-detail-observacoes').textContent = obsText;
             itemDetailModal.classList.remove('hidden');
         };
         const fecharItemDetailModal = () => itemDetailModal.classList.add('hidden');
         itemDetailCloseBtn.addEventListener('click', fecharItemDetailModal);
-        itemDetailModal.addEventListener('click', (e) => { if (e.target === itemDetailModal) fecharItemDetailModal(); });
+        // A linha abaixo foi removida para impedir o fechamento ao clicar fora do modal.
+        // itemDetailModal.addEventListener('click', (e) => { if (e.target === itemDetailModal) fecharItemDetailModal(); });
+
+        const showMaterialDetailsForItem = (item) => {
+            const materials = (item.materiais || []).filter(mat => mat.statusInfo?.status !== 'cancelado');
+            const modalContentHtml = generateMaterialListHtml(materials);
+            abrirModal(`Materiais para: "${item.codigo || ''} - ${item.descricao || ''}"`, modalContentHtml);
+        };
 
         modalList.addEventListener('click', (e) => {
-            if (currentModalType !== 'item') return;
             const listItem = e.target.closest('li[data-index]');
             if (!listItem) return;
 
             const index = parseInt(listItem.dataset.index, 10);
+            const etapa = listItem.dataset.etapa;
             const selectedItem = currentModalItems[index];
 
-            if (selectedItem) {
-                abrirItemDetailModal(selectedItem);
+            if (!selectedItem) return;
+
+            if (e.target.closest('.material-badge-details')) {
+                showMaterialDetailsForItem(selectedItem);
+            } else if (etapa) {
+                abrirItemDetailModal(selectedItem, etapa);
             }
         });
 
@@ -216,17 +235,17 @@
             obrasFiltradas.forEach(obra => {
                 if (!obra.itens) obra.itens = [];
                 obra.itens = obra.itens.filter(item => {
-                    const status = item.etapas?.emProducao?.status;
-                    if (status === 'cancelado') return false; 
-
+                    const statusProducao = item.etapas?.emProducao?.status;
+                    
                     if (filtros.kpi === 'pecas-atraso') {
-                        if (status === 'concluido') return false;
+                        if (statusProducao === 'concluido' || statusProducao === 'cancelado') return false;
                         const dataPrazo = item.etapas?.emProducao?.prazoConclusaoReagendado || item.etapas?.emProducao?.prazoConclusaoInicial;
                         if (!dataPrazo || new Date(dataPrazo + 'T00:00:00') >= today) {
                             return false;
                         }
                     }
                     if (filtros.kpi === 'mat-atraso') {
+                        if (statusProducao === 'cancelado') return false; 
                         const hasAtraso = (item.materiais || []).some(mat => {
                             const matStatus = mat.statusInfo?.status;
                             if (matStatus === 'alocadoTotal' || matStatus === 'cancelado') return false;
@@ -238,14 +257,14 @@
                     }
                     
                     if (filtros.tipoItem.length > 0 && !filtros.tipoItem.includes(item.tipo)) return false;
-                    if (filtros.statusItem && (status || 'nao-iniciado') !== filtros.statusItem) return false;
+                    if (filtros.statusItem && (statusProducao || 'nao-iniciado') !== filtros.statusItem) return false;
                     if (filtros.statusMaterial && !(item.materiais || []).some(mat => (mat.statusInfo?.status || 'emCotacao') === filtros.statusMaterial)) return false;
                     
                     return true;
                 });
             });
             
-            obrasVisiveisAtualmente = obrasFiltradas.filter(obra => obra.itens.length > 0);
+            obrasVisiveisAtualmente = obrasFiltradas.filter(obra => obra.itens.length > 0 || filtros.kpi);
             renderDashboard(obrasVisiveisAtualmente);
         };
 
@@ -377,21 +396,24 @@
             
             container.innerHTML = obrasParaMostrar.map(obra => {
                 const obraAnalisada = obrasFiltradas.find(o => o.id === obra.id) || { itens: [] };
-                
-                const itensAtivosDaObra = obraAnalisada.itens.filter(i => i.etapas?.emProducao?.status !== 'cancelado');
-                const itensProducao = itensAtivosDaObra.filter(i => ['Projeto', 'Terceiros'].includes(i.tipo));
-                
-                const producaoConcluida = itensProducao.filter(item => item.etapas?.emProducao?.status === 'concluido').length;
-                const percentualProducao = itensProducao.length > 0 ? Math.round((producaoConcluida / itensProducao.length) * 100) : 0;
-                
+                const todosOsItensDaObra = obraAnalisada.itens;
+
                 let totalMateriais = 0, materiaisAlocados = 0;
-                itensAtivosDaObra.forEach(item => {
+                todosOsItensDaObra.filter(i => i.etapas?.emProducao?.status !== 'cancelado').forEach(item => {
                     const materiaisAtivos = (item.materiais || []).filter(mat => mat.statusInfo?.status !== 'cancelado');
                     totalMateriais += materiaisAtivos.length;
                     materiaisAlocados += materiaisAtivos.filter(mat => mat.statusInfo?.status === 'alocadoTotal').length;
                 });
                 const percentualMateriais = totalMateriais > 0 ? Math.round((materiaisAlocados / totalMateriais) * 100) : 0;
                 
+                const itensProducao = todosOsItensDaObra.filter(i => ['Projeto', 'Terceiros'].includes(i.tipo) && i.etapas?.emProducao?.status !== 'cancelado');
+                const producaoConcluida = itensProducao.filter(item => item.etapas?.emProducao?.status === 'concluido').length;
+                const percentualProducao = itensProducao.length > 0 ? Math.round((producaoConcluida / itensProducao.length) * 100) : 0;
+                
+                const itensInstalacao = todosOsItensDaObra.filter(i => ['Projeto', 'Terceiros'].includes(i.tipo) && i.etapas?.instalado?.status !== 'cancelado');
+                const instalacaoConcluida = itensInstalacao.filter(item => item.etapas?.instalado?.status === 'concluido').length;
+                const percentualInstalacao = itensInstalacao.length > 0 ? Math.round((instalacaoConcluida / itensInstalacao.length) * 100) : 0;
+
                 let medicaoTextoFinal;
                 if (obra.medicaoEfetuada) {
                     medicaoTextoFinal = `Medição (Realizada): ${new Date(obra.medicaoEfetuada + 'T00:00:00').toLocaleDateString('pt-BR')}`;
@@ -411,27 +433,64 @@
                 }
 
                 const isSelectedClass = obra.id === filtros.obraId ? 'obra-selecionada' : '';
-                return `<div class="obra-card border-2 rounded-lg p-4 ${isSelectedClass}" data-obra-id="${obra.id}"><div class="flex flex-col sm:flex-row justify-between items-start"><div><h4 class="font-bold text-lg text-gray-800">${obra.nome}</h4><p class="text-sm text-gray-500">${obra.cliente}</p></div><div class="text-sm mt-2 sm:mt-0 sm:text-right"><p class="font-semibold text-gray-700">${medicaoTextoFinal}</p><p class="font-semibold text-gray-700">${entregaTextoFinal}</p></div></div><div class="mt-4 space-y-3"><div><div class="flex justify-between items-center mb-1"><span class="text-xs font-medium text-gray-600">Progresso (Materiais)</span><span class="text-xs font-bold text-green-600">${percentualMateriais}% (${materiaisAlocados}/${totalMateriais})</span></div><div class="w-full progress-bar-bg rounded-full h-2.5"><div class="bg-green-500 h-2.5 rounded-full" style="width: ${percentualMateriais}%"></div></div></div><div><div class="flex justify-between items-center mb-1"><span class="text-xs font-medium text-gray-600">Progresso (Produção)</span><span class="text-xs font-bold text-blue-600">${percentualProducao}% (${producaoConcluida}/${itensProducao.length})</span></div><div class="w-full progress-bar-bg rounded-full h-2.5"><div class="bg-blue-600 h-2.5 rounded-full" style="width: ${percentualProducao}%"></div></div></div></div></div>`;
+                return `<div class="obra-card border-2 rounded-lg p-4 ${isSelectedClass}" data-obra-id="${obra.id}">
+                    <div class="flex flex-col sm:flex-row justify-between items-start">
+                        <div><h4 class="font-bold text-lg text-gray-800">${obra.nome}</h4><p class="text-sm text-gray-500">${obra.cliente}</p></div>
+                        <div class="text-sm mt-2 sm:mt-0 sm:text-right"><p class="font-semibold text-gray-700">${medicaoTextoFinal}</p><p class="font-semibold text-gray-700">${entregaTextoFinal}</p></div>
+                    </div>
+                    <div class="mt-4 space-y-3">
+                        <div>
+                            <div class="flex justify-between items-center mb-1"><span class="text-xs font-medium text-gray-600">Progresso (Materiais)</span><span class="text-xs font-bold text-green-600">${percentualMateriais}% (${materiaisAlocados}/${totalMateriais})</span></div>
+                            <div class="w-full progress-bar-bg rounded-full h-2.5"><div class="bg-green-500 h-2.5 rounded-full" style="width: ${percentualMateriais}%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1"><span class="text-xs font-medium text-gray-600">Progresso (Produção)</span><span class="text-xs font-bold text-blue-600">${percentualProducao}% (${producaoConcluida}/${itensProducao.length})</span></div>
+                            <div class="w-full progress-bar-bg rounded-full h-2.5"><div class="bg-blue-600 h-2.5 rounded-full" style="width: ${percentualProducao}%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1"><span class="text-xs font-medium text-gray-600">Progresso (Instalação)</span><span class="text-xs font-bold text-purple-600">${percentualInstalacao}% (${instalacaoConcluida}/${itensInstalacao.length})</span></div>
+                            <div class="w-full progress-bar-bg rounded-full h-2.5"><div class="bg-black h-2.5 rounded-full" style="width: ${percentualInstalacao}%"></div></div>
+                        </div>
+                    </div>
+                </div>`;
             }).join('');
         };
         
         const renderCharts = (obras) => {
-            const itemStatusCounts = {}, materialStatusCounts = {};
+            const itemStatusCounts = {}, materialStatusCounts = {}, instalacaoStatusCounts = {};
+            const today = new Date().setHours(0, 0, 0, 0);
+
             obras.forEach(obra => {
                 (obra.itens || []).forEach(item => {
                     const itemStatus = item.etapas?.emProducao?.status || 'nao-iniciado';
-                    if (itemStatus === 'cancelado') return; 
+                    const instalacaoStatus = item.etapas?.instalado?.status || 'nao-iniciado';
                     
-                    if (item.tipo === 'Projeto') {
-                        if (STATUS_ITEM_MAP[itemStatus]) itemStatusCounts[itemStatus] = (itemStatusCounts[itemStatus] || 0) + 1;
+                    if (['Projeto', 'Terceiros'].includes(item.tipo)) {
+                        if (itemStatus !== 'cancelado' && STATUS_ITEM_MAP[itemStatus]) {
+                           itemStatusCounts[itemStatus] = (itemStatusCounts[itemStatus] || 0) + 1;
+                        }
+                        if (instalacaoStatus !== 'cancelado' && STATUS_ITEM_MAP[instalacaoStatus]) {
+                           instalacaoStatusCounts[instalacaoStatus] = (instalacaoStatusCounts[instalacaoStatus] || 0) + 1;
+                        }
                     }
                     
-                    (item.materiais || []).forEach(mat => {
-                        const matStatus = mat.statusInfo?.status || 'emCotacao';
-                        if (matStatus !== 'cancelado' && STATUS_MATERIAL_MAP[matStatus]) {
-                             materialStatusCounts[matStatus] = (materialStatusCounts[matStatus] || 0) + 1;
-                        }
-                    });
+                    if (item.etapas?.emProducao?.status !== 'cancelado') {
+                        (item.materiais || []).forEach(mat => {
+                            const matStatus = mat.statusInfo?.status || 'emCotacao';
+                            let shouldCountMaterial = true;
+
+                            if (filtros.kpi === 'mat-atraso') {
+                                const isAlocadoOuCancelado = (matStatus === 'alocadoTotal' || matStatus === 'cancelado');
+                                const dataPrevista = mat.statusInfo?.previsaoDisponibilidadeReagendado || mat.statusInfo?.previsaoDisponibilidadeInicial;
+                                const isDelayed = !isAlocadoOuCancelado && dataPrevista && (new Date(dataPrevista + 'T00:00:00') < today);
+                                shouldCountMaterial = isDelayed;
+                            }
+
+                            if (shouldCountMaterial && matStatus !== 'cancelado' && STATUS_MATERIAL_MAP[matStatus]) {
+                                materialStatusCounts[matStatus] = (materialStatusCounts[matStatus] || 0) + 1;
+                            }
+                        });
+                    }
                 });
             });
 
@@ -444,114 +503,120 @@
             const materialLabels = Object.keys(materialStatusCounts);
             const backgroundColors = materialLabels.map(statusKey => STATUS_MATERIAL_COLORS[statusKey] || '#d1d5db');
             materialStatusChartInstance = new Chart(document.getElementById('material-status-chart').getContext('2d'), { type: 'bar', data: { labels: materialLabels.map(k => STATUS_MATERIAL_MAP[k]), datasets: [{ label: 'Quantidade', data: Object.values(materialStatusCounts), backgroundColor: backgroundColors }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { font: { size: 10 } } } }, onClick: (e, el) => handleChartClick(e, el, materialStatusChartInstance, 'material') } });
+
+            if(instalacaoStatusChartInstance) instalacaoStatusChartInstance.destroy();
+            const instalacaoStatusLabels = Object.keys(instalacaoStatusCounts);
+            const instalacaoBackgroundColors = instalacaoStatusLabels.map(statusKey => STATUS_ITEM_COLORS[statusKey] || '#d1d5db');
+            instalacaoStatusChartInstance = new Chart(document.getElementById('instalacao-status-chart').getContext('2d'), { type: 'doughnut', data: { labels: instalacaoStatusLabels.map(k => STATUS_ITEM_MAP[k]), datasets: [{ data: Object.values(instalacaoStatusCounts), backgroundColor: instalacaoBackgroundColors, borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } }, onClick: (e, el) => handleChartClick(e, el, instalacaoStatusChartInstance, 'instalacao') } });
+        };
+        
+        const generateMaterialListHtml = (materials) => {
+            if (!materials || materials.length === 0) return '';
+            return materials.map(mat => {
+                const currentStatusKey = mat.statusInfo?.status || 'emCotacao';
+                const currentStatusText = STATUS_MATERIAL_MAP[currentStatusKey];
+                const statusBadge = `<span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${currentStatusText}</span>`;
+                
+                let dataDisponibilidadeHtml = '';
+                let dataInfo = null;
+                if (mat.statusInfo?.disponibilidadeTotal) {
+                    dataInfo = { label: 'Disponível em:', date: mat.statusInfo.disponibilidadeTotal };
+                } else if (mat.statusInfo?.previsaoDisponibilidadeReagendado) {
+                    dataInfo = { label: 'Prev. Reagendada:', date: mat.statusInfo.previsaoDisponibilidadeReagendado };
+                } else if (mat.statusInfo?.previsaoDisponibilidadeInicial) {
+                    dataInfo = { label: 'Prev. Inicial:', date: mat.statusInfo.previsaoDisponibilidadeInicial };
+                }
+
+                if (dataInfo) {
+                    const formattedDate = new Date(dataInfo.date + 'T00:00:00').toLocaleDateString('pt-BR');
+                    dataDisponibilidadeHtml = `<span>${dataInfo.label} <span class="font-medium text-blue-600">${formattedDate}</span></span>`;
+                } else {
+                    dataDisponibilidadeHtml = `<span></span>`;
+                }
+
+                return `<li class="p-3 rounded-md hover:bg-gray-100 border-b last:border-b-0">
+                            <div class="flex justify-between items-start">
+                                <p class="font-semibold text-gray-800 flex-1">${mat.tipo} - ${mat.descricao}</p>${statusBadge}
+                            </div>
+                            <div class="mt-2 text-sm grid grid-cols-1 sm:grid-cols-3 gap-x-4 text-gray-600">
+                                <span><strong>Qtd. Orçada:</strong> ${mat.qtdeOrcada || '-'}</span>
+                                <span><strong>Qtd. Disponível:</strong> ${mat.qtdeDisponivel || '-'}</span>
+                                ${dataDisponibilidadeHtml}
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Item: ${mat.itemCodigo} | Obra: ${mat.obraNome}</p>
+                        </li>`;
+            }).join('');
         };
         
         const handleChartClick = (event, elements, chartInstance, chartType) => {
             if (elements.length === 0) return;
             const label = chartInstance.data.labels[elements[0].index];
-            const map = chartType === 'item' ? STATUS_ITEM_MAP : STATUS_MATERIAL_MAP;
+            const map = chartType === 'material' ? STATUS_MATERIAL_MAP : STATUS_ITEM_MAP;
             const statusKey = Object.keys(map).find(k => map[k] === label);
             let modalContentHtml = '';
 
-            if (chartType === 'item') {
+            if (chartType === 'item' || chartType === 'instalacao') {
                 const matchingItems = [];
                 obrasVisiveisAtualmente.forEach(obra => {
                     (obra.itens || []).forEach(item => {
-                        const itemStatus = item.etapas?.emProducao?.status || 'nao-iniciado';
-                        if (itemStatus === 'cancelado') return;
-
-                        if (item.tipo === 'Projeto' && itemStatus === statusKey) {
+                        if (!['Projeto', 'Terceiros'].includes(item.tipo)) return;
+                        
+                        const statusToCheck = (chartType === 'item' ? item.etapas?.emProducao?.status : item.etapas?.instalado?.status) || 'nao-iniciado';
+                        if (statusToCheck !== 'cancelado' && statusToCheck === statusKey) {
                             matchingItems.push({ ...item, obraNome: obra.nome, obraId: obra.id });
                         }
                     });
                 });
 
                 currentModalItems = matchingItems; 
-                currentModalType = 'item';
+                currentModalType = chartType;
 
                 modalContentHtml = matchingItems.length > 0 ? matchingItems.map((item, index) => {
-                    let badgeHtml = '';
-                    const materiaisAtivos = (item.materiais || []).filter(mat => mat.statusInfo?.status !== 'cancelado');
-                    if (materiaisAtivos.length > 0) {
-                        const materiaisConcluidos = materiaisAtivos.filter(mat => mat.statusInfo?.status === 'alocadoTotal').length;
-                        const percentual = Math.round((materiaisConcluidos / materiaisAtivos.length) * 100);
-                        let badgeClasses = 'bg-yellow-100 text-yellow-800';
-                        if (percentual === 100) badgeClasses = 'bg-green-100 text-green-800';
-                        else if (percentual === 0) badgeClasses = 'bg-red-100 text-red-800';
-                        badgeHtml = `<span class="${badgeClasses} text-xs font-semibold ml-3 px-2.5 py-0.5 rounded-full">${percentual}% Mat.</span>`;
-                    }
-
-                    let dataProducaoTexto = '';
-                    const producao = item.etapas?.emProducao;
-                    if (producao) {
-                        if (producao.conclusaoEfetiva) {
-                            dataProducaoTexto = `Concluído: ${new Date(producao.conclusaoEfetiva + 'T00:00:00').toLocaleDateString('pt-BR')}`;
-                        } else if (producao.prazoConclusaoReagendado) {
-                            dataProducaoTexto = `Reagendado: ${new Date(producao.prazoConclusaoReagendado + 'T00:00:00').toLocaleDateString('pt-BR')}`;
-                        } else if (producao.prazoConclusaoInicial) {
-                            dataProducaoTexto = `Prazo: ${new Date(producao.prazoConclusaoInicial + 'T00:00:00').toLocaleDateString('pt-BR')}`;
+                    const etapa = chartType === 'item' ? item.etapas?.emProducao : item.etapas?.instalado;
+                    let dataEtapaTexto = '';
+                    if (etapa) {
+                        if (etapa.status === 'concluido' && etapa.conclusaoEfetiva) {
+                            dataEtapaTexto = `Concluído: ${new Date(etapa.conclusaoEfetiva + 'T00:00:00').toLocaleDateString('pt-BR')}`;
+                        } else if (etapa.data) {
+                            dataEtapaTexto = `${STATUS_ITEM_MAP[etapa.status] || 'Status'}: ${new Date(etapa.data + 'T00:00:00').toLocaleDateString('pt-BR')}`;
                         }
                     }
 
-                    return `<li data-index="${index}" class="cursor-pointer p-3 rounded-md hover:bg-gray-100 transition-colors">
-                                <div class="flex justify-between items-center pointer-events-none">
-                                    <p class="font-semibold text-gray-800">${item.codigo || ''} - ${item.descricao || ''}</p>${badgeHtml}
+                    return `<li data-index="${index}" data-etapa="${chartType === 'item' ? 'producao' : 'instalacao'}" class="cursor-pointer p-3 rounded-md hover:bg-gray-100 transition-colors">
+                                <div class="flex justify-between items-center">
+                                    <p class="font-semibold text-gray-800">${item.codigo || ''} - ${item.descricao || ''}</p>
                                 </div>
-                                <div class="flex justify-between items-center mt-1 text-sm pointer-events-none">
-                                    <p class="text-gray-500">Obra: ${item.obraNome}</p>${dataProducaoTexto ? `<p class="font-medium text-blue-600">${dataProducaoTexto}</p>` : ''}
+                                <div class="flex justify-between items-center mt-1 text-sm">
+                                    <p class="text-gray-500">Obra: ${item.obraNome}</p>${dataEtapaTexto ? `<p class="font-medium text-blue-600">${dataEtapaTexto}</p>` : ''}
                                 </div>
                             </li>`;
                 }).join('') : '';
+
             } else { 
                 currentModalType = 'material';
                 const matchingMaterials = [];
+                const today = new Date().setHours(0, 0, 0, 0);
                 obrasVisiveisAtualmente.forEach(obra => {
                     (obra.itens || []).forEach(item => {
                          if (item.etapas?.emProducao?.status === 'cancelado') return;
-
                         (item.materiais || []).forEach(material => {
                             const matStatus = material.statusInfo?.status || 'emCotacao';
                             if (matStatus === statusKey && matStatus !== 'cancelado') {
-                                matchingMaterials.push({ ...material, obraNome: obra.nome, itemCodigo: item.codigo });
+                                let shouldInclude = true;
+                                if (filtros.kpi === 'mat-atraso') {
+                                    const isAlocadoOuCancelado = (matStatus === 'alocadoTotal' || matStatus === 'cancelado');
+                                    const dataPrevista = material.statusInfo?.previsaoDisponibilidadeReagendado || material.statusInfo?.previsaoDisponibilidadeInicial;
+                                    const isDelayed = !isAlocadoOuCancelado && dataPrevista && (new Date(dataPrevista + 'T00:00:00') < today);
+                                    shouldInclude = isDelayed;
+                                }
+                                if (shouldInclude) {
+                                    matchingMaterials.push({ ...material, obraNome: obra.nome, itemCodigo: item.codigo });
+                                }
                             }
                         });
                     });
                 });
-                modalContentHtml = matchingMaterials.length > 0 ? matchingMaterials.map(mat => {
-                    const currentStatusKey = mat.statusInfo?.status || 'emCotacao';
-                    const currentStatusText = STATUS_MATERIAL_MAP[currentStatusKey];
-                    const statusBadge = `<span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${currentStatusText}</span>`;
-                    
-                    let dataDisponibilidadeHtml = '';
-                    let dataInfo = null;
-
-                    if (mat.statusInfo?.disponibilidadeTotal) {
-                        dataInfo = { label: 'Disponível em:', date: mat.statusInfo.disponibilidadeTotal };
-                    } else if (mat.statusInfo?.previsaoDisponibilidadeReagendado) {
-                        dataInfo = { label: 'Prev. Reagendada:', date: mat.statusInfo.previsaoDisponibilidadeReagendado };
-                    } else if (mat.statusInfo?.previsaoDisponibilidadeInicial) {
-                        dataInfo = { label: 'Prev. Inicial:', date: mat.statusInfo.previsaoDisponibilidadeInicial };
-                    }
-
-                    if (dataInfo) {
-                        const formattedDate = new Date(dataInfo.date + 'T00:00:00').toLocaleDateString('pt-BR');
-                        dataDisponibilidadeHtml = `<span>${dataInfo.label} <span class="font-medium text-blue-600">${formattedDate}</span></span>`;
-                    } else {
-                        dataDisponibilidadeHtml = `<span></span>`;
-                    }
-
-                    return `<li class="p-3 rounded-md hover:bg-gray-100 border-b last:border-b-0">
-                                <div class="flex justify-between items-start">
-                                    <p class="font-semibold text-gray-800 flex-1">${mat.tipo} - ${mat.descricao}</p>${statusBadge}
-                                </div>
-                                <div class="mt-2 text-sm grid grid-cols-1 sm:grid-cols-3 gap-x-4 text-gray-600">
-                                    <span><strong>Qtd. Orçada:</strong> ${mat.qtdeOrcada || '-'}</span>
-                                    <span><strong>Qtd. Disponível:</strong> ${mat.qtdeDisponivel || '-'}</span>
-                                    ${dataDisponibilidadeHtml}
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Item: ${mat.itemCodigo} | Obra: ${mat.obraNome}</p>
-                            </li>`;
-                }).join('') : '';
+                modalContentHtml = generateMaterialListHtml(matchingMaterials);
             }
             abrirModal(`Detalhes para: "${label}"`, modalContentHtml);
         };
