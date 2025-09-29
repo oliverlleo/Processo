@@ -90,7 +90,10 @@
             <div>
                 <h1 class="text-xl md:text-2xl font-bold text-gray-800">GESTÃO DE OBRAS - Perfecta (Firebase)</h1>
             </div>
-            <button id="btn-toggle-form-obra" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-800 transition flex-shrink-0">NOVA OBRA</button>
+            <div class="flex items-center gap-4">
+                <a href="Dashboard.html" target="_blank" class="bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-gray-700 transition flex-shrink-0">DASHBOARD</a>
+                <button id="btn-toggle-form-obra" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-800 transition flex-shrink-0">NOVA OBRA</button>
+            </div>
         </header>
 
         <div id="form-nova-obra-container" class="hidden">
@@ -114,7 +117,7 @@
                         <textarea id="inputObsMedicao" rows="2" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0"></textarea>
                     </div>
                     <div>
-                        <h4 class="font-semibold text-gray-700 mb-2">ENTREGA</h4>
+                        <h4 class="font-semibold text-gray-700 mb-2">FINALIZAÇÃO</h4>
                         <label for="inputPrevisaoInicialEntrega" class="text-sm font-medium text-gray-600">Previsão Inicial</label>
                         <input type="date" id="inputPrevisaoInicialEntrega" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0">
                         <label for="inputNovaPrevisaoEntrega" class="text-sm font-medium text-gray-600 mt-2 block">Nova Previsão</label>
@@ -191,7 +194,7 @@
                     </div>
 
                     <div id="modal-entrega-final-container" class="hidden">
-                        <label for="modal-entrega-final" class="block text-sm font-medium text-gray-700 mb-1 mt-2">Entrega Final</label>
+                        <label for="modal-entrega-final" class="block text-sm font-medium text-gray-700 mb-1 mt-2">Transporte Final</label>
                         <input type="date" id="modal-entrega-final" class="w-full p-3 border rounded-lg bg-gray-100 focus:ring-0" readonly>
                     </div>
 
@@ -213,8 +216,7 @@
                 </div>
             </div>
             
-            <div class="flex justify-between items-center mt-auto pt-6 border-t flex-shrink-0">
-                <button id="modal-btn-limpar" class="bg-transparent text-gray-700 font-semibold py-2 px-6 rounded-lg hover:bg-gray-100 border border-gray-300 transition">Limpar Status</button>
+            <div class="flex justify-end items-center mt-auto pt-6 border-t flex-shrink-0">
                 <div class="flex gap-4">
                     <button id="modal-btn-cancelar" class="bg-transparent text-gray-700 font-semibold py-2 px-6 rounded-lg hover:bg-gray-100 border border-gray-300 transition">Cancelar</button>
                     <button id="modal-btn-salvar" class="bg-green-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-green-700 transition">Salvar</button>
@@ -297,7 +299,7 @@
                         <textarea id="edit-obra-obs-medicao" rows="2" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0"></textarea>
                     </div>
                     <div>
-                        <h4 class="font-semibold text-gray-700 mb-2">ENTREGA</h4>
+                        <h4 class="font-semibold text-gray-700 mb-2">FINALIZAÇÃO</h4>
                         <label for="edit-obra-previsao-inicial-entrega" class="text-sm font-medium text-gray-600">Previsão Inicial</label>
                         <input type="date" id="edit-obra-previsao-inicial-entrega" class="w-full p-2 border rounded-lg mt-1 focus:border-blue-500 focus:ring-0">
                         <label for="edit-obra-nova-previsao-entrega" class="text-sm font-medium text-gray-600 mt-2 block">Nova Previsão</label>
@@ -346,7 +348,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONFIGURAÇÕES GLOBAIS ---
-    const ETAPAS_ITEM = [ { id: 'alteracaoProjeto', nome: 'ORÇAMENTO' }, { id: 'projetoFinal', nome: 'Projeto Final' }, { id: 'emProducao', nome: 'PRODUÇÃO' }, { id: 'entregue', nome: 'Entrega' }, { id: 'instalado', nome: 'Instalação' }];
+    const ETAPAS_ITEM = [ { id: 'alteracaoProjeto', nome: 'ORÇAMENTO' }, { id: 'projetoFinal', nome: 'LISTA' }, { id: 'emProducao', nome: 'PRODUÇÃO' }, { id: 'entregue', nome: 'TRANSPORTE' }, { id: 'instalado', nome: 'INSTALAÇÃO' }];
     const STATUS_ITEM_MAP = { 'nao-iniciado': { texto: 'Não iniciado', classe: 'status-item-nao-iniciado' }, 'iniciado': { texto: 'Iniciado', classe: 'status-item-iniciado' }, 'parado': { texto: 'Parado', classe: 'status-item-parado' }, 'concluido': { texto: 'Concluído', classe: 'status-item-concluido' }, 'cancelado': { texto: 'Cancelado', classe: 'status-item-cancelado' }, 'default': { texto: 'Não iniciado', classe: 'status-item-nao-iniciado' } };
     const STATUS_MATERIAL_MAP = { 'conferenciaEstoque': { texto: 'Conferência Estoque', classe: 'status-mat-conferenciaEstoque' }, 'emCotacao': { texto: 'Em cotação', classe: 'status-mat-emCotacao' }, 'compraParcial': { texto: 'Compra Parcial', classe: 'status-mat-compraParcial' }, 'compraTotal': { texto: 'Compra Total', classe: 'status-mat-compraTotal' }, 'recebidoParcial': { texto: 'Recebido Parcial', classe: 'status-mat-recebidoParcial' }, 'recebidoTotal': { texto: 'Recebido Total', classe: 'status-mat-recebidoTotal' }, 'conferidoFalta': { texto: 'Conferido Falta', classe: 'status-mat-conferidoFalta' }, 'conferidoParcial': { texto: 'Conferido Parcial', classe: 'status-mat-conferidoParcial' }, 'conferidoTotal': { texto: 'Conferido Total', classe: 'status-mat-conferidoTotal' }, 'alocadoParcial': { texto: 'Alocado Parcial', classe: 'status-mat-alocadoParcial' }, 'alocadoTotal': { texto: 'Alocado Total', classe: 'status-mat-alocadoTotal' }, 'cancelado': { texto: 'Cancelado', classe: 'status-mat-cancelado' }, 'default': { texto: 'Em cotação', classe: 'status-mat-emCotacao' } };
     const TIPO_ITEM_STYLE_MAP = { 'Projeto': 'bg-blue-100 text-blue-800', 'Orçamento': 'bg-green-100 text-green-800', 'Terceiros': 'bg-purple-100 text-purple-800', 'Compra Inicial': 'bg-orange-100 text-orange-800' };
@@ -402,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- FUNÇÕES DE RENDERIZAÇÃO E UTILITÁRIOS ---
-    const formatarData = (dataString) => dataString ? new Date(dataString + 'T00:00:00').toLocaleDateString('pt-BR') : '---';
+    const formatarData = (dataString) => dataString ? new Date(dataString + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '---';
 
     const calcularTotaisItens = (obra) => {
         const etapaProducaoId = 'emProducao';
@@ -428,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const statusMaterialFiltro = filtros.statusMaterial || [];
         const statusItemFiltros = filtros.statusItem || {};
         const estoqueFiltro = filtros.estoque;
-        const temFiltroDeItem = tipoItemFiltro.length > 0 || statusMaterialFiltro.length > 0 || estoqueFiltro || Object.values(statusItemFiltros).some(v => v !== 'todos');
+        const temFiltroDeItem = tipoItemFiltro.length > 0 || statusMaterialFiltro.length > 0 || !!estoqueFiltro || Object.values(statusItemFiltros).some(v => v !== 'todos');
         
         if (temFiltroDeItem) {
             obrasFiltradas = obrasFiltradas.map(obra => {
@@ -447,7 +449,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (statusMaterialFiltro.length > 0 || estoqueFiltro) {
                         const temMaterialCorrespondente = (item.materiais || []).some(mat => {
                             const statusMatch = statusMaterialFiltro.length === 0 || statusMaterialFiltro.includes(mat.statusInfo?.status || 'emCotacao');
-                            const estoqueMatch = !estoqueFiltro || mat.statusInfo?.statusDates?.conferenciaEstoque;
+                            
+                            const temDataEstoque = mat.statusInfo?.statusDates?.conferenciaEstoque;
+                            let estoqueMatch = true;
+                            if (estoqueFiltro === 'S') {
+                                estoqueMatch = !!temDataEstoque;
+                            } else if (estoqueFiltro === 'N') {
+                                estoqueMatch = !temDataEstoque;
+                            }
+
                             return statusMatch && estoqueMatch;
                         });
                         if (!temMaterialCorrespondente) return false;
@@ -482,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <p class="text-xs text-gray-500 mt-1 whitespace-pre-wrap">${obra.obsMedicao || ' '}</p>
                             </div>
                             <div>
-                                <h4 class="font-bold text-gray-700">ENTREGA</h4>
+                                <h4 class="font-bold text-gray-700">FINALIZAÇÃO</h4>
                                 <p class="text-sm text-gray-600">Prev. Inicial: <span class="font-medium">${formatarData(obra.previsaoInicialEntrega)}</span></p>
                                 <p class="text-sm text-gray-600">Nova Previsão: <span class="font-medium">${formatarData(obra.novaPrevisaoEntrega)}</span></p>
                                 <p class="text-sm text-gray-600">Realizada: <span class="font-medium">${formatarData(obra.entregaRealizada)}</span></p>
@@ -692,7 +702,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (statusMaterialFiltro.length > 0 || estoqueFiltro) {
             materiaisParaRenderizar = materiaisParaRenderizar.filter(mat => {
                 const statusMatch = statusMaterialFiltro.length === 0 || statusMaterialFiltro.includes(mat.statusInfo?.status || 'emCotacao');
-                const estoqueMatch = !estoqueFiltro || mat.statusInfo?.statusDates?.conferenciaEstoque;
+                
+                const temDataEstoque = mat.statusInfo?.statusDates?.conferenciaEstoque;
+                let estoqueMatch = true;
+                if (estoqueFiltro === 'S') {
+                    estoqueMatch = !!temDataEstoque;
+                } else if (estoqueFiltro === 'N') {
+                    estoqueMatch = !temDataEstoque;
+                }
+
                 return statusMatch && estoqueMatch;
             });
         }
@@ -700,7 +718,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return `<tr class="materiais-row"><td colspan="100%" class="bg-gray-100 p-4"><div class="p-4"><h4 class="font-bold text-gray-700 mb-3">Materiais: ${item.codigo} - ${item.descricao}</h4><div class="table-container"><table class="min-w-full bg-white rounded-lg"><thead><tr class="border-b"><th class="p-2 text-left text-xs font-semibold text-gray-500">Tipo</th><th class="p-2 text-left text-xs font-semibold text-gray-500">Descrição</th>${additionalHeaders}<th class="p-2 text-left text-xs font-semibold text-gray-500">Prev. Inicial</th><th class="p-2 text-left text-xs font-semibold text-gray-500">Prev. Reag.</th><th class="p-2 text-left text-xs font-semibold text-gray-500">Disp. Total</th><th class="p-2 text-center text-xs font-semibold text-gray-500">Status</th><th class="p-2 text-center text-xs font-semibold text-gray-500">Ação</th></tr></thead><tbody>
                 ${(materiaisParaRenderizar).map(mat => {
                     const statusInfo = mat.statusInfo || {}, statusData = statusInfo.status ? STATUS_MATERIAL_MAP[statusInfo.status] : STATUS_MATERIAL_MAP['default'];
-                    return `<tr class="border-b"><td class="p-2 font-medium text-gray-800">${mat.tipo}</td><td class="p-2 text-gray-600">${mat.descricao}</td>${renderAdditionalCells(mat)}<td class="p-2 text-gray-600">${formatarData(statusInfo.previsaoDisponibilidadeInicial)}</td><td class="p-2 text-gray-600">${formatarData(statusInfo.previsaoDisponibilidadeReagendado)}</td><td class="p-2 text-gray-600">${formatarData(statusInfo.disponibilidadeTotal)}</td><td class="p-2 text-center"><div class="status-badge rounded-md ${statusData.classe} material-status-badge" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}" title="${statusInfo.observacao || ''}">${statusData.texto}</div></td><td class="p-2"><div class="flex justify-center items-center gap-3"><button title="Alterar Material" class="btn-alterar-material action-btn bg-yellow-400 text-white" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg></button><button title="Excluir Material" class="btn-excluir-material action-btn bg-red-500 text-white" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></button></div></td></tr>`;
+                    return `<tr class="border-b"><td class="p-2 font-medium text-gray-800">${mat.tipo}</td><td class="p-2 text-gray-600">${mat.descricao}</td>${renderAdditionalCells(mat)}<td class="p-2 text-gray-600 text-xs">${formatarData(statusInfo.previsaoDisponibilidadeInicial)}</td><td class="p-2 text-gray-600 text-xs">${formatarData(statusInfo.previsaoDisponibilidadeReagendado)}</td><td class="p-2 text-gray-600 text-xs">${formatarData(statusInfo.disponibilidadeTotal)}</td><td class="p-2 text-center"><div class="status-badge rounded-md ${statusData.classe} material-status-badge" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}" title="${statusInfo.observacao || ''}">${statusData.texto}</div></td><td class="p-2"><div class="flex justify-center items-center gap-3"><button title="Alterar Material" class="btn-alterar-material action-btn bg-yellow-400 text-white" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg></button><button title="Excluir Material" class="btn-excluir-material action-btn bg-red-500 text-white" data-obra-id="${obra.id}" data-item-id="${item.id}" data-material-id="${mat.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></button></div></td></tr>`;
                 }).join('')}
                 </tbody></table></div><div class="mt-4 flex flex-col sm:flex-row gap-2 flex-wrap items-center"><input type="text" placeholder="Tipo (ex: Perfil)" class="input-material-tipo flex-grow p-2 border rounded-md focus:border-blue-500 focus:ring-0" data-item-id="${item.id}"><input type="text" placeholder="Descrição (ex: PVC Branco)" class="input-material-desc flex-grow p-2 border rounded-md focus:border-blue-500 focus:ring-0" data-item-id="${item.id}">${additionalInputsHtml}<button class="btn-add-material bg-indigo-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-600" data-obra-id="${obra.id}" data-item-id="${item.id}">Adicionar</button><label for="upload-materiais-${item.id}" class="bg-teal-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-teal-600 cursor-pointer">Importar Material</label><input type="file" id="upload-materiais-${item.id}" class="hidden" accept=".xlsx, .xls" data-obra-id="${obra.id}" data-item-id="${item.id}"></div></div></td></tr>`;
     }
@@ -921,24 +939,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fecharModal();
     };
 
-    const limparStatus = async () => {
-        if(confirm('Deseja limpar o status deste item?')) {
-            const { obraId, itemId, etapaId, materialId } = edicaoAtual;
-            const obra = obras.find(o => o.id === obraId);
-            const itemIndex = obra.itens.findIndex(p => p.id === itemId);
-            const obraDocRef = doc(db, 'obras', obraId);
-            if (materialId) {
-                const materialIndex = obra.itens[itemIndex].materiais.findIndex(m => m.id === materialId);
-                obra.itens[itemIndex].materiais[materialIndex].statusInfo = {}; // Limpa tudo
-            } else {
-                delete obra.itens[itemIndex].etapas[etapaId]; // Remove a etapa
-            }
-            await updateDoc(obraDocRef, { itens: obra.itens });
-            fecharModal();
-        }
-    };
-
-
     const abrirModalAlterarItem = (obraId, itemId) => {
         edicaoItemAtual = { obraId, itemId };
         const obra = obras.find(o => o.id === obraId);
@@ -1101,14 +1101,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (button.classList.contains('btn-toggle-dados')) { uiState[obraId] = { ...uiState[obraId], dadosExpanded: !uiState[obraId]?.dadosExpanded }; aplicarFiltrosERenderizar(); }
         else if (button.classList.contains('btn-toggle-itens')) { const newState = !uiState[obraId]?.isExpanded; Object.keys(uiState).forEach(id => uiState[id] = {...uiState[id], isExpanded: false }); uiState[obraId] = { ...uiState[obraId], isExpanded: newState }; aplicarFiltrosERenderizar(); }
         else if (button.classList.contains('btn-excluir-obra')) {
-            // AVISO DE SEGURANÇA: A senha está hardcoded no código do cliente.
-            // Para um ambiente de produção, isso deve ser substituído por um método de autenticação seguro no servidor.
+            const obra = obras.find(o => o.id === obraId);
             const senha = prompt('Para excluir a obra, digite a senha de confirmação:');
             if (senha === '5866') {
-                if (confirm('Tem certeza que deseja EXCLUIR esta obra e todos os seus itens permanentemente? Esta ação não pode ser desfeita.')) {
+                if (confirm(`Tem certeza que deseja EXCLUIR a obra "${obra.nome}" e todos os seus itens permanentemente? Esta ação não pode ser desfeita.`)) {
                     await deleteDoc(doc(db, 'obras', obraId));
                 }
-            } else if (senha !== null) { // se senha for null, o usuário clicou em Cancelar
+            } else if (senha !== null) {
                 alert('Senha incorreta.');
             }
         }
@@ -1154,17 +1153,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (qtdeDisponivelInput) qtdeDisponivelInput.value = '';
             }
         } else if (button.classList.contains('btn-excluir-item')) {
-            if (confirm('Tem certeza que deseja excluir este item?')) {
-                const obra = obras.find(o => o.id === obraId);
-                if(obra) {
-                    const itensAtualizados = obra.itens.filter(p => p.id !== itemId);
-                    await updateDoc(doc(db, 'obras', obraId), { itens: itensAtualizados });
-                }
+            const obra = obras.find(o => o.id === obraId);
+            const item = obra.itens.find(i => i.id === itemId);
+            if (confirm(`Tem certeza que deseja excluir o item "${item.codigo} - ${item.descricao}"?`)) {
+                const itensAtualizados = obra.itens.filter(p => p.id !== itemId);
+                await updateDoc(doc(db, 'obras', obraId), { itens: itensAtualizados });
             }
         }
         else if (button.classList.contains('btn-alterar-item')) { abrirModalAlterarItem(obraId, itemId); }
         else if (button.classList.contains('btn-toggle-materiais')) { const currentExpanded = uiState[obraId]?.itemExpandidoId; uiState[obraId] = { ...uiState[obraId], itemExpandidoId: currentExpanded === itemId ? null : itemId }; aplicarFiltrosERenderizar(); }
-        else if (button.classList.contains('btn-excluir-material')) { if(confirm('Deseja EXCLUIR este material?')) { const obra = obras.find(o => o.id === obraId); const item = obra.itens.find(p => p.id === itemId); item.materiais = (item.materiais || []).filter(m => m.id !== materialId); await updateDoc(doc(db, 'obras', obraId), { itens: obra.itens }); } }
+        else if (button.classList.contains('btn-excluir-material')) { 
+            const obra = obras.find(o => o.id === obraId);
+            const item = obra.itens.find(i => i.id === itemId);
+            const material = item.materiais.find(m => m.id === materialId);
+            if(confirm(`Deseja EXCLUIR o material "${material.tipo} - ${material.descricao}"?`)) { 
+                item.materiais = (item.materiais || []).filter(m => m.id !== materialId); 
+                await updateDoc(doc(db, 'obras', obraId), { itens: obra.itens }); 
+            } 
+        }
         else if (button.classList.contains('btn-alterar-material')) { abrirModalAlterarMaterial(obraId, itemId, materialId); }
     }
 
@@ -1293,15 +1299,15 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const statusMaterialContainer = document.getElementById('filtro-status-material-container');
         const statusMateriais = Object.entries(STATUS_MATERIAL_MAP).filter(([key]) => key !== 'default');
-        let matCheckboxesHtml = `<div class="flex items-center"><input type="checkbox" id="filtro-mat-todos" class="filtro-mat-checkbox-todos h-4 w-4 rounded"><label for="filtro-mat-todos" class="ml-2 text-sm font-semibold">Todos</label></div>`;
-        matCheckboxesHtml += `<div class="flex items-center"><input type="checkbox" id="filtro-mat-estoque" class="h-4 w-4 rounded"><label for="filtro-mat-estoque" class="ml-2 text-sm font-bold text-green-700 uppercase">CONFERIDO ESTOQUE</label></div>`;
+        let matCheckboxesHtml = `<div class="flex items-center col-span-2"><input type="checkbox" id="filtro-mat-todos" class="filtro-mat-checkbox-todos h-4 w-4 rounded"><label for="filtro-mat-todos" class="ml-2 text-sm font-semibold">Todos os Status</label></div>`;
+        matCheckboxesHtml += `<div class="flex items-center gap-x-2 col-span-4"><label class="text-sm font-bold text-green-700 uppercase">Conferido Estoque:</label><input type="checkbox" id="filtro-mat-estoque-s" data-estoque-filter="S" class="filtro-mat-estoque-option h-4 w-4 rounded"><label for="filtro-mat-estoque-s" class="text-sm">S</label><input type="checkbox" id="filtro-mat-estoque-n" data-estoque-filter="N" class="filtro-mat-estoque-option h-4 w-4 rounded"><label for="filtro-mat-estoque-n" class="text-sm">N</label></div>`;
         statusMateriais.forEach(([key, value]) => { matCheckboxesHtml += `<div class="flex items-center"><input type="checkbox" id="filtro-mat-${key}" value="${key}" class="filtro-mat-status-checkbox h-4 w-4 rounded"><label for="filtro-mat-${key}" class="ml-2 text-sm">${value.texto}</label></div>`; });
         statusMaterialContainer.innerHTML = matCheckboxesHtml;
         
         const filtrosStatusContainer = document.getElementById('filtros-status-item-container');
         filtrosStatusContainer.innerHTML = ETAPAS_ITEM.map(etapa => `<div><label for="filtro-status-${etapa.id}" class="text-sm font-medium text-gray-600">${etapa.nome}</label><select id="filtro-status-${etapa.id}" data-etapa-id="${etapa.id}" class="filtro-status-item w-full p-2 border rounded-lg mt-1"><option value="todos">Todos</option>${Object.entries(STATUS_ITEM_MAP).filter(([key]) => key !== 'default').map(([key, value]) => `<option value="${key}">${value.texto}</option>`).join('')}</select></div>`).join('');
         
-        filtros = { nomeObra: '', tipoItem: [], statusMaterial: [], estoque: false, statusItem: ETAPAS_ITEM.reduce((acc, etapa) => ({...acc, [etapa.id]: 'todos'}), {}) };
+        filtros = { nomeObra: '', tipoItem: [], statusMaterial: [], estoque: null, statusItem: ETAPAS_ITEM.reduce((acc, etapa) => ({...acc, [etapa.id]: 'todos'}), {}) };
     };
 
     const adicionarListenersFiltros = () => {
@@ -1316,16 +1322,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         document.getElementById('filtro-status-material-container').addEventListener('change', (e) => {
             const target = e.target; if (target.type !== 'checkbox') return;
+            
             const todosCheckbox = document.getElementById('filtro-mat-todos');
             const statusCheckboxes = document.querySelectorAll('.filtro-mat-status-checkbox');
+            const estoqueCheckboxes = document.querySelectorAll('.filtro-mat-estoque-option');
+
             if (target.id === 'filtro-mat-todos') {
                 statusCheckboxes.forEach(cb => cb.checked = target.checked);
             } else if (target.classList.contains('filtro-mat-status-checkbox')) {
                 todosCheckbox.checked = [...statusCheckboxes].every(cb => cb.checked);
+            } else if (target.classList.contains('filtro-mat-estoque-option')) {
+                if (target.checked) {
+                    estoqueCheckboxes.forEach(cb => { if (cb !== target) { cb.checked = false; }});
+                }
             }
+
             filtros.statusMaterial = [...document.querySelectorAll('.filtro-mat-status-checkbox:checked')].map(cb => cb.value);
             if (todosCheckbox.checked) filtros.statusMaterial = [];
-            filtros.estoque = document.getElementById('filtro-mat-estoque').checked;
+
+            const checkedEstoqueBox = document.querySelector('.filtro-mat-estoque-option:checked');
+            filtros.estoque = checkedEstoqueBox ? checkedEstoqueBox.dataset.estoqueFilter : null;
+
             aplicarFiltrosERenderizar();
         });
         document.querySelectorAll('.filtro-status-item').forEach(select => { select.addEventListener('change', (e) => { filtros.statusItem[e.target.dataset.etapaId] = e.target.value; aplicarFiltrosERenderizar(); }); });
@@ -1334,17 +1351,22 @@ document.addEventListener('DOMContentLoaded', () => {
     btnToggleFormObra.addEventListener('click', () => { isFormularioNovaObraVisivel = !isFormularioNovaObraVisivel; renderizarFormulario(); });
     document.getElementById('modal-btn-salvar').addEventListener('click', salvarStatus);
     document.getElementById('modal-btn-cancelar').addEventListener('click', fecharModal);
-    document.getElementById('modal-btn-limpar').addEventListener('click', limparStatus);
-    modal.addEventListener('click', (e) => e.target === modal && fecharModal());
+    // A linha abaixo foi removida.
+    // document.getElementById('modal-btn-limpar').addEventListener('click', limparStatus);
+    // A linha abaixo foi removida.
+    // modal.addEventListener('click', (e) => e.target === modal && fecharModal());
     document.getElementById('edit-item-btn-salvar').addEventListener('click', salvarAlteracaoItem);
     document.getElementById('edit-item-btn-cancelar').addEventListener('click', fecharModalAlterarItem);
-    editItemModal.addEventListener('click', (e) => e.target === editItemModal && fecharModalAlterarItem());
+    // A linha abaixo foi removida.
+    // editItemModal.addEventListener('click', (e) => e.target === editItemModal && fecharModalAlterarItem());
     document.getElementById('edit-material-btn-salvar').addEventListener('click', salvarAlteracaoMaterial);
     document.getElementById('edit-material-btn-cancelar').addEventListener('click', fecharModalAlterarMaterial);
-    editMaterialModal.addEventListener('click', (e) => e.target === editMaterialModal && fecharModalAlterarMaterial());
+    // A linha abaixo foi removida.
+    // editMaterialModal.addEventListener('click', (e) => e.target === editMaterialModal && fecharModalAlterarMaterial());
     document.getElementById('edit-obra-btn-salvar').addEventListener('click', salvarAlteracaoObra);
     document.getElementById('edit-obra-btn-cancelar').addEventListener('click', fecharModalAlterarObra);
-    editObraModal.addEventListener('click', (e) => e.target === editObraModal && fecharModalAlterarObra());
+    // A linha abaixo foi removida.
+    // editObraModal.addEventListener('click', (e) => e.target === editObraModal && fecharModalAlterarObra());
 
     popularFiltros();
     adicionarListenersFiltros();
