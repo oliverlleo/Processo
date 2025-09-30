@@ -91,7 +91,8 @@
                 <h1 class="text-xl md:text-2xl font-bold text-gray-800">GESTÃO DE OBRAS - Perfecta (Firebase)</h1>
             </div>
             <div class="flex items-center gap-4">
-                <a href="Dashboard.html" target="_blank" class="bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-gray-700 transition flex-shrink-0">DASHBOARD</a>
+                <a href="Projetos.html" target="_blank" class="bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-gray-700 transition flex-shrink-0">PROJETOS</a>
+                <a href="Dashboard.html" target="_blank" class="bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-gray-700 transition flex-shrink-0">FÁBRICA</a>
                 <button id="btn-toggle-form-obra" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-800 transition flex-shrink-0">NOVA OBRA</button>
             </div>
         </header>
@@ -367,9 +368,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONFIGURAÇÕES GLOBAIS ---
     const ETAPAS_ITEM = [ { id: 'alteracaoProjeto', nome: 'ORÇAMENTO' }, { id: 'projetoFinal', nome: 'LISTA' }, { id: 'emProducao', nome: 'PRODUÇÃO' }, { id: 'entregue', nome: 'TRANSPORTE' }, { id: 'instalado', nome: 'INSTALAÇÃO' }];
-    const STATUS_ITEM_MAP = { 'nao-iniciado': { texto: 'Não iniciado', classe: 'status-item-nao-iniciado' }, 'iniciado': { texto: 'Iniciado', classe: 'status-item-iniciado' }, 'parado': { texto: 'Parado', classe: 'status-item-parado' }, 'concluido': { texto: 'Concluído', classe: 'status-item-concluido' }, 'cancelado': { texto: 'Cancelado', classe: 'status-item-cancelado' }, 'default': { texto: 'Não iniciado', classe: 'status-item-nao-iniciado' } };
+    const STATUS_ITEM_MAP = { 'nao-iniciado': { texto: 'Inclusão', classe: 'status-item-nao-iniciado' }, 'iniciado': { texto: 'Iniciado', classe: 'status-item-iniciado' }, 'parado': { texto: 'Parado', classe: 'status-item-parado' }, 'concluido': { texto: 'Concluído', classe: 'status-item-concluido' }, 'cancelado': { texto: 'Cancelado', classe: 'status-item-cancelado' }, 'default': { texto: 'Inclusão', classe: 'status-item-nao-iniciado' } };
     const STATUS_MATERIAL_MAP = { 
-        'naoIniciado': { texto: 'Não Iniciado', classe: 'status-item-nao-iniciado' },
+        'naoIniciado': { texto: 'Inclusão', classe: 'status-item-nao-iniciado' },
         'conferenciaEstoque': { texto: 'Conferência Estoque', classe: 'status-mat-conferenciaEstoque' }, 
         'emCotacao': { texto: 'Em cotação', classe: 'status-mat-emCotacao' }, 
         'compraParcial': { texto: 'Compra Parcial', classe: 'status-mat-compraParcial' }, 
@@ -382,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'alocadoParcial': { texto: 'Alocado Parcial', classe: 'status-mat-alocadoParcial' }, 
         'alocadoTotal': { texto: 'Alocado Total', classe: 'status-mat-alocadoTotal' }, 
         'cancelado': { texto: 'Cancelado', classe: 'status-mat-cancelado' }, 
-        'default': { texto: 'Não Iniciado', classe: 'status-item-nao-iniciado' } 
+        'default': { texto: 'Inclusão', classe: 'status-item-nao-iniciado' } 
     };
     const TIPO_ITEM_STYLE_MAP = { 'Projeto': 'bg-blue-100 text-blue-800', 'Orçamento': 'bg-green-100 text-green-800', 'Revisão': 'bg-fuchsia-100 text-fuchsia-800', 'Terceiros': 'bg-purple-100 text-purple-800', 'Compra Inicial': 'bg-orange-100 text-orange-800' };
 

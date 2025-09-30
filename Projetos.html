@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DASHBOARD ORÇAMENTOS E REVISÕES - Perfecta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .kpi-card, .chart-container {
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, background-color 0.2s;
+        }
+        .kpi-card[data-filtro]:hover, #status-chart:hover, #obras-chart:hover {
+             transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .kpi-card[data-filtro], #status-chart, #obras-chart { cursor: pointer; }
+        .item-row { cursor: pointer; }
+        .kpi-selecionado {
+            border-color: #ef4444; /* red-500 */
+            background-color: #fee2e2; /* red-100 */
+        }
+        /* Cores dos status mantidas do Obras.html */
+        .status-item-nao-iniciado { background-color: #ffffff; color: #1f2937; border: 1px solid #d1d5db; }
+        .status-item-iniciado { background-color: #0ea5e9; color: white; }
+        .status-item-parado { background-color: #1f2937; color: white; }
+        .status-item-concluido { background-color: #16a34a; color: white; }
+        .status-item-cancelado { background-color: #6b7280; color: white; }
+        .modal { transition: opacity 0.2s ease-in-out; }
+        .modal-content { transition: opacity 0.2s ease-in-out; }
+    </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+
+    <div id="app" class="max-w-7xl mx-auto">
+        <header class="mb-8">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-red-600">DASHBOARD ORÇAMENTOS E REVISÕES</h1>
+            </div>
+        </header>
+
+        <div class="bg-white p-6 rounded-xl mb-8 border border-gray-200">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-700">Filtros <span id="filtro-ativo-titulo" class="ml-2 font-normal text-red-600 text-base"></span></h3>
+                <button id="btn-limpar-filtros" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-700 transition disabled:opacity-50 disabled:cursor-not-allowed">Limpar Filtros</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6">
+                <div>
+                    <label class="text-sm font-bold text-red-600 block mb-2">Tipo de Item</label>
+                    <div id="filtro-tipo-container" class="flex flex-col space-y-2"></div>
+                </div>
+                <div>
+                    <label class="text-sm font-bold text-red-600 block mb-2">Status</label>
+                    <div id="filtro-status-container" class="grid grid-cols-2 gap-x-4 gap-y-2"></div>
+                </div>
+                <div>
+                     <label class="text-sm font-bold text-red-600 block mb-2">Conclusão</label>
+                     <div id="filtro-conclusao-container" class="flex items-center gap-x-2">
+                        <div class="flex-1">
+                            <label for="filtro-conclusao-inicio" class="text-xs font-medium text-gray-700">Data Inicial</label>
+                            <input type="date" id="filtro-conclusao-inicio" class="w-full p-2 border rounded-lg mt-1 text-sm">
+                        </div>
+                        <div class="flex-1">
+                            <label for="filtro-conclusao-fim" class="text-xs font-medium text-gray-700">Data Final</label>
+                            <input type="date" id="filtro-conclusao-fim" class="w-full p-2 border rounded-lg mt-1 text-sm">
+                        </div>
+                     </div>
+                </div>
+            </div>
+        </div>
+
+        <section id="kpi-section" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-6 mb-8">
+             <div id="kpi-card-nao-iniciado" data-filtro="naoIniciado" class="kpi-card bg-white p-4 rounded-xl border-2 border-transparent">
+                <p class="text-gray-500 text-sm font-medium">Não Iniciado</p>
+                <p id="kpi-nao-iniciado" class="text-3xl font-bold text-gray-400">...</p>
+            </div>
+             <div id="kpi-card-media-inicio" class="kpi-card bg-white p-4 rounded-xl border-2 border-transparent">
+                <p class="text-gray-500 text-sm font-medium">Média Início</p>
+                <p id="kpi-media-inicio" class="text-3xl font-bold text-gray-800">...</p>
+            </div>
+            <div id="kpi-card-parado" data-filtro="parado" class="kpi-card bg-white p-4 rounded-xl border-2 border-transparent">
+                <p class="text-gray-500 text-sm font-medium">Parado</p>
+                <p id="kpi-parados" class="text-3xl font-bold text-gray-800">...</p>
+            </div>
+            <div id="kpi-card-atrasado" data-filtro="atrasado" class="kpi-card bg-white p-4 rounded-xl border-2 border-transparent">
+                <p class="text-gray-500 text-sm font-medium">Atrasado</p>
+                <p id="kpi-atrasado" class="text-3xl font-bold text-red-500">...</p>
+            </div>
+            <div id="kpi-card-media-conclusao" class="kpi-card bg-white p-4 rounded-xl border-2 border-transparent">
+                <p class="text-gray-500 text-sm font-medium">Média Conclusão</p>
+                <p id="kpi-media-conclusao" class="text-3xl font-bold text-gray-800">...</p>
+            </div>
+            <div id="kpi-card-media-total" class="kpi-card bg-white p-4 rounded-xl border-2 border-transparent">
+                <p class="text-gray-500 text-sm font-medium">Média Total</p>
+                <p id="kpi-media-total" class="text-3xl font-bold text-gray-800">...</p>
+            </div>
+             <div id="kpi-card-revisoes" data-filtro="revisoes" class="kpi-card bg-white p-4 rounded-xl border-2 border-transparent">
+                <p class="text-gray-500 text-sm font-medium">Solic. Revisão</p>
+                <p id="kpi-revisoes" class="text-3xl font-bold text-fuchsia-600">...</p>
+            </div>
+        </section>
+
+        <main class="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-8">
+            <div class="lg:col-span-2 chart-container bg-white p-6 rounded-xl border border-gray-200">
+                <h3 class="text-lg font-bold text-gray-700 mb-4">STATUS</h3>
+                <div class="h-64 flex items-center justify-center"><canvas id="status-chart"></canvas></div>
+            </div>
+            <div class="lg:col-span-3 chart-container bg-white p-6 rounded-xl border border-gray-200">
+                <h3 class="text-lg font-bold text-gray-700 mb-4">ITENS POR OBRA</h3>
+                <div class="h-64 flex items-center justify-center"><canvas id="obras-chart"></canvas></div>
+            </div>
+        </main>
+        
+        <div class="mb-4 flex justify-between items-center">
+            <p id="active-filters-display" class="text-sm font-medium text-gray-700 h-5"></p>
+        </div>
+        <section id="obras-agrupadas-container" class="space-y-4">
+            <div class="text-center p-8 bg-white rounded-lg border border-gray-200">
+                <h3 class="text-lg font-medium text-gray-700">Carregando dados...</h3>
+            </div>
+        </section>
+    </div>
+
+    <div id="item-details-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden modal">
+        <div class="bg-white rounded-2xl p-8 w-full max-w-2xl mx-auto modal-content flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-start flex-shrink-0">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Detalhes do Item</h2>
+                    <p class="text-gray-600 mb-6">Obra: <span class="font-semibold" id="modal-detalhe-obra"></span></p>
+                </div>
+                 <button id="modal-detalhe-btn-fechar" class="text-gray-400 hover:text-gray-600 transition">&times;</button>
+            </div>
+            
+            <div class="overflow-y-auto pr-4 space-y-6">
+                <div class="border-b pb-4">
+                    <h3 class="text-lg font-semibold text-red-600 mb-3">Cadastro</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                        <p><strong>Código:</strong> <span id="modal-detalhe-codigo"></span></p>
+                        <p><strong>Tipo:</strong> <span id="modal-detalhe-tipo"></span></p>
+                        <p class="md:col-span-2"><strong>Descrição:</strong> <span id="modal-detalhe-descricao"></span></p>
+                        <div id="modal-detalhe-campos-orcamento" class="hidden">
+                            <p><strong>Qtd. Peças:</strong> <span id="modal-detalhe-qtdpecas"></span></p>
+                        </div>
+                        <div id="modal-detalhe-campos-revisao" class="hidden grid grid-cols-1 md:grid-cols-2 gap-x-6">
+                             <p><strong>Versão:</strong> <span id="modal-detalhe-versao"></span></p>
+                             <p><strong>Solic. Alteração:</strong> <span id="modal-detalhe-solicitacao"></span></p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                     <h3 class="text-lg font-semibold text-red-600 mb-3">Status</h3>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                         <p><strong>Status Atual:</strong> <span id="modal-detalhe-status"></span></p>
+                         <p><strong>Data do Status:</strong> <span id="modal-detalhe-datastatus"></span></p>
+                         <p><strong>Prazo de Conclusão:</strong> <span id="modal-detalhe-prazo"></span></p>
+                         <p><strong>Data de Conclusão:</strong> <span id="modal-detalhe-conclusao"></span></p>
+                         <p class="md:col-span-2"><strong>Observação:</strong> <br><span class="text-gray-600" id="modal-detalhe-obs"></span></p>
+                     </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end items-center mt-auto pt-6 border-t flex-shrink-0">
+                <button id="modal-detalhe-btn-fechar-2" class="bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-gray-700 transition">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+<script type="module">
+    // --- CONFIGURAÇÃO FIREBASE ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    
+    const firebaseConfig = { apiKey: "AIzaSyDyNk5BJscelHhxjKRHKlOZpYnNKgnh3B4", authDomain: "controle-gc.firebaseapp.com", projectId: "controle-gc", storageBucket: "controle-gc.appspot.com", messagingSenderId: "197002816768", appId: "1:197002816768:web:a6a56f47421ea52961d7e5" };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const obrasCollection = collection(db, 'obras');
+
+    document.addEventListener('DOMContentLoaded', () => {
+        let todosOsItens = [];
+        let statusChartInstance = null;
+        let obrasChartInstance = null;
+        let filtros = { tipo: [], status: [], conclusao: { inicio: null, fim: null }, kpi: null, obra: null };
+        let uiState = {}; 
+
+        const STATUS_ITEM_MAP = { 'nao-iniciado': { texto: 'Inclusão', classe: 'status-item-nao-iniciado', cor: '#d1d5db' }, 'iniciado': { texto: 'Iniciado', classe: 'status-item-iniciado', cor: '#0ea5e9' }, 'parado': { texto: 'Parado', classe: 'status-item-parado', cor: '#1f2937' }, 'concluido': { texto: 'Concluído', classe: 'status-item-concluido', cor: '#16a34a' }, 'cancelado': { texto: 'Cancelado', classe: 'status-item-cancelado', cor: '#6b7280' }, 'default': { texto: 'Inclusão', classe: 'status-item-nao-iniciado', cor: '#d1d5db' } };
+        const TIPO_ITEM_STYLE_MAP = { 'Orçamento': 'bg-green-100 text-green-800', 'Revisão': 'bg-purple-100 text-purple-800' };
+        const ETAPA_ID = 'alteracaoProjeto';
+
+        const btnLimparFiltros = document.getElementById('btn-limpar-filtros');
+        const filtroAtivoTitulo = document.getElementById('filtro-ativo-titulo');
+        const detailsModal = document.getElementById('item-details-modal');
+
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                onSnapshot(obrasCollection, (querySnapshot) => {
+                    const itensTemp = [];
+                    querySnapshot.forEach((doc) => {
+                        const obra = { id: doc.id, ...doc.data() };
+                        if (obra.itens) {
+                            obra.itens.forEach(item => {
+                                const etapa = item.etapas?.[ETAPA_ID];
+                                if ((item.tipo === 'Orçamento' || item.tipo === 'Revisão') && etapa?.status !== 'cancelado') {
+                                    itensTemp.push({ ...item, obraId: obra.id, obraNome: obra.nome, obraCliente: obra.cliente });
+                                }
+                            });
+                        }
+                    });
+                    todosOsItens = itensTemp;
+                    renderDashboardCompleto();
+                }, (error) => console.error("Erro ao buscar dados:", error));
+            } else {
+                signInAnonymously(auth).catch(error => console.error("Erro na autenticação:", error));
+            }
+        });
+
+        const parseDate = (dateString) => dateString ? new Date(dateString + 'T00:00:00') : null;
+
+        const formatarData = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '---';
+
+        const calcularDiferencaDias = (dataInicioStr, dataFimStr) => {
+            const dataInicio = parseDate(dataInicioStr);
+            const dataFim = parseDate(dataFimStr);
+            if (!dataInicio || !dataFim || dataFim < dataInicio) return null;
+            return Math.ceil(Math.abs(dataFim - dataInicio) / (1000 * 60 * 60 * 24));
+        };
+
+        const renderDashboardCompleto = () => {
+            // 1. Aplica filtros primários (obra, kpi)
+            const itensPrimarios = aplicarFiltrosPrimarios();
+
+            // 2. Cria uma lista para contagem nos filtros, aplicando o filtro de data de conclusão.
+            let itensParaContagem = itensPrimarios;
+            if (filtros.conclusao.inicio || filtros.conclusao.fim) {
+                const inicioFiltro = filtros.conclusao.inicio ? parseDate(filtros.conclusao.inicio) : null;
+                const fimFiltro = filtros.conclusao.fim ? parseDate(filtros.conclusao.fim) : null;
+                itensParaContagem = itensPrimarios.filter(item => {
+                    const conclusaoDataStr = item.etapas?.[ETAPA_ID]?.conclusaoFinal;
+                    if (!conclusaoDataStr) return false;
+                    const conclusaoData = parseDate(conclusaoDataStr);
+                    const atendeInicio = inicioFiltro ? conclusaoData >= inicioFiltro : true;
+                    const atendeFim = fimFiltro ? conclusaoData <= fimFiltro : true;
+                    return atendeInicio && atendeFim;
+                });
+            }
+            
+            // 3. Popula o painel de filtros com as contagens corretas.
+            popularFiltros(itensParaContagem);
+
+            // 4. Aplica os filtros de checkbox (tipo, status) para obter a lista final para exibição.
+            let itensFiltrados = itensParaContagem;
+            if (filtros.tipo.length > 0) {
+                itensFiltrados = itensFiltrados.filter(item => filtros.tipo.includes(item.tipo));
+            }
+            if (filtros.status.length > 0) {
+                itensFiltrados = itensFiltrados.filter(item => filtros.status.includes(item.etapas?.[ETAPA_ID]?.status || 'nao-iniciado'));
+            }
+
+            // 5. Renderiza os componentes do dashboard com a lista final filtrada.
+            renderKPIs(itensFiltrados, todosOsItens);
+            renderCharts(itensFiltrados);
+            renderObrasAgrupadas(itensFiltrados);
+            atualizarDisplayDeFiltros();
+        };
+
+        const aplicarFiltrosPrimarios = () => {
+            let itensVisiveis = [...todosOsItens];
+            if (filtros.obra) {
+                itensVisiveis = itensVisiveis.filter(item => item.obraNome === filtros.obra);
+            }
+            if (filtros.kpi) {
+                const hoje = new Date(); hoje.setHours(0,0,0,0);
+                switch(filtros.kpi) {
+                    case 'naoIniciado': return itensVisiveis.filter(item => { const etapa = item.etapas?.[ETAPA_ID]; return (etapa?.status || 'nao-iniciado') === 'nao-iniciado' && parseDate(etapa?.statusDates?.['nao-iniciado'] || etapa?.data) < hoje; });
+                    case 'parado': return itensVisiveis.filter(item => item.etapas?.[ETAPA_ID]?.status === 'parado');
+                    case 'atrasado': return itensVisiveis.filter(item => { const etapa = item.etapas?.[ETAPA_ID]; if (!etapa || etapa.status === 'concluido') return false; const prazoFinal = parseDate(etapa.prazoConclusaoReagendado || etapa.prazoConclusaoInicial); return prazoFinal && prazoFinal < hoje; });
+                    case 'revisoes': return itensVisiveis.filter(item => item.tipo === 'Revisão' && item.revisaoAprovada);
+                }
+            }
+            return itensVisiveis;
+        };
+        
+        const atualizarDisplayDeFiltros = () => {
+            let textoFiltro = '';
+            filtroAtivoTitulo.textContent = '';
+            
+            if(filtros.obra) textoFiltro = `Filtro de Obra: "${filtros.obra}"`;
+            else if(filtros.kpi) {
+                const kpiTitle = document.querySelector(`.kpi-card[data-filtro="${filtros.kpi}"] p:first-child`).textContent;
+                filtroAtivoTitulo.textContent = `(Filtro: ${kpiTitle})`;
+            }
+
+            document.getElementById('active-filters-display').textContent = textoFiltro;
+
+            const hasActiveFilter = Object.values(filtros).some(v => (Array.isArray(v) ? v.length > 0 : (typeof v === 'object' && v !== null ? (v.inicio || v.fim) : v !== null)));
+            btnLimparFiltros.disabled = !hasActiveFilter;
+        };
+
+        const renderKPIs = (itensFiltrados, todos) => {
+            const hoje = new Date(); hoje.setHours(0,0,0,0);
+            
+            let naoIniciadoAtrasado = 0, parados = 0, atrasados = 0, solicitacoesRevisao = 0;
+            let duracoesInicio = [], duracoesConclusao = [], duracoesTotal = [];
+
+            todos.forEach(item => {
+                const etapa = item.etapas?.[ETAPA_ID];
+                if (!etapa) return;
+                
+                if ((etapa.status || 'nao-iniciado') === 'nao-iniciado') {
+                    const dataStatus = parseDate(etapa.statusDates?.['nao-iniciado'] || etapa.data);
+                    if (dataStatus && dataStatus < hoje) naoIniciadoAtrasado++;
+                }
+                if (etapa.status === 'parado') parados++;
+
+                if (etapa.status !== 'concluido') {
+                    const prazoFinal = parseDate(etapa.prazoConclusaoReagendado || etapa.prazoConclusaoInicial);
+                    if (prazoFinal && prazoFinal < hoje) atrasados++;
+                }
+
+                if (item.tipo === 'Revisão' && item.revisaoAprovada) solicitacoesRevisao++;
+                
+                if (itensFiltrados.includes(item)) {
+                    const dataNaoIniciado = etapa.statusDates?.['nao-iniciado'];
+                    const dataIniciado = etapa.statusDates?.iniciado;
+                    const dataConcluido = etapa.statusDates?.concluido;
+
+                    if (dataNaoIniciado && dataIniciado) {
+                        const diff = calcularDiferencaDias(dataNaoIniciado, dataIniciado);
+                        if (diff !== null) duracoesInicio.push(diff);
+                    }
+                    if (dataIniciado && dataConcluido) {
+                        const diff = calcularDiferencaDias(dataIniciado, dataConcluido);
+                        if (diff !== null) duracoesConclusao.push(diff);
+                    }
+                    if (dataNaoIniciado && dataConcluido) {
+                        const diff = calcularDiferencaDias(dataNaoIniciado, dataConcluido);
+                        if (diff !== null) duracoesTotal.push(diff);
+                    }
+                }
+            });
+
+            const calcularMedia = arr => arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : 'N/A';
+
+            document.getElementById('kpi-nao-iniciado').textContent = naoIniciadoAtrasado;
+            document.getElementById('kpi-parados').textContent = parados;
+            document.getElementById('kpi-atrasado').textContent = atrasados;
+            document.getElementById('kpi-revisoes').textContent = solicitacoesRevisao;
+            document.getElementById('kpi-media-inicio').innerHTML = `${calcularMedia(duracoesInicio)} <span class="text-sm font-medium text-gray-500">dias</span>`;
+            document.getElementById('kpi-media-conclusao').innerHTML = `${calcularMedia(duracoesConclusao)} <span class="text-sm font-medium text-gray-500">dias (${duracoesConclusao.length})</span>`;
+            document.getElementById('kpi-media-total').innerHTML = `${calcularMedia(duracoesTotal)} <span class="text-sm font-medium text-gray-500">dias (${duracoesTotal.length})</span>`;
+
+            document.querySelectorAll('.kpi-card[data-filtro]').forEach(card => card.classList.toggle('kpi-selecionado', card.dataset.filtro === filtros.kpi));
+        };
+        
+        const handleChartClick = (event, elements, chartInstance, type) => {
+            if (elements.length === 0) return;
+            const label = chartInstance.data.labels[elements[0].index];
+            
+            if (type === 'obra') {
+                filtros.obra = filtros.obra === label ? null : label;
+            } else if (type === 'status') {
+                const statusKey = Object.keys(STATUS_ITEM_MAP).find(k => STATUS_ITEM_MAP[k].texto === label);
+                if (statusKey) {
+                    const index = filtros.status.indexOf(statusKey);
+                    if (index > -1) {
+                        filtros.status.splice(index, 1);
+                    } else {
+                        filtros.status.push(statusKey);
+                    }
+                }
+            }
+            renderDashboardCompleto();
+        };
+
+        const renderCharts = (itens) => {
+            const statusCounts = {};
+            itens.forEach(item => {
+                const status = item.etapas?.[ETAPA_ID]?.status || 'nao-iniciado';
+                statusCounts[status] = (statusCounts[status] || 0) + 1;
+            });
+            
+            if(statusChartInstance) statusChartInstance.destroy();
+            statusChartInstance = new Chart(document.getElementById('status-chart').getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: Object.keys(statusCounts).map(k => STATUS_ITEM_MAP[k]?.texto || k), datasets: [{ data: Object.values(statusCounts), backgroundColor: Object.keys(statusCounts).map(k => STATUS_ITEM_MAP[k]?.cor || '#cccccc') }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, onClick: (e, el) => handleChartClick(e, el, statusChartInstance, 'status') }
+            });
+
+            const obrasCounts = {};
+            itens.forEach(item => { obrasCounts[item.obraNome] = (obrasCounts[item.obraNome] || 0) + 1; });
+            
+            if(obrasChartInstance) obrasChartInstance.destroy();
+            obrasChartInstance = new Chart(document.getElementById('obras-chart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: Object.keys(obrasCounts), datasets: [{ label: 'Qtd. de Itens', data: Object.values(obrasCounts), backgroundColor: '#3b82f6' }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, onClick: (e, el) => handleChartClick(e, el, obrasChartInstance, 'obra') }
+            });
+        };
+
+        const renderObrasAgrupadas = (itens) => {
+            const container = document.getElementById('obras-agrupadas-container');
+            if (itens.length === 0) {
+                container.innerHTML = `<div class="text-center p-8 bg-white rounded-lg border border-gray-200"><h3 class="text-lg font-medium text-gray-700">Nenhum item encontrado para o filtro selecionado.</h3></div>`;
+                return;
+            }
+
+            const obrasAgrupadas = itens.reduce((acc, item) => {
+                if (!acc[item.obraId]) acc[item.obraId] = { obraNome: item.obraNome, obraCliente: item.obraCliente, itens: [] };
+                acc[item.obraId].itens.push(item);
+                return acc;
+            }, {});
+
+            container.innerHTML = Object.values(obrasAgrupadas).map(obraData => {
+                const obraId = obraData.itens[0].obraId;
+                const isExpanded = uiState[obraId]?.isExpanded || false;
+                const totalItens = obraData.itens.length, concluidos = obraData.itens.filter(i => (i.etapas?.[ETAPA_ID]?.status) === 'concluido').length;
+                
+                const itensHtml = isExpanded ? `<div class="overflow-x-auto p-4"><table class="min-w-full">
+                    <thead><tr class="border-b">
+                        <th class="p-2 text-left text-xs font-semibold text-gray-500 uppercase">Item</th>
+                        <th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">Qtd Itens</th>
+                        <th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">Revisão</th>
+                        <th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">Status</th>
+                        <th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">Inclusão</th>
+                        <th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">Iniciado</th>
+                        <th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">Parado</th>
+                        <th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">Concluído</th>
+                        <th class="p-2 text-center text-xs font-semibold text-gray-500 uppercase">Prazo</th>
+                    </tr></thead><tbody>
+                        ${obraData.itens.map(item => {
+                            const etapa = item.etapas?.[ETAPA_ID] || {}, statusInfo = STATUS_ITEM_MAP[etapa.status || 'nao-iniciado'];
+                            const tipoStyle = TIPO_ITEM_STYLE_MAP[item.tipo] || 'bg-gray-100 text-gray-800';
+                            const prazoFinal = etapa.prazoConclusaoReagendado || etapa.prazoConclusaoInicial;
+                            let prazoStyle = '';
+                            if (prazoFinal && etapa.status !== 'concluido') {
+                                if (parseDate(prazoFinal) < new Date(new Date().toDateString())) prazoStyle = 'color: red; font-weight: bold;';
+                            }
+                            const revisaoTexto = item.tipo === 'Revisão' ? (item.revisaoAprovada ? 'Sim' : 'Não') : '---';
+                            const revisaoStyle = item.revisaoAprovada ? 'color: green; font-weight: bold;' : '';
+
+                            return `<tr class="item-row hover:bg-gray-50" data-obra-id="${item.obraId}" data-item-id="${item.id}">
+                                <td class="p-2">
+                                    <div class="flex items-center space-x-2">
+                                        <p class="font-semibold text-gray-800">${item.codigo}</p>
+                                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${tipoStyle}">${item.tipo}</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600">${item.descricao}</p>
+                                </td>
+                                <td class="p-2 text-center text-sm">${item.tipo === 'Orçamento' ? (item.qtdPecas || '---') : '---'}</td>
+                                <td class="p-2 text-center text-sm" style="${revisaoStyle}">${revisaoTexto}</td>
+                                <td class="p-2 text-center"><span class="px-2 py-1 text-xs font-semibold rounded-full ${statusInfo.classe}">${statusInfo.texto}</span></td>
+                                <td class="p-2 text-center text-xs">${formatarData(etapa.statusDates?.['nao-iniciado'])}</td>
+                                <td class="p-2 text-center text-xs">${formatarData(etapa.statusDates?.iniciado)}</td>
+                                <td class="p-2 text-center text-xs">${formatarData(etapa.statusDates?.parado)}</td>
+                                <td class="p-2 text-center text-xs">${formatarData(etapa.conclusaoFinal)}</td>
+                                <td class="p-2 text-center text-xs" style="${prazoStyle}">${formatarData(prazoFinal)}</td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody></table></div>` : '';
+                return `<div class="bg-white rounded-xl border border-gray-200">
+                    <div class="flex justify-between items-center p-4"><h3 class="font-bold text-lg text-gray-800">${obraData.obraNome}</h3><div class="flex items-center gap-4">
+                        <span class="bg-gray-100 text-gray-800 text-sm font-bold py-1 px-3 rounded-lg">${concluidos}/${totalItens} Concluídos</span>
+                        <button class="btn-toggle-itens p-2 rounded-md hover:bg-gray-100" data-obra-id="${obraId}"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-transform ${isExpanded ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg></button>
+                    </div></div>${itensHtml}</div>`;
+            }).join('');
+        };
+        
+        const abrirModalDetalhes = (obraId, itemId) => {
+            const item = todosOsItens.find(i => i.obraId === obraId && i.id === itemId);
+            if (!item) return;
+            
+            const etapa = item.etapas?.[ETAPA_ID] || {};
+            const status = etapa.status || 'nao-iniciado';
+
+            document.getElementById('modal-detalhe-obra').textContent = `${item.obraNome} - ${item.obraCliente}`;
+            document.getElementById('modal-detalhe-codigo').textContent = item.codigo || '---';
+            document.getElementById('modal-detalhe-tipo').textContent = item.tipo || '---';
+            document.getElementById('modal-detalhe-descricao').textContent = item.descricao || '---';
+            
+            const camposOrcamento = document.getElementById('modal-detalhe-campos-orcamento');
+            const camposRevisao = document.getElementById('modal-detalhe-campos-revisao');
+
+            if (item.tipo === 'Orçamento') {
+                document.getElementById('modal-detalhe-qtdpecas').textContent = item.qtdPecas || '---';
+                camposOrcamento.classList.remove('hidden');
+                camposRevisao.classList.add('hidden');
+            } else if (item.tipo === 'Revisão') {
+                document.getElementById('modal-detalhe-versao').textContent = item.versao || '---';
+                document.getElementById('modal-detalhe-solicitacao').textContent = item.revisaoAprovada ? 'Sim' : 'Não';
+                camposRevisao.classList.remove('hidden');
+                camposOrcamento.classList.add('hidden');
+            } else {
+                camposOrcamento.classList.add('hidden');
+                camposRevisao.classList.add('hidden');
+            }
+
+            document.getElementById('modal-detalhe-status').textContent = STATUS_ITEM_MAP[status].texto;
+            document.getElementById('modal-detalhe-datastatus').textContent = formatarData(etapa.data);
+            document.getElementById('modal-detalhe-prazo').textContent = formatarData(etapa.prazoConclusaoReagendado || etapa.prazoConclusaoInicial);
+            document.getElementById('modal-detalhe-conclusao').textContent = formatarData(etapa.conclusaoFinal);
+            document.getElementById('modal-detalhe-obs').textContent = etapa.observacao || 'Nenhuma observação.';
+
+            detailsModal.classList.remove('hidden');
+        };
+
+        const fecharModalDetalhes = () => detailsModal.classList.add('hidden');
+
+        const popularFiltros = (itens) => {
+            const counts = {
+                tipo: { Orçamento: { items: 0, obras: new Set() }, Revisão: { items: 0, obras: new Set() } },
+                status: { 'nao-iniciado': { items: 0, obras: new Set() }, 'iniciado': { items: 0, obras: new Set() }, 'parado': { items: 0, obras: new Set() }, 'concluido': { items: 0, obras: new Set() } },
+            };
+
+            itens.forEach(item => {
+                if (item.tipo === 'Orçamento') {
+                    counts.tipo.Orçamento.items += (parseInt(item.qtdPecas, 10) || 0);
+                    counts.tipo.Orçamento.obras.add(item.obraId);
+                } else if (item.tipo === 'Revisão') {
+                    counts.tipo.Revisão.items++;
+                    counts.tipo.Revisão.obras.add(item.obraId);
+                }
+                
+                const status = item.etapas?.[ETAPA_ID]?.status || 'nao-iniciado';
+                if (counts.status.hasOwnProperty(status)) {
+                    counts.status[status].items++;
+                    counts.status[status].obras.add(item.obraId);
+                }
+            });
+
+            document.getElementById('filtro-tipo-container').innerHTML = `
+                <div class="flex items-center"><input type="checkbox" id="filtro-tipo-orcamento" value="Orçamento" class="h-4 w-4 rounded"><label for="filtro-tipo-orcamento" class="ml-2 text-sm">(${counts.tipo.Orçamento.obras.size}) Orçamento (${counts.tipo.Orçamento.items})</label></div>
+                <div class="flex items-center"><input type="checkbox" id="filtro-tipo-revisao" value="Revisão" class="h-4 w-4 rounded"><label for="filtro-tipo-revisao" class="ml-2 text-sm">(${counts.tipo.Revisão.obras.size}) Revisão (${counts.tipo.Revisão.items})</label></div>`;
+            
+            document.getElementById('filtro-status-container').innerHTML = Object.entries(STATUS_ITEM_MAP)
+                .filter(([key]) => key !== 'default' && key !== 'cancelado')
+                .map(([key, value]) => `<div class="flex items-center"><input type="checkbox" id="filtro-status-${key}" value="${key}" class="h-4 w-4 rounded"><label for="filtro-status-${key}" class="ml-2 text-sm">(${counts.status[key].obras.size}) ${value.texto} (${counts.status[key].items})</label></div>`)
+                .join('');
+
+            filtros.tipo.forEach(t => { const cb = document.querySelector(`#filtro-tipo-container input[value="${t}"]`); if(cb) cb.checked = true; });
+            filtros.status.forEach(s => { const cb = document.querySelector(`#filtro-status-container input[value="${s}"]`); if(cb) cb.checked = true; });
+            document.getElementById('filtro-conclusao-inicio').value = filtros.conclusao.inicio || '';
+            document.getElementById('filtro-conclusao-fim').value = filtros.conclusao.fim || '';
+        };
+
+        const limparFiltros = (render = true) => {
+            filtros = { tipo: [], status: [], conclusao: { inicio: null, fim: null }, kpi: null, obra: null };
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.getElementById('filtro-conclusao-inicio').value = '';
+            document.getElementById('filtro-conclusao-fim').value = '';
+            if(render) renderDashboardCompleto();
+        };
+
+        // --- LISTENERS DE EVENTOS ---
+        document.getElementById('filtro-tipo-container').addEventListener('change', () => {
+            filtros.tipo = Array.from(document.querySelectorAll('#filtro-tipo-container input:checked')).map(cb => cb.value);
+            renderDashboardCompleto();
+        });
+        document.getElementById('filtro-status-container').addEventListener('change', () => {
+            filtros.status = Array.from(document.querySelectorAll('#filtro-status-container input:checked')).map(cb => cb.value);
+            renderDashboardCompleto();
+        });
+        document.getElementById('filtro-conclusao-inicio').addEventListener('change', (e) => {
+            filtros.conclusao.inicio = e.target.value;
+            renderDashboardCompleto();
+        });
+        document.getElementById('filtro-conclusao-fim').addEventListener('change', (e) => {
+            filtros.conclusao.fim = e.target.value;
+            renderDashboardCompleto();
+        });
+
+        document.getElementById('kpi-section').addEventListener('click', (e) => {
+            const card = e.target.closest('.kpi-card[data-filtro]');
+            if (card) {
+                const filtro = card.dataset.filtro;
+                filtros.obra = null; 
+                filtros.kpi = filtros.kpi === filtro ? null : filtro;
+                renderDashboardCompleto();
+            }
+        });
+        
+        btnLimparFiltros.addEventListener('click', () => limparFiltros(true));
+
+        document.getElementById('obras-agrupadas-container').addEventListener('click', (e) => {
+            const toggleButton = e.target.closest('.btn-toggle-itens');
+            const itemRow = e.target.closest('.item-row');
+            
+            if (toggleButton) {
+                e.stopPropagation(); 
+                const { obraId } = toggleButton.dataset;
+                uiState[obraId] = { ...uiState[obraId], isExpanded: !uiState[obraId]?.isExpanded };
+                renderDashboardCompleto();
+            } else if (itemRow) {
+                const { obraId, itemId } = itemRow.dataset;
+                abrirModalDetalhes(obraId, itemId);
+            }
+        });
+        
+        document.getElementById('modal-detalhe-btn-fechar').addEventListener('click', fecharModalDetalhes);
+        document.getElementById('modal-detalhe-btn-fechar-2').addEventListener('click', fecharModalDetalhes);
+    });
+</script>
+
+</body>
+</html>
