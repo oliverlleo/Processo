@@ -58,10 +58,14 @@
             <p id="active-filter-status" class="text-sm text-blue-600 font-medium mt-3 h-5"></p>
         </section>
 
-        <section id="kpi-section" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <section id="kpi-section" class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
             <div id="kpi-card-obras" class="kpi-card bg-white p-6 rounded-xl border border-gray-200 flex items-center gap-5"><div class="bg-blue-100 text-blue-600 rounded-full p-4 text-2xl"><i class="fas fa-ruler-combined"></i></div><div><p class="text-gray-500 text-sm font-medium">Medição - Atraso</p><p id="kpi-total-obras" class="text-3xl font-bold text-gray-800">...</p></div></div>
+            <div id="kpi-card-materiais-nao-iniciado" class="kpi-card bg-white p-6 rounded-xl border border-gray-200 flex items-center gap-5"><div class="bg-red-100 text-red-600 rounded-full p-4 text-2xl"><i class="fas fa-box-open"></i></div><div><p class="text-gray-500 text-sm font-medium">Materiais - Não Iniciado</p><p id="kpi-materiais-nao-iniciados" class="text-3xl font-bold text-gray-800">...</p></div></div>
             <div id="kpi-card-pendentes" class="kpi-card bg-white p-6 rounded-xl border border-gray-200 flex items-center gap-5"><div class="bg-red-100 text-red-600 rounded-full p-4 text-2xl"><i class="fas fa-box-open"></i></div><div><p class="text-gray-500 text-sm font-medium">Materiais - Atraso</p><p id="kpi-materiais-pendentes" class="text-3xl font-bold text-gray-800">...</p></div></div>
+            
+            <div id="kpi-card-producao-nao-iniciada" class="kpi-card bg-white p-6 rounded-xl border border-gray-200 flex items-center gap-5"><div class="bg-green-100 text-green-600 rounded-full p-4 text-2xl"><i class="fas fa-th-large"></i></div><div><p class="text-gray-500 text-sm font-medium">Produção - Não Iniciado</p><p id="kpi-producao-nao-iniciada" class="text-3xl font-bold text-gray-800">...</p></div></div>
             <div id="kpi-card-producao" class="kpi-card bg-white p-6 rounded-xl border border-gray-200 flex items-center gap-5"><div class="bg-green-100 text-green-600 rounded-full p-4 text-2xl"><i class="fas fa-th-large"></i></div><div><p class="text-gray-500 text-sm font-medium">Produção - Atraso</p><p id="kpi-progresso-geral" class="text-3xl font-bold text-gray-800">...</p></div></div>
+            
             <div id="kpi-card-atrasadas" class="kpi-card bg-white p-6 rounded-xl border border-gray-200 flex items-center gap-5"><div class="bg-yellow-100 text-yellow-600 rounded-full p-4 text-2xl"><i class="fas fa-home"></i></div><div><p class="text-gray-500 text-sm font-medium">Finalização - Atraso</p><p id="kpi-obras-atrasadas" class="text-3xl font-bold text-gray-800">...</p></div></div>
         </section>
 
@@ -144,8 +148,9 @@
         const TIPO_ITEM_MAP = { 'Compra Inicial': 'bg-orange-100 text-orange-800', 'Projeto': 'bg-blue-100 text-blue-800', 'Terceiros': 'bg-purple-100 text-purple-800' };
         const STATUS_ITEM_MAP = { 'nao-iniciado': 'Não iniciado', 'iniciado': 'Iniciado', 'parado': 'Parado', 'concluido': 'Concluído' };
         const STATUS_ITEM_COLORS = { 'concluido': '#16a34a', 'iniciado': '#f59e0b', 'nao-iniciado': '#9ca3af', 'parado': '#ef4444' };
-        const STATUS_MATERIAL_MAP = { 'emCotacao': 'Em cotação', 'compraParcial': 'Compra Parcial', 'compraTotal': 'Compra Total', 'recebidoParcial': 'Recebido Parcial', 'recebidoTotal': 'Recebido Total', 'conferidoFalta': 'Conferido (Falta)', 'conferidoParcial': 'Conferido Parcial', 'conferidoTotal': 'Conferido Total', 'alocadoParcial': 'Alocado Parcial', 'alocadoTotal': 'Alocado Total' };
-        const STATUS_MATERIAL_COLORS = { emCotacao: '#60a5fa', compraParcial: '#f59e0b', compraTotal: '#34d399', recebidoParcial: '#f59e0b', recebidoTotal: '#34d399', conferidoFalta: '#ef4444', conferidoParcial: '#f59e0b', conferidoTotal: '#34d399', alocadoParcial: '#f59e0b', alocadoTotal: '#166534' };
+        
+        const STATUS_MATERIAL_MAP = { 'naoIniciado': 'Não Iniciado', 'emCotacao': 'Em cotação', 'compraParcial': 'Compra Parcial', 'compraTotal': 'Compra Total', 'recebidoParcial': 'Recebido Parcial', 'recebidoTotal': 'Recebido Total', 'conferidoFalta': 'Conferido (Falta)', 'conferidoParcial': 'Conferido Parcial', 'conferidoTotal': 'Conferido Total', 'alocadoParcial': 'Alocado Parcial', 'alocadoTotal': 'Alocado Total' };
+        const STATUS_MATERIAL_COLORS = { naoIniciado: '#9ca3af', emCotacao: '#60a5fa', compraParcial: '#f59e0b', compraTotal: '#34d399', recebidoParcial: '#f59e0b', recebidoTotal: '#34d399', conferidoFalta: '#ef4444', conferidoParcial: '#f59e0b', conferidoTotal: '#34d399', alocadoParcial: '#f59e0b', alocadoTotal: '#166534' };
         
         const detailsModal = document.getElementById('details-modal');
         const modalTitle = document.getElementById('modal-title');
@@ -159,13 +164,11 @@
         };
         const fecharModal = () => detailsModal.classList.add('hidden');
         modalCloseBtn.addEventListener('click', fecharModal);
-        // A linha abaixo foi removida para impedir o fechamento ao clicar fora do modal.
-        // detailsModal.addEventListener('click', (e) => { if (e.target === detailsModal) fecharModal(); });
         
         const itemDetailModal = document.getElementById('item-detail-modal');
         const itemDetailCloseBtn = document.getElementById('item-detail-close-btn');
 
-        const formatDate = (dateString) => dateString ? new Date(dateString + 'T00:00:00').toLocaleDateString('pt-BR') : 'dd/mm/aaaa';
+        const formatDate = (dateString) => dateString ? new Date(dateString + 'T00:00:00').toLocaleDateString('pt-BR') : '---';
         
         const abrirItemDetailModal = (item, etapa = 'producao') => {
             const etapaInfo = etapa === 'instalacao' ? (item.etapas?.instalado || {}) : (item.etapas?.emProducao || {});
@@ -184,8 +187,6 @@
         };
         const fecharItemDetailModal = () => itemDetailModal.classList.add('hidden');
         itemDetailCloseBtn.addEventListener('click', fecharItemDetailModal);
-        // A linha abaixo foi removida para impedir o fechamento ao clicar fora do modal.
-        // itemDetailModal.addEventListener('click', (e) => { if (e.target === itemDetailModal) fecharItemDetailModal(); });
 
         const showMaterialDetailsForItem = (item) => {
             const materials = (item.materiais || []).filter(mat => mat.statusInfo?.status !== 'cancelado');
@@ -240,9 +241,7 @@
                     if (filtros.kpi === 'pecas-atraso') {
                         if (statusProducao === 'concluido' || statusProducao === 'cancelado') return false;
                         const dataPrazo = item.etapas?.emProducao?.prazoConclusaoReagendado || item.etapas?.emProducao?.prazoConclusaoInicial;
-                        if (!dataPrazo || new Date(dataPrazo + 'T00:00:00') >= today) {
-                            return false;
-                        }
+                        if (!dataPrazo || new Date(dataPrazo + 'T00:00:00') >= today) return false;
                     }
                     if (filtros.kpi === 'mat-atraso') {
                         if (statusProducao === 'cancelado') return false; 
@@ -250,15 +249,30 @@
                             const matStatus = mat.statusInfo?.status;
                             if (matStatus === 'alocadoTotal' || matStatus === 'cancelado') return false;
                             const dataPrevista = mat.statusInfo?.previsaoDisponibilidadeReagendado || mat.statusInfo?.previsaoDisponibilidadeInicial;
-                            if (!dataPrevista) return false;
-                            return new Date(dataPrevista + 'T00:00:00') < today;
+                            return dataPrevista && new Date(dataPrevista + 'T00:00:00') < today;
                         });
                         if (!hasAtraso) return false;
+                    }
+                    if (filtros.kpi === 'mat-nao-iniciado') {
+                        if (statusProducao === 'cancelado') return false;
+                        const hasNaoIniciadoAtrasado = (item.materiais || []).some(mat => {
+                            const matStatus = mat.statusInfo?.status || 'naoIniciado';
+                            const dataStatus = mat.statusInfo?.data;
+                            if (matStatus !== 'naoIniciado' || matStatus === 'cancelado') return false;
+                            return dataStatus && new Date(dataStatus + 'T00:00:00') < today;
+                        });
+                        if (!hasNaoIniciadoAtrasado) return false;
+                    }
+                    if (filtros.kpi === 'prod-nao-iniciada') {
+                        const producaoStatus = statusProducao || 'nao-iniciado';
+                        const dataStatus = item.etapas?.emProducao?.data;
+                        if (producaoStatus !== 'nao-iniciado') return false;
+                        if (!dataStatus || new Date(dataStatus + 'T00:00:00') >= today) return false;
                     }
                     
                     if (filtros.tipoItem.length > 0 && !filtros.tipoItem.includes(item.tipo)) return false;
                     if (filtros.statusItem && (statusProducao || 'nao-iniciado') !== filtros.statusItem) return false;
-                    if (filtros.statusMaterial && !(item.materiais || []).some(mat => (mat.statusInfo?.status || 'emCotacao') === filtros.statusMaterial)) return false;
+                    if (filtros.statusMaterial && !(item.materiais || []).some(mat => (mat.statusInfo?.status || 'naoIniciado') === filtros.statusMaterial)) return false;
                     
                     return true;
                 });
@@ -297,31 +311,26 @@
 
             document.getElementById('btn-limpar-filtros').addEventListener('click', () => limparFiltros(true));
             
-            ['obras', 'pendentes', 'producao', 'atrasadas'].forEach(kpiType => {
-                document.getElementById(`kpi-card-${kpiType}`).addEventListener('click', () => {
-                    limparFiltros(false);
-                    const statusEl = document.getElementById('active-filter-status');
-                    let newKpi = null;
-                    let newStatusText = '';
+            const kpiCards = [
+                { id: 'kpi-card-obras', key: 'medicao-atraso', text: 'Filtro ativo: Obras com Medição Atrasada' },
+                { id: 'kpi-card-materiais-nao-iniciado', key: 'mat-nao-iniciado', text: 'Filtro ativo: Materiais Não Iniciados (Status Atrasado)' },
+                { id: 'kpi-card-pendentes', key: 'mat-atraso', text: 'Filtro ativo: Materiais com Entrega Atrasada' },
+                { id: 'kpi-card-producao', key: 'pecas-atraso', text: 'Filtro ativo: Produção com Prazo Atrasado' },
+                { id: 'kpi-card-producao-nao-iniciada', key: 'prod-nao-iniciada', text: 'Filtro ativo: Produção Não Iniciada (Status Atrasado)' },
+                { id: 'kpi-card-atrasadas', key: 'atrasadas', text: 'Filtro ativo: Obras com Entregas em Atraso' }
+            ];
 
-                    if (kpiType === 'obras') {
-                        newKpi = 'medicao-atraso';
-                        newStatusText = 'Filtro ativo: Obras com Medição Atrasada';
-                    } else if (kpiType === 'producao') {
-                        newKpi = 'pecas-atraso';
-                        newStatusText = 'Filtro ativo: Obras com Produção em Atraso';
-                    } else if (kpiType === 'atrasadas') {
-                        newKpi = 'atrasadas';
-                        newStatusText = 'Filtro ativo: Obras com Entregas em Atraso';
-                    } else if (kpiType === 'pendentes') {
-                        newKpi = 'mat-atraso';
-                        newStatusText = 'Filtro ativo: Materiais com Entrega Atrasada';
-                    }
-
-                    filtros.kpi = filtros.kpi === newKpi ? null : newKpi;
-                    statusEl.textContent = filtros.kpi ? newStatusText : '';
-                    aplicarFiltrosERenderizar();
-                });
+            kpiCards.forEach(card => {
+                const cardElement = document.getElementById(card.id);
+                if (cardElement) {
+                    cardElement.addEventListener('click', () => {
+                        limparFiltros(false);
+                        const statusEl = document.getElementById('active-filter-status');
+                        filtros.kpi = filtros.kpi === card.key ? null : card.key;
+                        statusEl.textContent = filtros.kpi ? card.text : '';
+                        aplicarFiltrosERenderizar();
+                    });
+                }
             });
         };
         
@@ -341,7 +350,7 @@
         };
         
         const calculateAndRenderKPIs = (obras) => {
-            let medicaoComAtraso = 0, pecasComAtraso = 0, obrasAtrasadas = 0, materiaisComAtraso = 0;
+            let medicaoComAtraso = 0, pecasComAtraso = 0, obrasAtrasadas = 0, materiaisComAtraso = 0, materiaisNaoIniciados = 0, producaoNaoIniciada = 0;
             const today = new Date().setHours(0,0,0,0);
 
             obras.forEach(obra => {
@@ -365,6 +374,12 @@
                     const status = item.etapas?.emProducao?.status;
                     if (status === 'cancelado') return;
 
+                    const producaoStatus = status || 'nao-iniciado';
+                    const dataStatusProducao = item.etapas?.emProducao?.data;
+                    if (producaoStatus === 'nao-iniciado' && dataStatusProducao && new Date(dataStatusProducao + 'T00:00:00') < today) {
+                        producaoNaoIniciada++;
+                    }
+
                     if (status !== 'concluido') {
                         const dataPrazo = item.etapas?.emProducao?.prazoConclusaoReagendado || item.etapas?.emProducao?.prazoConclusaoInicial;
                         if (dataPrazo && new Date(dataPrazo + 'T00:00:00') < today) {
@@ -374,7 +389,15 @@
                     
                     (item.materiais || []).forEach(mat => {
                         const matStatus = mat.statusInfo?.status;
-                        if (matStatus !== 'alocadoTotal' && matStatus !== 'cancelado') {
+                        if (matStatus === 'cancelado') return;
+
+                        const materialStatus = matStatus || 'naoIniciado';
+                        const dataStatusMaterial = mat.statusInfo?.data;
+                        if (materialStatus === 'naoIniciado' && dataStatusMaterial && new Date(dataStatusMaterial + 'T00:00:00') < today) {
+                            materiaisNaoIniciados++;
+                        }
+
+                        if (matStatus !== 'alocadoTotal') {
                             const dataPrevista = mat.statusInfo?.previsaoDisponibilidadeReagendado || mat.statusInfo?.previsaoDisponibilidadeInicial;
                             if (dataPrevista && new Date(dataPrevista + 'T00:00:00') < today) {
                                 materiaisComAtraso++;
@@ -388,6 +411,8 @@
             document.getElementById('kpi-progresso-geral').textContent = pecasComAtraso;
             document.getElementById('kpi-obras-atrasadas').textContent = obrasAtrasadas;
             document.getElementById('kpi-materiais-pendentes').textContent = materiaisComAtraso;
+            document.getElementById('kpi-materiais-nao-iniciados').textContent = materiaisNaoIniciados;
+            document.getElementById('kpi-producao-nao-iniciada').textContent = producaoNaoIniciada;
         };
 
         const renderObrasList = (obrasParaMostrar, obrasFiltradas) => {
@@ -476,13 +501,19 @@
                     
                     if (item.etapas?.emProducao?.status !== 'cancelado') {
                         (item.materiais || []).forEach(mat => {
-                            const matStatus = mat.statusInfo?.status || 'emCotacao';
+                            const matStatus = mat.statusInfo?.status || 'naoIniciado';
                             let shouldCountMaterial = true;
 
-                            if (filtros.kpi === 'mat-atraso') {
+                            if (filtros.kpi === 'mat-atraso' || filtros.kpi === 'mat-nao-iniciado') {
                                 const isAlocadoOuCancelado = (matStatus === 'alocadoTotal' || matStatus === 'cancelado');
-                                const dataPrevista = mat.statusInfo?.previsaoDisponibilidadeReagendado || mat.statusInfo?.previsaoDisponibilidadeInicial;
-                                const isDelayed = !isAlocadoOuCancelado && dataPrevista && (new Date(dataPrevista + 'T00:00:00') < today);
+                                let isDelayed = false;
+                                if (filtros.kpi === 'mat-nao-iniciado') {
+                                    const dataStatus = mat.statusInfo?.data;
+                                    isDelayed = matStatus === 'naoIniciado' && dataStatus && (new Date(dataStatus + 'T00:00:00') < today);
+                                } else { // mat-atraso
+                                    const dataPrevista = mat.statusInfo?.previsaoDisponibilidadeReagendado || mat.statusInfo?.previsaoDisponibilidadeInicial;
+                                    isDelayed = !isAlocadoOuCancelado && dataPrevista && (new Date(dataPrevista + 'T00:00:00') < today);
+                                }
                                 shouldCountMaterial = isDelayed;
                             }
 
@@ -513,10 +544,13 @@
         const generateMaterialListHtml = (materials) => {
             if (!materials || materials.length === 0) return '';
             return materials.map(mat => {
-                const currentStatusKey = mat.statusInfo?.status || 'emCotacao';
-                const currentStatusText = STATUS_MATERIAL_MAP[currentStatusKey];
+                const currentStatusKey = mat.statusInfo?.status || 'naoIniciado';
+                const currentStatusText = STATUS_MATERIAL_MAP[currentStatusKey] || 'Não Iniciado';
                 const statusBadge = `<span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${currentStatusText}</span>`;
                 
+                const statusDate = mat.statusInfo?.data;
+                const dataStatusHtml = statusDate ? `<span><strong>Data Status:</strong> <span class="font-medium text-gray-700">${formatDate(statusDate)}</span></span>` : '';
+
                 let dataDisponibilidadeHtml = '';
                 let dataInfo = null;
                 if (mat.statusInfo?.disponibilidadeTotal) {
@@ -528,19 +562,17 @@
                 }
 
                 if (dataInfo) {
-                    const formattedDate = new Date(dataInfo.date + 'T00:00:00').toLocaleDateString('pt-BR');
-                    dataDisponibilidadeHtml = `<span>${dataInfo.label} <span class="font-medium text-blue-600">${formattedDate}</span></span>`;
-                } else {
-                    dataDisponibilidadeHtml = `<span></span>`;
+                    dataDisponibilidadeHtml = `<span>${dataInfo.label} <span class="font-medium text-blue-600">${formatDate(dataInfo.date)}</span></span>`;
                 }
 
                 return `<li class="p-3 rounded-md hover:bg-gray-100 border-b last:border-b-0">
                             <div class="flex justify-between items-start">
                                 <p class="font-semibold text-gray-800 flex-1">${mat.tipo} - ${mat.descricao}</p>${statusBadge}
                             </div>
-                            <div class="mt-2 text-sm grid grid-cols-1 sm:grid-cols-3 gap-x-4 text-gray-600">
+                            <div class="mt-2 text-sm grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1 text-gray-600">
                                 <span><strong>Qtd. Orçada:</strong> ${mat.qtdeOrcada || '-'}</span>
                                 <span><strong>Qtd. Disponível:</strong> ${mat.qtdeDisponivel || '-'}</span>
+                                ${dataStatusHtml}
                                 ${dataDisponibilidadeHtml}
                             </div>
                             <p class="text-xs text-gray-500 mt-1">Item: ${mat.itemCodigo} | Obra: ${mat.obraNome}</p>
@@ -600,13 +632,19 @@
                     (obra.itens || []).forEach(item => {
                          if (item.etapas?.emProducao?.status === 'cancelado') return;
                         (item.materiais || []).forEach(material => {
-                            const matStatus = material.statusInfo?.status || 'emCotacao';
+                            const matStatus = material.statusInfo?.status || 'naoIniciado';
                             if (matStatus === statusKey && matStatus !== 'cancelado') {
                                 let shouldInclude = true;
-                                if (filtros.kpi === 'mat-atraso') {
-                                    const isAlocadoOuCancelado = (matStatus === 'alocadoTotal' || matStatus === 'cancelado');
-                                    const dataPrevista = material.statusInfo?.previsaoDisponibilidadeReagendado || material.statusInfo?.previsaoDisponibilidadeInicial;
-                                    const isDelayed = !isAlocadoOuCancelado && dataPrevista && (new Date(dataPrevista + 'T00:00:00') < today);
+                                if (filtros.kpi === 'mat-atraso' || filtros.kpi === 'mat-nao-iniciado') {
+                                    let isDelayed = false;
+                                    if (filtros.kpi === 'mat-nao-iniciado') {
+                                        const dataStatus = material.statusInfo?.data;
+                                        isDelayed = matStatus === 'naoIniciado' && dataStatus && (new Date(dataStatus + 'T00:00:00') < today);
+                                    } else { // mat-atraso
+                                        const isAlocadoOuCancelado = (matStatus === 'alocadoTotal' || matStatus === 'cancelado');
+                                        const dataPrevista = material.statusInfo?.previsaoDisponibilidadeReagendado || material.statusInfo?.previsaoDisponibilidadeInicial;
+                                        isDelayed = !isAlocadoOuCancelado && dataPrevista && (new Date(dataPrevista + 'T00:00:00') < today);
+                                    }
                                     shouldInclude = isDelayed;
                                 }
                                 if (shouldInclude) {
